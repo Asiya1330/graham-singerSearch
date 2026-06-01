@@ -23,8 +23,8 @@ import connectPgSimple from "connect-pg-simple";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import multer from "multer";
-import path from "path";
 import express from "express";
+import { uploadToSupabaseStorage } from "./lib/file-upload";
 import { eq, desc } from "drizzle-orm";
 
 const scryptAsync = promisify(scrypt);
@@ -79,16 +79,8 @@ function requireOrg(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
-const resumeStorage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, "uploads/"),
-  filename: (_req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, "resume-" + uniqueSuffix + path.extname(file.originalname));
-  },
-});
-
 const resumeUpload = multer({
-  storage: resumeStorage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (file.mimetype === "application/pdf") {
@@ -99,16 +91,8 @@ const resumeUpload = multer({
   },
 });
 
-const headshotStorage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, "uploads/"),
-  filename: (_req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, "headshot-" + uniqueSuffix + path.extname(file.originalname));
-  },
-});
-
 const headshotUpload = multer({
-  storage: headshotStorage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (["image/jpeg", "image/jpg", "image/png", "image/webp"].includes(file.mimetype)) {
@@ -123,9 +107,11 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  // Legacy local uploads (dev only); production uses Supabase Storage URLs
   app.use("/uploads", express.static("uploads"));
 
   const PgStore = connectPgSimple(session);
+  const isProduction = process.env.NODE_ENV === "production";
 
   app.use(
     session({
@@ -133,7 +119,13 @@ export async function registerRoutes(
       secret: process.env.SESSION_SECRET || "singer-search-secret-key",
       resave: false,
       saveUninitialized: false,
-      cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 },
+      proxy: true,
+      cookie: {
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax",
+      },
     })
   );
 
@@ -1458,7 +1450,7 @@ export async function registerRoutes(
   app.post("/api/singer/resume", requireAuth, requireSinger, resumeUpload.single("resume"), async (req: Request, res: Response) => {
     try {
       if (!req.file) return res.status(400).json({ message: "No file uploaded" });
-      const resumeUrl = `/uploads/${req.file.filename}`;
+      const resumeUrl = await uploadToSupabaseStorage("resumes", req.file);
       const singer = await storage.updateSinger(req.session.userId!, { resume_url: resumeUrl });
       if (!singer) return res.status(404).json({ message: "Singer not found" });
       res.json({ resume_url: resumeUrl, message: "Resume uploaded successfully" });
@@ -1510,7 +1502,7 @@ export async function registerRoutes(
   app.post("/api/singer/headshot", requireAuth, requireSinger, headshotUpload.single("headshot"), async (req: Request, res: Response) => {
     try {
       if (!req.file) return res.status(400).json({ message: "No file uploaded" });
-      const url = `/uploads/${req.file.filename}`;
+      const url = await uploadToSupabaseStorage("headshots", req.file);
       const singer = await storage.updateSinger(req.session.userId!, { headshot_url: url });
       if (!singer) return res.status(404).json({ message: "Singer not found" });
       const { password: _, ...safe } = singer;

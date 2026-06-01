@@ -1,6 +1,9 @@
 import { Pool, PoolClient } from "pg";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function parseCsv(content: string): Record<string, string>[] {
   const lines = content.split(/\r?\n/).filter((l) => l.trim().length > 0);

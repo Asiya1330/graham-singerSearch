@@ -2,8 +2,6 @@ import { build as esbuild } from "esbuild";
 import { build as viteBuild } from "vite";
 import { rm, readFile, mkdir, copyFile } from "fs/promises";
 
-// server deps to bundle to reduce openat(2) syscalls
-// which helps cold start times
 const allowlist = [
   "@google/generative-ai",
   "axios",
@@ -32,12 +30,12 @@ const allowlist = [
   "zod-validation-error",
 ];
 
-async function buildAll() {
-  await rm("dist", { recursive: true, force: true });
-
+async function buildClient() {
   console.log("building client...");
   await viteBuild();
+}
 
+async function buildServer() {
   console.log("building server...");
   const pkg = JSON.parse(await readFile("package.json", "utf-8"));
   const allDeps = [
@@ -65,7 +63,23 @@ async function buildAll() {
   await copyFile("server/data/repertoire.csv", "dist/data/repertoire.csv");
 }
 
-buildAll().catch((err) => {
+async function buildAll() {
+  await rm("dist", { recursive: true, force: true });
+  await buildClient();
+  await buildServer();
+}
+
+const mode = process.argv[2] || "all";
+
+if (mode === "client") {
+  buildClient().catch(fail);
+} else if (mode === "server") {
+  buildServer().catch(fail);
+} else {
+  buildAll().catch(fail);
+}
+
+function fail(err: unknown) {
   console.error(err);
   process.exit(1);
-});
+}

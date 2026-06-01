@@ -1,4 +1,6 @@
+import "./lib/load-env.js";
 import express, { type Request, Response, NextFunction } from "express";
+import { shouldServeClient } from "./lib/env";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
@@ -8,6 +10,7 @@ import { seedRepertoire } from "./seed-repertoire";
 import { geocodeCityState } from "./lib/geocode";
 
 const app = express();
+app.set("trust proxy", 1);
 const httpServer = createServer(app);
 
 declare module "http" {
@@ -96,10 +99,15 @@ app.use((req, res, next) => {
     log("Performance types tagged successfully.");
   }
 
-  {
+  if (
+    process.env.NODE_ENV !== "production" &&
+    process.env.SKIP_DEMO_SEED !== "1"
+  ) {
     const { rows } = await pool.query("SELECT count(*)::int as cnt FROM singers");
     if (rows[0].cnt < 50) {
-      log(`Only ${rows[0].cnt} singers found — clearing demo data and re-seeding 100 demo profiles (env=${process.env.NODE_ENV || "development"})...`);
+      log(
+        `Only ${rows[0].cnt} singers found — re-seeding 100 demo profiles (first run can take 2–5 minutes over Supabase; set SKIP_DEMO_SEED=1 to skip)`,
+      );
       await pool.query("DELETE FROM contact_reveals WHERE singer_id IN (SELECT id FROM singers WHERE email LIKE '%@example.com')");
       await pool.query("DELETE FROM availabilities WHERE singer_id IN (SELECT id FROM singers WHERE email LIKE '%@example.com')");
       await pool.query("DELETE FROM singer_roles WHERE singer_id IN (SELECT id FROM singers WHERE email LIKE '%@example.com')");
@@ -208,9 +216,9 @@ app.use((req, res, next) => {
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
-  if (process.env.NODE_ENV === "production") {
+  if (process.env.NODE_ENV === "production" && shouldServeClient()) {
     serveStatic(app);
-  } else {
+  } else if (process.env.NODE_ENV !== "production") {
     const { setupVite } = await import("./vite");
     await setupVite(httpServer, app);
   }
@@ -220,14 +228,8 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || "5000", 10);
-  httpServer.listen(
-    {
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    },
-    () => {
-      log(`serving on port ${port}`);
-    },
-  );
+  const host = process.env.HOST || "0.0.0.0";
+  httpServer.listen(port, host, () => {
+    log(`serving on http://localhost:${port}`);
+  });
 })();
