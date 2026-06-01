@@ -1,0 +1,23 @@
+node_modules
+dist
+.local
+.DS_Store
+server/public
+vite.config.ts.*
+*.tar.gz
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+
+.replit
+replit.md
+.local
+.agents
+.config
+skills-lock.json
+generated-icon.png
+attached_assets/Pasted-*
