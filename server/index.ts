@@ -232,6 +232,9 @@ app.use((req, res, next) => {
   // doesn't interfere with the other routes
   if (process.env.NODE_ENV === "production" && shouldServeClient()) {
     serveStatic(app);
+    log("serving frontend from dist/public");
+  } else if (process.env.NODE_ENV === "production") {
+    log("API-only mode (no dist/public — frontend should be on Vercel)");
   } else if (process.env.NODE_ENV !== "production") {
     const { setupVite } = await import("./vite");
     await setupVite(httpServer, app);
