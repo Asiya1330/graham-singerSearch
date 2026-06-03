@@ -85,7 +85,7 @@ Set `EMAIL_NOTIFICATIONS_ENABLED=false` to disable without removing the API key.
 
 Redeploy Railway after saving variables.
 
-**Vercel does not need these variables** — the frontend only proxies `/api/*` to Railway.
+**Vercel does not need Resend variables** — only `RAILWAY_API_URL` (see [SETUP-PREVIEW-DEPLOY.md](SETUP-PREVIEW-DEPLOY.md)). Email runs on whichever Railway environment handles the request.
 
 ---
 
