@@ -62,6 +62,8 @@ Uses Drizzle against your Supabase database URL.
 
 Railway environment variables: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_DATABASE_URL`, `SUPABASE_STORAGE_BUCKET`, `SESSION_SECRET`, `ADMIN_PASSWORD`, `NODE_ENV=production`, `SERVE_CLIENT=false`.
 
+Optional email notifications (Resend): see [SETUP-EMAIL.md](SETUP-EMAIL.md) — `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `ADMIN_NOTIFICATION_EMAIL`.
+
 ## Troubleshooting
 
 - **DB connection failed** — use the **pooler** URL (6543), add `?sslmode=require` if missing.  
