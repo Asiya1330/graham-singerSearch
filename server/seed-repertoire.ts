@@ -1,9 +1,6 @@
 import { Pool, PoolClient } from "pg";
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function parseCsv(content: string): Record<string, string>[] {
   const lines = content.split(/\r?\n/).filter((l) => l.trim().length > 0);
@@ -48,9 +45,17 @@ export async function seedRepertoire(client: PoolClient | Pool): Promise<number>
   const { rows: countRows } = await client.query("SELECT count(*)::int AS cnt FROM repertoire_reference");
   if (countRows[0].cnt > 0) return 0;
 
-  const csvPath = path.resolve(__dirname, "data", "repertoire.csv");
-  if (!fs.existsSync(csvPath)) {
-    console.warn(`[repertoire-seed] CSV not found at ${csvPath} — skipping`);
+  // Avoid import.meta/__dirname runtime differences between ESM dev and CJS production bundle.
+  // Railway runs `dist/index.cjs`, where the copied CSV is at `dist/data/repertoire.csv`.
+  const candidatePaths = [
+    path.resolve(process.cwd(), "dist", "data", "repertoire.csv"),
+    path.resolve(process.cwd(), "server", "data", "repertoire.csv"),
+  ];
+  const csvPath = candidatePaths.find((p) => fs.existsSync(p));
+  if (!csvPath) {
+    console.warn(
+      `[repertoire-seed] CSV not found. Tried: ${candidatePaths.join(", ")} — skipping`,
+    );
     return 0;
   }
   const content = fs.readFileSync(csvPath, "utf-8");
