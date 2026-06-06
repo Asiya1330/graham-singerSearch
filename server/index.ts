@@ -68,8 +68,22 @@ app.use((req, res, next) => {
 
 (async () => {
   await pool.query(`
+    -- singers schema backfill for migrated databases
+    ALTER TABLE singers ADD COLUMN IF NOT EXISTS latitude double precision;
+    ALTER TABLE singers ADD COLUMN IF NOT EXISTS longitude double precision;
+    ALTER TABLE singers ADD COLUMN IF NOT EXISTS video_link_1 text;
+    ALTER TABLE singers ADD COLUMN IF NOT EXISTS video_link_2 text;
+    ALTER TABLE singers ADD COLUMN IF NOT EXISTS audio_link_1 text;
     ALTER TABLE singers ADD COLUMN IF NOT EXISTS founding_expires_at timestamp;
     ALTER TABLE singers ADD COLUMN IF NOT EXISTS performance_types text[];
+
+    -- organizations schema backfill
+    ALTER TABLE organizations ADD COLUMN IF NOT EXISTS founding_expires_at timestamp;
+
+    -- role/work schema backfill
+    ALTER TABLE singer_roles ADD COLUMN IF NOT EXISTS status text DEFAULT 'performed';
+    ALTER TABLE singer_works ADD COLUMN IF NOT EXISTS status text DEFAULT 'performed';
+
     CREATE TABLE IF NOT EXISTS search_logs (
       id serial primary key,
       org_id integer,
