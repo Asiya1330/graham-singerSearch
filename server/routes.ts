@@ -25,6 +25,7 @@ import { promisify } from "util";
 import multer from "multer";
 import express from "express";
 import { uploadToSupabaseStorage } from "./lib/file-upload";
+import { notifyNewRegistration } from "./lib/email";
 import { eq, desc } from "drizzle-orm";
 
 const scryptAsync = promisify(scrypt);
@@ -181,6 +182,19 @@ export async function registerRoutes(
       }
 
       const updated = await storage.getSinger(singer.id);
+      void notifyNewRegistration({
+        userType: "singer",
+        userId: updated!.id,
+        email: updated!.email,
+        displayName: `${updated!.first_name} ${updated!.last_name}`.trim(),
+        city: updated!.city,
+        state: updated!.state,
+        detailLabel: "Voice type",
+        detailValue: updated!.primary_voice_type,
+        isFoundingMember: isFounding,
+        registeredAt: updated!.created_at ?? new Date(),
+      });
+
       const { password: _, ...safe } = updated!;
       res.status(201).json(safe);
     } catch (error: any) {
@@ -220,6 +234,19 @@ export async function registerRoutes(
 
       req.session.userId = org.id;
       req.session.userType = "organization";
+
+      void notifyNewRegistration({
+        userType: "organization",
+        userId: org.id,
+        email: org.email,
+        displayName: org.organization_name,
+        city: org.city,
+        state: org.state,
+        detailLabel: "Organization type",
+        detailValue: org.organization_type,
+        isFoundingMember: isFounding,
+        registeredAt: org.created_at ?? new Date(),
+      });
 
       const { password: _, ...safe } = org;
       res.status(201).json(safe);
