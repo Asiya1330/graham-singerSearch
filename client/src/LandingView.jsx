@@ -7,6 +7,7 @@ import logo2 from "./assets/logos/logo_2.png";
 import logo3 from "./assets/logos/logo_3.png";
 import logo4 from "./assets/logos/logo_4.png";
 import { useAppContext } from "./AppContext";
+import { FeaturedSingers } from "./pages/home";
 
 export function LandingView({ setAdminMode }) {
   const { setView } = useAppContext();
@@ -282,6 +283,17 @@ export function LandingView({ setAdminMode }) {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+
+        {/* Featured singers from live database */}
+        <div className="border-t border-white/5 bg-[#0D1017] py-16">
+          <div className="max-w-7xl mx-auto px-6">
+            <h2 className="text-xl font-bold text-white mb-2">Featured Singers</h2>
+            <p className="text-white/35 text-sm font-mono mb-8">
+              Admin-approved professionals currently in the database
+            </p>
+            <FeaturedSingers limit={8} />
           </div>
         </div>
 
