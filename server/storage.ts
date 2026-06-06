@@ -1,3 +1,4 @@
+import "./lib/load-env.js";
 import {
   type Singer, type InsertSinger,
   type SingerRole, type InsertSingerRole,
@@ -17,6 +18,7 @@ import {
 import { drizzle } from "drizzle-orm/node-postgres";
 import { eq, and, gte, lte, ilike, or, sql, desc, count, inArray } from "drizzle-orm";
 import { Pool } from "pg";
+import { getSupabaseDatabaseUrl } from "./lib/env";
 
 export interface IStorage {
   getSinger(id: number): Promise<Singer | undefined>;
@@ -132,7 +134,10 @@ export interface IStorage {
   listRepertoireSuggestions(): Promise<(RepertoireSuggestion & { singer_first_name: string | null; singer_last_name: string | null })[]>;
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+export const pool = new Pool({
+  connectionString: getSupabaseDatabaseUrl(),
+  ssl: { rejectUnauthorized: false },
+});
 export const db = drizzle(pool);
 
 export class DatabaseStorage implements IStorage {

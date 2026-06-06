@@ -504,7 +504,12 @@ export async function seedDatabase(client: PoolClient | Pool) {
   ];
   const shuffledTiers = seededShuffle(tiers, 88);
 
+  console.log("[seed] Starting demo seed (100 singers — ~2–5 min over Supabase, one query at a time)...");
+
   for (let i = 0; i < 100; i++) {
+    if (i > 0 && i % 10 === 0) {
+      console.log(`[seed] ${i}/100 singers inserted...`);
+    }
     const s = ALL_SINGERS[i];
     const loc = shuffledCities[i];
     const perfTypes = shuffledPerfTypes[i];
