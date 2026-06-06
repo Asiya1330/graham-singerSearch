@@ -26,7 +26,7 @@ import multer from "multer";
 import express from "express";
 import { uploadToSupabaseStorage } from "./lib/file-upload";
 import { notifyNewRegistration, getEmailConfigStatus, sendTestEmail } from "./lib/email";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 
 const scryptAsync = promisify(scrypt);
 
