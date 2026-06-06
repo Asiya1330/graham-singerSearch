@@ -5,7 +5,6 @@ import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 import { pool } from "./storage";
-import { seedDatabase } from "./seed-data";
 import { seedRepertoire } from "./seed-repertoire";
 import { geocodeCityState } from "./lib/geocode";
 import { logEmailConfigStatus } from "./lib/email";
@@ -112,29 +111,6 @@ app.use((req, res, next) => {
     `);
     await pool.query("UPDATE singers SET performance_types = ARRAY['Other'] WHERE performance_types IS NULL OR array_length(performance_types, 1) IS NULL");
     log("Performance types tagged successfully.");
-  }
-
-  if (
-    process.env.NODE_ENV !== "production" &&
-    process.env.SKIP_DEMO_SEED !== "1"
-  ) {
-    const { rows } = await pool.query("SELECT count(*)::int as cnt FROM singers");
-    if (rows[0].cnt < 50) {
-      log(
-        `Only ${rows[0].cnt} singers found — re-seeding 100 demo profiles (first run can take 2–5 minutes over Supabase; set SKIP_DEMO_SEED=1 to skip)`,
-      );
-      await pool.query("DELETE FROM contact_reveals WHERE singer_id IN (SELECT id FROM singers WHERE email LIKE '%@example.com')");
-      await pool.query("DELETE FROM availabilities WHERE singer_id IN (SELECT id FROM singers WHERE email LIKE '%@example.com')");
-      await pool.query("DELETE FROM singer_roles WHERE singer_id IN (SELECT id FROM singers WHERE email LIKE '%@example.com')");
-      await pool.query("DELETE FROM singer_works WHERE singer_id IN (SELECT id FROM singers WHERE email LIKE '%@example.com')");
-      await pool.query("DELETE FROM singers WHERE email LIKE '%@example.com'");
-      await pool.query("DELETE FROM contact_reveals WHERE org_id IN (SELECT id FROM organizations WHERE email IN ('sarah.mitchell@metopera.org','casting@lyricchicago.org','casting@operasanjose.org','casting@azopera.org','casting@operatampa.org','casting@madisonopera.org','casting@pbopera.org'))");
-      await pool.query("DELETE FROM organizations WHERE email IN ('sarah.mitchell@metopera.org','casting@lyricchicago.org','casting@operasanjose.org','casting@azopera.org','casting@operatampa.org','casting@madisonopera.org','casting@pbopera.org')");
-      await seedDatabase(pool);
-      log("Demo data seeded successfully! (100 singers, 7 organizations)");
-    } else {
-      log(`${rows[0].cnt} singers present — skipping demo reseed.`);
-    }
   }
 
   if (process.env.RESET_ORG_4_CREDITS === "1") {
