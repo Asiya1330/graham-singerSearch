@@ -9,10 +9,12 @@ You no longer edit `vercel.json` when switching between production and preview R
 ## How it works
 
 ```text
-Browser → Vercel (frontend + /api proxy) → Railway API
+Browser → Vercel middleware (middleware.ts) → Railway API
                 ↑
-         RAILWAY_API_URL (env var)
+         RAILWAY_API_URL (env var per Vercel environment)
 ```
+
+Static client builds (`outputDirectory`) do **not** run `/api` serverless files. Routing uses **Vercel Routing Middleware** at the project root, plus a **fallback rewrite** in `vercel.json` to production Railway if middleware is unavailable.
 
 | Vercel deployment | Vercel env scope | Typical branch | Railway target |
 |-------------------|------------------|----------------|----------------|
@@ -121,7 +123,7 @@ Preview vs production on Railway is controlled by **which environment** and **wh
 
 | Symptom | Fix |
 |---------|-----|
-| **404 on every `/api/*` request** | Ensure `vercel.json` includes the `/api/:path*` rewrite (routes static deploys to the proxy). Redeploy Vercel after pulling latest. Confirm `api/[...path].ts` exists at project root. |
+| **404 on every `/api/*` request** | Pull latest (uses `middleware.ts` + `vercel.json` fallback rewrite). Redeploy Vercel. Confirm **Root Directory** in Vercel matches the folder that contains `middleware.ts` and `vercel.json`. Test Railway directly: `RAILWAY_API_URL/api/public/founding-status?type=singer`. |
 | Preview site hits production API | Set **Preview** `RAILWAY_API_URL` on Vercel to Railway **preview** URL; redeploy preview |
 | `RAILWAY_API_URL is not set` (500 JSON) | Add variable on Vercel for the environment you’re testing |
 | `Failed to reach Railway API` (502) | Wrong Railway URL, Railway service down, or URL has a typo — open `RAILWAY_API_URL/api/public/founding-status?type=singer` in a browser |
@@ -132,5 +134,5 @@ Preview vs production on Railway is controlled by **which environment** and **wh
 
 ## Files
 
-- `api/[...path].ts` — proxies `/api/*` to `RAILWAY_API_URL`
-- `vercel.json` — client build only (no hardcoded Railway URL)
+- `middleware.ts` — proxies `/api/*` to `RAILWAY_API_URL` (Production vs Preview)
+- `vercel.json` — client build + fallback rewrite to production Railway

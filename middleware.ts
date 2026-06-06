@@ -1,6 +1,7 @@
-export const config = {
-  runtime: "edge",
-};
+/**
+ * Proxies /api/* to Railway using RAILWAY_API_URL (set per Vercel environment).
+ * Required for static deployments (outputDirectory) where /api serverless files are not used.
+ */
 
 const HOP_BY_HOP = new Set([
   "connection",
@@ -29,22 +30,17 @@ function forwardRequestHeaders(request: Request): Headers {
   return headers;
 }
 
-function forwardResponseHeaders(upstream: Response): Headers {
-  const headers = new Headers();
-  upstream.headers.forEach((value, key) => {
-    if (HOP_BY_HOP.has(key.toLowerCase())) return;
-    headers.append(key, value);
-  });
-  return headers;
-}
+export const config = {
+  matcher: ["/api/:path*"],
+};
 
-export default async function handler(request: Request): Promise<Response> {
+export default async function middleware(request: Request): Promise<Response> {
   const railwayBase = getRailwayBase();
   if (!railwayBase) {
     return new Response(
       JSON.stringify({
         message:
-          "RAILWAY_API_URL is not set on Vercel. Add it under Project Settings → Environment Variables (Production and Preview).",
+          "RAILWAY_API_URL is not set on Vercel. Add it under Project Settings → Environment Variables.",
       }),
       { status: 500, headers: { "Content-Type": "application/json" } },
     );
@@ -65,7 +61,8 @@ export default async function handler(request: Request): Promise<Response> {
 
     return new Response(upstream.body, {
       status: upstream.status,
-      headers: forwardResponseHeaders(upstream),
+      statusText: upstream.statusText,
+      headers: upstream.headers,
     });
   } catch (err) {
     console.error("[api-proxy] Railway request failed:", err);
