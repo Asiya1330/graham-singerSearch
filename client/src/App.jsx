@@ -106,7 +106,7 @@ function AdminLogin({ onSuccess }) {
             </svg>
           </div>
           <h1 className="text-xl font-bold text-slate-900">Admin Access</h1>
-          <p className="text-sm text-slate-500 mt-1">Enter the Admin's password to continue</p>
+          <p className="text-sm text-slate-500 mt-1">Enter the admin password to continue</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
