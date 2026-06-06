@@ -1,3 +1,6 @@
+import fs from "fs";
+import path from "path";
+
 /** Supabase project URL, e.g. https://xxxx.supabase.co */
 export function getSupabaseUrl(): string {
   const url = process.env.SUPABASE_URL;
@@ -38,6 +41,20 @@ export function getStorageBucket(): string {
   return process.env.SUPABASE_STORAGE_BUCKET || "singer-uploads";
 }
 
+export function getClientBuildPath(): string {
+  return path.resolve(process.cwd(), "dist", "public");
+}
+
+export function hasClientBuild(): boolean {
+  return fs.existsSync(getClientBuildPath());
+}
+
+/** Railway/Vercel split deploy: API-only when dist/public is missing. */
 export function shouldServeClient(): boolean {
-  return process.env.SERVE_CLIENT !== "false";
+  if (process.env.SERVE_CLIENT === "false") return false;
+  if (process.env.SERVE_CLIENT === "true") return true;
+  if (process.env.NODE_ENV === "production") {
+    return hasClientBuild();
+  }
+  return true;
 }
