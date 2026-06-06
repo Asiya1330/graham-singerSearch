@@ -121,8 +121,10 @@ Preview vs production on Railway is controlled by **which environment** and **wh
 
 | Symptom | Fix |
 |---------|-----|
+| **404 on every `/api/*` request** | Ensure `vercel.json` includes the `/api/:path*` rewrite (routes static deploys to the proxy). Redeploy Vercel after pulling latest. Confirm `api/[...path].ts` exists at project root. |
 | Preview site hits production API | Set **Preview** `RAILWAY_API_URL` on Vercel to Railway **preview** URL; redeploy preview |
-| `RAILWAY_API_URL is not set` | Add variable on Vercel for the environment you’re testing |
+| `RAILWAY_API_URL is not set` (500 JSON) | Add variable on Vercel for the environment you’re testing |
+| `Failed to reach Railway API` (502) | Wrong Railway URL, Railway service down, or URL has a typo — open `RAILWAY_API_URL/api/public/founding-status?type=singer` in a browser |
 | Email works on prod, not preview | Resend vars on **Railway Preview**, not only Production |
 | Login/session broken on preview | Keep `NODE_ENV=production` on Railway; ensure preview Railway URL is in Vercel Preview `RAILWAY_API_URL` |
 
