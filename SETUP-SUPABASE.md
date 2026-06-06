@@ -57,8 +57,8 @@ Uses Drizzle against your Supabase database URL.
 | **Vercel** | Frontend | `npm run build:client` | static `dist/public` |
 
 1. Deploy Railway first; copy the public URL.  
-2. Edit [`vercel.json`](vercel.json) — replace `RAILWAY_API_URL` with your Railway URL.  
-3. Deploy Vercel with env vars from `.env.example` (no secrets needed on Vercel except `SITE_URL` if desired).
+2. In Vercel → **Environment Variables**, set `RAILWAY_API_URL` (Production and Preview scopes) — see [SETUP-PREVIEW-DEPLOY.md](SETUP-PREVIEW-DEPLOY.md).  
+3. Deploy Vercel with env vars from `.env.example` (no secrets needed on Vercel except `SITE_URL` and `RAILWAY_API_URL`).
 
 Railway environment variables: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_DATABASE_URL`, `SUPABASE_STORAGE_BUCKET`, `SESSION_SECRET`, `ADMIN_PASSWORD`, `NODE_ENV=production`, `SERVE_CLIENT=false`.
 
@@ -68,4 +68,4 @@ Optional email notifications (Resend): see [SETUP-EMAIL.md](SETUP-EMAIL.md) — 
 
 - **DB connection failed** — use the **pooler** URL (6543), add `?sslmode=require` if missing.  
 - **Upload failed** — bucket must exist and be **public** (or use signed URLs later).  
-- **Login/session issues on split deploy** — ensure `vercel.json` rewrites `/api/*` to Railway and cookies use `secure` + `sameSite: none` in production.
+- **Login/session issues on split deploy** — ensure Vercel `RAILWAY_API_URL` points at the correct Railway environment and cookies use `secure` + `sameSite: none` in production.
