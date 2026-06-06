@@ -1,0 +1,1210 @@
+id,work_title,composer,part_name,voice_type_primary,specialization,part_tier,category,created_at
+001938a0-08e7-4cfc-815a-3ec573c71bb3,Wozzeck,Alban Berg,Marie,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 20:22:59.252405
+006306d3-11cf-4cf0-8c34-8ecbd110354d,Semele,George Frideric Handel,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+007c8c04-9a36-4b40-a386-92b003d8930f,Caractacus Op 35,Edward Elgar,Baritone Solo,baritone,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+00c18222-4082-4cf6-a785-43004b9242be,A Sea Symphony,Ralph Vaughan Williams,Soprano Solo,soprano,concert_solo,lead,symphonic,2026-04-26 20:30:01.34038
+00f36783-2fed-4830-8edb-87b33d86a1a3,Tosca,Giacomo Puccini,Sciarrone,baritone,comprimario_baritone,small,opera,2026-04-26 18:54:05.133147
+01247a54-fbd6-40c6-9abd-8d1b51ab3733,Der Freischutz,Carl Maria von Weber,Ottokar,baritone,lyric_baritone,small,opera,2026-04-26 20:20:59.436774
+014e3565-41a3-403d-be19-807f057bc28a,Boris Godunov,Modest Mussorgsky,Varlaam,bass,buffo_bass,secondary,opera,2026-04-26 19:01:41.337283
+016d5682-86d7-4176-afe4-5916eb957bf3,Solomon,George Frideric Handel,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+0185d6fe-10ed-4a5c-b9f5-8f8f5fd41087,Mass in D major Op 86,Antonin Dvorak,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+01ba8df9-d99a-4195-a7c8-bbc44bd2d2c1,Sea Drift,Frederick Delius,Baritone Solo,baritone,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+01d23494-9346-4aac-9f50-e7cd251a32d5,Scenes from Goethe's Faust,Robert Schumann,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+01f8c585-6932-465c-a260-47ae19623702,Orfeo ed Euridice,Christoph Willibald Gluck,Amore,soprano,soubrette,secondary,opera,2026-04-26 20:20:59.436774
+0204f770-aca4-43b9-9713-647fe22a7099,Saint Ludmila,Antonin Dvorak,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+02252595-fbd5-44a9-ad0e-4df4a893b782,Die erste Walpurgisnacht Op 60,Felix Mendelssohn,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+0271eb19-ea4c-45fa-80cb-eb364bd70b9c,St Matthew Passion,Johann Sebastian Bach,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+0285fadf-4ca1-4ab5-9a0b-dcd256974777,Les Beatitudes,Cesar Franck,Baritone Solo,baritone,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+02aed56e-c00d-4b54-95df-3f89ceda6c25,Billy Budd,Benjamin Britten,Captain Vere,tenor,lyric_tenor,lead,opera,2026-04-26 20:26:11.596639
+02c43fc0-5687-4b3a-915d-88216a3122d7,Esther,George Frideric Handel,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+0314afb2-0f10-4353-852b-d069184466bc,Luisa Miller,Giuseppe Verdi,Rodolfo,tenor,lyric_tenor,lead,opera,2026-04-26 19:01:41.337283
+0333135e-be1a-4da8-9217-8cf642aee22b,Thais,Jules Massenet,Crobyle,soprano,soubrette,small,opera,2026-04-26 20:22:59.252405
+0333cd19-2826-4a65-8d0d-92eb4f0f104b,Les Contes d'Hoffmann,Jacques Offenbach,Hoffmann,tenor,lyric_tenor,lead,opera,2026-04-26 18:58:46.291908
+034b54af-006c-444c-abdc-c58d623ae60f,Rusalka,Antonin Dvorak,The Prince,tenor,lyric_tenor,lead,opera,2026-04-26 19:01:41.337283
+03538a61-4a33-4870-b7db-8508336ab1ab,Adriana Lecouvreur,Francesco Cilea,Dangeville,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 19:01:41.337283
+0381a2b8-9096-410c-856b-738a5452722f,Ariadne auf Naxos,Richard Strauss,Zerbinetta,soprano,coloratura_soprano,secondary,opera,2026-04-26 20:20:59.436774
+04535745-1b82-4eb1-8088-196570d47ee1,Adriana Lecouvreur,Francesco Cilea,Maurizio,tenor,spinto_tenor,lead,opera,2026-04-26 19:01:41.337283
+046e9ba7-57dc-4d78-a7c3-113c24b2c1f7,The Legend of Saint Elisabeth,Franz Liszt,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+04a2c11a-9dee-4ecb-9fd5-26677ecebfaf,The Kingdom Op 51,Edward Elgar,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+04f1b937-714c-4269-9b45-95750b07f1af,L'elisir d'amore,Gaetano Donizetti,Doctor Dulcamara,bass,buffo_bass,secondary,opera,2026-04-26 18:55:25.267066
+05013ca5-d44b-404f-b8bb-a9b779d43750,La Traviata,Giuseppe Verdi,Violetta Valery,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 18:48:43.492581
+051a269b-4583-49f3-aab5-738af4e99751,The Rake's Progress,Igor Stravinsky,Tom Rakewell,tenor,lyric_tenor,lead,opera,2026-04-26 20:26:11.596639
+052f126f-3750-446f-b0b9-768f50621e4d,Herodiade,Jules Massenet,Herodias,mezzo_soprano,dramatic_mezzo,lead,opera,2026-04-26 20:26:11.596639
+05abdadf-9160-4e39-8ed3-cba819787204,Andrea Chenier,Umberto Giordano,Madelon,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 19:01:41.337283
+05b9633b-99a8-4673-b299-a47108ec6ab7,Stabat Mater,Gioachino Rossini,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+05d636e9-8290-4d52-800a-55eb158aad3f,Oedipus Rex,Igor Stravinsky,Baritone Solo,baritone,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+0653929b-7ef6-4bd0-94d5-8c71002014a8,The Rake's Progress,Igor Stravinsky,Trulove,bass,lyric_bass,secondary,opera,2026-04-26 20:26:11.596639
+06845777-95bb-4d87-b40a-5c2639cd69aa,Falstaff,Giuseppe Verdi,Mistress Quickly,mezzo_soprano,dramatic_mezzo,secondary,opera,2026-04-26 18:57:01.888083
+06ea9af6-23f9-44af-9e10-82804b350639,Anna Bolena,Gaetano Donizetti,Anna Bolena,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 20:20:59.436774
+0704ce3b-af03-439b-949b-afaf1df399fa,Alexander Nevsky Op 78,Sergei Prokofiev,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,symphonic,2026-04-27 19:55:04.175513
+072484de-4b63-441f-9f10-8007f74a8d42,Adriana Lecouvreur,Francesco Cilea,Jouvenot,soprano,soubrette,small,opera,2026-04-26 19:01:41.337283
+0729b74d-d43c-4cda-ba83-c5f9848f3917,Don Quichotte,Jules Massenet,Garcias,soprano,soubrette,small,opera,2026-04-26 20:26:11.596639
+0744d28a-9105-49a1-8629-753eb21a18cd,Jeanne d'Arc au Bucher,Arthur Honegger,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+08f42d16-205b-49c8-83ef-34267b16c69f,Siegfried,Richard Wagner,Mime,tenor,comprimario_tenor,secondary,opera,2026-04-26 20:22:59.252405
+09472472-dfa8-4330-a29a-f38e94ff9153,Ascension Oratorio BWV 11,Johann Sebastian Bach,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+09672c83-4a45-437a-bcec-d7e517ff21ff,The Damnation of Faust,Hector Berlioz,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+097e9fb3-77b4-443c-8dc3-0cb658e25866,Semele,George Frideric Handel,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+09d7ad02-8e30-4e3b-8634-bf3f502173a2,La Traviata,Giuseppe Verdi,Giorgio Germont,baritone,lyric_baritone,lead,opera,2026-04-26 18:48:43.492581
+0a58f6aa-282a-49e0-8f04-43ba14882d8e,Manon Lescaut,Giacomo Puccini,Edmondo,tenor,comprimario_tenor,small,opera,2026-04-26 18:57:01.888083
+0a74dafa-f240-44a9-b826-ccd87685a5b7,Lulu,Alban Berg,Schigolch,bass,lyric_bass,secondary,opera,2026-04-26 20:26:11.596639
+0ae18d2d-4678-41f4-ace4-6d6708d6e448,Mass in F minor Op 130,Anton Bruckner,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+0bba20f1-9c4c-4657-a74b-7bfccc094d3c,Pelleas et Melisande,Claude Debussy,A Doctor,bass,comprimario_bass,small,opera,2026-04-26 20:22:59.252405
+0bbc5dae-f620-4a89-86a8-ad3adc9c0b27,Mass in G major D 167,Franz Schubert,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+0c084d87-619f-46dc-b2de-63da2d3f4b7c,Symphony No 14,Dmitri Shostakovich,Bass Solo,bass,concert_solo,lead,symphonic,2026-04-27 19:51:55.063557
+0c4b8e6e-47a4-4ed4-8415-c77e898f555f,Rigoletto,Giuseppe Verdi,Matteo Borsa,tenor,comprimario_tenor,small,opera,2026-04-26 18:54:05.133147
+0c4d2c57-4c7a-424d-8306-d8112ff8b05f,Boris Godunov,Modest Mussorgsky,Xenia,soprano,soubrette,small,opera,2026-04-26 19:01:41.337283
+0c76c228-28fe-4945-b329-918b458dc054,Il Barbiere di Siviglia,Gioachino Rossini,Fiorello,baritone,comprimario_baritone,small,opera,2026-04-26 18:54:05.133147
+0c8366e5-875c-408a-a6ac-21f4ba715ce3,Requiem Op 9,Gabriel Durufle,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+0c8aaf44-d1ef-465d-96ee-50a1bc1f2eac,Rigoletto,Giuseppe Verdi,Giovanna,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 18:54:05.133147
+0caeb9ae-0186-4a5a-89d3-a8302d00dbd2,Peter Grimes,Benjamin Britten,Ellen Orford,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 20:26:11.596639
+0d014376-f7af-492c-8a31-4ea05879d667,L'Allegro il Penseroso ed il Moderato,George Frideric Handel,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+0d7a82bf-df2b-40c6-b61e-0b934afbf5fd,Luisa Miller,Giuseppe Verdi,Luisa,soprano,lyric_soprano,lead,opera,2026-04-26 19:01:41.337283
+0dc2eb63-6abe-4967-8099-512f804f02f4,Requiem,Andrew Lloyd Webber,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+0de47bf7-3974-47e7-80a1-fdd21b45ac0e,L'elisir d'amore,Gaetano Donizetti,Adina,soprano,lyric_coloratura_soprano,lead,opera,2026-04-26 18:55:25.267066
+0df2f9f6-1356-4261-9723-a6629e233077,Adriana Lecouvreur,Francesco Cilea,Abbe de Chazeuil,tenor,comprimario_tenor,small,opera,2026-04-26 19:01:41.337283
+0e2b7f38-e7a1-4ac4-8d92-721de8e60e24,The Kingdom Op 51,Edward Elgar,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+0e60a398-332c-49c2-ba46-bbc87dfffa29,Lady Macbeth of Mtsensk,Dmitri Shostakovich,Sergei,tenor,lyric_tenor,lead,opera,2026-04-26 20:26:11.596639
+0e6a2ad6-9597-4c7c-aa01-93d4e04d3695,Herodiade,Jules Massenet,Salome,soprano,lyric_soprano,lead,opera,2026-04-26 20:26:11.596639
+0eee40c9-409a-4ed7-8a01-05310dbac373,Luisa Miller,Giuseppe Verdi,Federica,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 19:01:41.337283
+0f2a65d1-e945-47da-af3c-9329b0dd0f88,Andrea Chenier,Umberto Giordano,Bersi,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 19:01:41.337283
+0f86349d-b4aa-446b-8244-dbdd4cdf3a01,Easter Oratorio BWV 249,Johann Sebastian Bach,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+0f88c496-7165-450c-9d9f-c7766ce98077,La Sonnambula,Vincenzo Bellini,Amina,soprano,lyric_coloratura_soprano,lead,opera,2026-04-26 18:58:46.291908
+0f999e41-5e39-41d4-8c71-dc35d6406f67,Le Nozze di Figaro,Wolfgang Amadeus Mozart,Cherubino,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 18:48:43.492581
+0fa079b4-0319-4a7b-a2f1-792552584e2e,Symphony No 8 Symphony of a Thousand,Gustav Mahler,Soprano Solo,soprano,concert_solo,lead,symphonic,2026-04-26 20:28:53.719839
+0fc18cdf-9b6b-4261-9154-1b4deba27bfc,L'Italiana in Algeri,Gioachino Rossini,Isabella,mezzo_soprano,lyric_coloratura_mezzo,lead,opera,2026-04-26 20:20:59.436774
+0fcaef8f-60f3-4dd3-8404-f785fbb89cbc,Lulu,Alban Berg,The Painter,tenor,lyric_tenor,secondary,opera,2026-04-26 20:26:11.596639
+0ff30d94-1a4b-484b-a55b-880a476959ee,Messiah,George Frideric Handel,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+1003814f-c50e-44b6-a9e0-7060b3f7eb41,Faust,Charles Gounod,Marthe,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 18:55:25.267066
+1092c252-31f0-4dfb-ae4d-540dc2884c37,Chichester Psalms,Leonard Bernstein,Soprano Solo,soprano,concert_solo,lead,symphonic,2026-04-27 19:55:04.175513
+10955190-6df5-44de-a563-c6cab1b1bc74,Symphony No 2 Lobgesang,Felix Mendelssohn,Soprano Solo,soprano,concert_solo,lead,symphonic,2026-04-27 19:51:55.063557
+10992052-2b47-46ef-9f97-2c9ed05f54df,Requiem,Andrew Lloyd Webber,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+10b21836-f919-411e-9f0d-f10fee3cf7c7,Scenes from Goethe's Faust,Robert Schumann,Baritone Solo,baritone,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+11752cfd-74ea-45d5-8d4c-544282285cdb,The Armed Man A Mass for Peace,Karl Jenkins,Baritone Solo,baritone,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+11a4f015-2865-456d-a4e6-f03ccefa5161,Manon,Jules Massenet,Poussette,soprano,soubrette,small,opera,2026-04-26 18:58:46.291908
+11ddb7ac-2061-42be-b85c-4dc8b21d338b,Il Barbiere di Siviglia,Gioachino Rossini,An Officer,bass,comprimario_bass,small,opera,2026-04-26 18:54:05.133147
+11e1088e-f71d-4974-9dc6-e5b805fa68ee,A German Requiem,Johannes Brahms,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+1252a4a0-76e9-4bde-80e8-2d043c02f1e8,Les Pecheurs de Perles,Georges Bizet,Nadir,tenor,lyric_tenor,lead,opera,2026-04-26 20:20:59.436774
+1270bcc5-edf7-4812-aca5-0076bc67d3fe,The Rake's Progress,Igor Stravinsky,Sellem,tenor,comprimario_tenor,small,opera,2026-04-26 20:26:11.596639
+12f2e94a-3286-4aad-9f1a-8c0a0654291c,Mass in F minor Op 130,Anton Bruckner,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+13491b4d-0193-4eb7-80e7-2566316f58d4,Requiem Op 48,Gabriel Faure,Baritone Solo,baritone,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+137e65ea-f027-4d47-8af7-f4033a7e76d3,Das Rheingold,Richard Wagner,Wotan,baritone,dramatic_baritone,lead,opera,2026-04-26 20:22:59.252405
+13e79ff6-ce8d-445c-859b-f52840006ae7,Lobgesang Op 52,Felix Mendelssohn,Soprano Solo,soprano,concert_solo,lead,symphonic,2026-04-27 19:56:19.320672
+13f7173f-7c84-4eac-a0b6-cbe3788720c4,Il Tabarro,Giacomo Puccini,Giorgetta,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 19:01:41.337283
+14387179-de3f-47a5-a4e3-676e8c580d31,Ariadne auf Naxos,Richard Strauss,Harlequin,baritone,lyric_baritone,secondary,opera,2026-04-26 20:20:59.436774
+14874a0a-6287-4c68-a923-4c9128818ff3,La Traviata,Giuseppe Verdi,Baron Douphol,baritone,comprimario_baritone,small,opera,2026-04-26 18:48:43.492581
+1489380c-da5d-4faa-9c45-c74b59221ff2,The Vision of Saint Augustine,Michael Tippett,Baritone Solo,baritone,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+148f96cd-013e-4d8f-98e3-37f8c2bfeec2,Carmina Burana,Carl Orff,Soprano Solo,soprano,concert_solo,lead,symphonic,2026-04-26 20:30:01.34038
+14a1ac8c-55b0-40b7-8e62-54751304fa04,Belshazzar,George Frideric Handel,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+14a4fd73-c77d-43ac-b1db-b35a868b627b,Symphony No 2 Lobgesang,Felix Mendelssohn,Tenor Solo,tenor,concert_solo,lead,symphonic,2026-04-27 19:51:55.063557
+154273ab-1119-41ea-a0e2-075f4f7c1d11,Il Tabarro,Giacomo Puccini,Il Talpa,bass,comprimario_bass,small,opera,2026-04-26 19:01:41.337283
+15747fd5-ca7f-43a7-a28e-5a0894dc9110,Maria Stuarda,Gaetano Donizetti,Anna Kennedy,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 20:20:59.436774
+159e8e4a-1246-4ea6-b5ef-588d40abaecd,Deborah,George Frideric Handel,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+160119ef-e232-4577-a15c-6f975c7aa68b,A Mass of Life,Frederick Delius,Tenor Solo,tenor,concert_solo,lead,symphonic,2026-04-27 19:53:06.44092
+161a62d8-1a02-4644-b2cb-fc478f3e129e,La Clemenza di Tito,Wolfgang Amadeus Mozart,Vitellia,soprano,lyric_soprano,lead,opera,2026-04-26 20:26:11.596639
+16c55dae-0721-4751-8f7c-0d013f2f383b,Tannhauser,Richard Wagner,Biterolf,bass,comprimario_bass,small,opera,2026-04-26 20:20:59.436774
+17099d41-4cd9-4f7a-aac7-8ab295a2ac99,The Queen of Spades,Pyotr Ilyich Tchaikovsky,Prince Yeletsky,baritone,lyric_baritone,secondary,opera,2026-04-26 18:58:46.291908
+1737503f-a750-4599-a829-23e0abcc9b1e,War and Peace,Sergei Prokofiev,Field Marshal Kutuzov,bass,lyric_bass,secondary,opera,2026-04-26 20:22:59.252405
+174ff13b-4aa0-4f9f-9efd-1b1673b5ef5a,Passio,Arvo Part,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+178d6df0-0407-4c9d-a034-9b9400775f22,Das Rheingold,Richard Wagner,Erda,mezzo_soprano,dramatic_mezzo,secondary,opera,2026-04-26 20:22:59.252405
+17a508cb-f6b6-4a04-b4aa-c213b10717b5,A Midsummer Night's Dream,Benjamin Britten,Lysander,tenor,lyric_tenor,secondary,opera,2026-04-26 20:26:11.596639
+17d8d83b-10d3-4d40-9786-d13b51f50400,Semiramide,Gioachino Rossini,Semiramide,soprano,lyric_coloratura_soprano,lead,opera,2026-04-26 20:22:59.252405
+17dae6ee-1689-4471-ae29-41fb936f8147,Romeo et Juliette Op 17,Hector Berlioz,Bass Solo,bass,concert_solo,lead,symphonic,2026-04-27 19:53:06.44092
+18361b8a-bd2c-4bee-b46b-f564e5008e12,Les Pecheurs de Perles,Georges Bizet,Nourabad,bass,lyric_bass,secondary,opera,2026-04-26 20:20:59.436774
+1845b55a-41a6-434c-9c9d-16dca590f8a4,Elektra,Richard Strauss,Orest,baritone,dramatic_baritone,secondary,opera,2026-04-26 19:01:41.337283
+188c3f78-8f0f-4498-8a6c-05eadae747bb,L'Enfance du Christ,Hector Berlioz,Baritone Solo,baritone,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+190301d3-9ba2-42d5-a1e1-def4f0a8064d,Samson,George Frideric Handel,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+1903df33-cc30-455f-afa0-15c973230dfe,Wozzeck,Alban Berg,Wozzeck,baritone,dramatic_baritone,lead,opera,2026-04-26 20:22:59.252405
+194d18cb-f66b-46ab-9159-54d4c3e32751,Giulio Cesare,George Frideric Handel,Curio,bass,comprimario_bass,small,opera,2026-04-26 20:20:59.436774
+19520436-a456-4e13-8463-a7af0c5f563d,Belshazzar's Feast,William Walton,Baritone Solo,baritone,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+1960e5cd-41af-4ea9-8219-aa139218b692,Jephtha,George Frideric Handel,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+19997cb3-fef2-442b-9648-d54010d031ea,Lakme,Leo Delibes,Nilakantha,bass,lyric_bass,secondary,opera,2026-04-26 20:22:59.252405
+1a3c2329-4b30-4042-907d-c2ed7f2fd845,The Queen of Spades,Pyotr Ilyich Tchaikovsky,The Countess,mezzo_soprano,dramatic_mezzo,secondary,opera,2026-04-26 18:58:46.291908
+1aeb9888-15c8-4739-b96f-b8a17389538e,Joshua,George Frideric Handel,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+1aefe0fa-2b3b-4e4c-b349-75bb143174de,Eugene Onegin,Pyotr Ilyich Tchaikovsky,Filipyevna,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 18:55:25.267066
+1af6ff76-2cf9-4615-a2f9-d97f0b5af66a,Die Meistersinger von Nurnberg,Richard Wagner,Hans Sachs,baritone,lyric_baritone,lead,opera,2026-04-26 20:20:59.436774
+1b424cfb-ec1d-4ca2-9388-ed8a66361aca,Esther,George Frideric Handel,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+1b4b2cd9-8026-4662-b1e6-6550fd129ad7,Christus,Franz Liszt,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+1bf969b4-43f8-4134-88b1-33da045d199b,Il Barbiere di Siviglia,Gioachino Rossini,Berta,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 18:54:05.133147
+1bfd5a5b-2338-4ed5-aedc-d85e370ca547,Dixit Dominus HWV 232,George Frideric Handel,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+1c05c3f8-8f78-47ee-aaf0-f48963d28b7a,Jenufa,Leos Janacek,The Mayor,baritone,lyric_baritone,small,opera,2026-04-26 19:01:41.337283
+1d078e03-84fa-478a-817a-fc71f98f2e4f,Iphigenie en Tauride,Christoph Willibald Gluck,Thoas,bass,dramatic_bass,secondary,opera,2026-04-26 20:26:11.596639
+1d387fef-8e69-418e-ae16-0fde44c1d81f,I Puritani,Vincenzo Bellini,Sir George Walton,bass,lyric_bass,secondary,opera,2026-04-26 18:58:46.291908
+1d4e00da-cfe4-46b3-9cc2-6aceb535e47e,Die Zauberflote,Wolfgang Amadeus Mozart,Second Lady,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 18:54:05.133147
+1d5dde7d-d40d-4862-80f4-52613bd77fe0,Werther,Jules Massenet,Sophie,soprano,soubrette,secondary,opera,2026-04-26 18:57:01.888083
+1d70d2a6-dc8c-4b3e-adbe-3e4ee150c7a4,Semiramide,Gioachino Rossini,Oroe,bass,lyric_bass,secondary,opera,2026-04-26 20:22:59.252405
+1da2837d-713d-49a6-b842-cb020f0f0aaf,Das Lied von der Erde,Gustav Mahler,Tenor Solo,tenor,concert_solo,lead,symphonic,2026-04-26 20:28:53.719839
+1e294c0f-85b8-4b42-9b06-37b6e6791c6e,A Child of Our Time,Michael Tippett,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+1e42561e-f5f3-4459-9af7-4ee098576699,Maria Stuarda,Gaetano Donizetti,Maria Stuarda,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 20:20:59.436774
+1e4da85f-b282-423e-8fc8-efa22418cd27,Theodora,George Frideric Handel,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+1e5bda84-c12f-4132-84c7-1e5f853e3a32,Aida,Giuseppe Verdi,Aida,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 18:54:05.133147
+1e81f1d2-b3d7-401c-a218-666479e691ad,A Midsummer Night's Dream,Benjamin Britten,Bottom,bass,buffo_bass,lead,opera,2026-04-26 20:26:11.596639
+1e8e6ed9-a818-4c60-874e-359404993801,Joshua,George Frideric Handel,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+1eb0edce-9040-4c98-bbcf-f6169aa44c7f,Hodie,Ralph Vaughan Williams,Baritone Solo,baritone,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+1ec44162-9687-4773-82b5-c50ac0fb3a9d,La Clemenza di Tito,Wolfgang Amadeus Mozart,Tito,tenor,lyric_tenor,lead,opera,2026-04-26 20:26:11.596639
+1ed1b87c-9f54-4ba7-841e-44c29dcf13d2,The Dream of Gerontius,Edward Elgar,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+1f1244eb-1807-419b-a4ce-a99b0906b73d,Kaddish Symphony No 3,Leonard Bernstein,Soprano Solo,soprano,concert_solo,lead,symphonic,2026-04-27 19:51:55.063557
+1f41baea-c38a-4c69-ad8c-7a683512211d,St Matthew Passion,Johann Sebastian Bach,Baritone Solo,baritone,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+1f6beb9f-a40c-4e59-b0da-39bc0665e5fa,La Boheme,Giacomo Puccini,Alcindoro,bass,buffo_bass,small,opera,2026-04-26 18:48:43.492581
+1fc12c62-f054-44ee-b952-f0b820cf87ea,Magnificat in D major BWV 243,Johann Sebastian Bach,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+1ffc95ba-737b-4df1-bdc2-0afbf0508800,L'Italiana in Algeri,Gioachino Rossini,Zulma,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 20:20:59.436774
+2001291a-59d2-4e25-9af9-b1374056bea5,Lauda Sion,Felix Mendelssohn,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+203a379f-bf20-4dc1-b6b1-d176bb455490,Lakme,Leo Delibes,Frederic,baritone,lyric_baritone,small,opera,2026-04-26 20:22:59.252405
+206651bb-86d7-4251-bee9-76a279f15f15,A Mass of Life,Frederick Delius,Soprano Solo,soprano,concert_solo,lead,symphonic,2026-04-27 19:53:06.44092
+20879a04-36c7-479f-a675-76b98250e8f6,Nelson Mass,Joseph Haydn,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+20e129fd-9f36-482b-b757-7773bc5a6491,Arabella,Richard Strauss,Matteo,tenor,lyric_tenor,secondary,opera,2026-04-26 20:26:11.596639
+2113f816-656a-456e-a3eb-5a5a69c2d095,Passion According to St Luke,Krzysztof Penderecki,Baritone Solo,baritone,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+2123612a-1ea3-4208-a15f-a7d45ea8d58d,Don Pasquale,Gaetano Donizetti,Doctor Malatesta,baritone,lyric_baritone,lead,opera,2026-04-26 18:57:01.888083
+212f9940-0237-43f7-9b98-c4f4fac07dea,Gotterdammerung,Richard Wagner,Second Norn,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 20:22:59.252405
+21349f3e-864b-49bc-8f08-1c0af64a3ff4,Mass,Leonard Bernstein,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+216e2b8e-f2f4-4015-ae9d-ab3b49745aac,Gotterdammerung,Richard Wagner,Waltraute,mezzo_soprano,dramatic_mezzo,secondary,opera,2026-04-26 20:22:59.252405
+217774f5-9c31-43a5-8e85-88213c027f16,Falstaff,Giuseppe Verdi,Sir John Falstaff,baritone,lyric_baritone,lead,opera,2026-04-26 18:57:01.888083
+21883159-4d8f-4124-95d3-3ca2a8a647d9,Romeo et Juliette,Charles Gounod,Tybalt,tenor,comprimario_tenor,secondary,opera,2026-04-26 18:57:01.888083
+2188cf58-342a-441b-b11c-f5a10d34f1b8,Katya Kabanova,Leos Janacek,Kudrjas,tenor,comprimario_tenor,secondary,opera,2026-04-26 20:26:11.596639
+218c4131-fa0c-489d-926b-9f52a2724405,Herodiade,Jules Massenet,Phanuel,bass,lyric_bass,secondary,opera,2026-04-26 20:26:11.596639
+2190e6a2-e190-4674-8b0d-509813929361,Prince Igor,Alexander Borodin,Skula,bass,buffo_bass,small,opera,2026-04-26 20:20:59.436774
+21a3e9e1-05d5-4aab-9715-e3a2312210fa,Idomeneo,Wolfgang Amadeus Mozart,Arbace,tenor,lyric_tenor,small,opera,2026-04-26 20:20:59.436774
+21ef89db-5d3d-49b0-b707-e9282c98b733,Mass in F minor Op 130,Anton Bruckner,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+22146f7f-80d6-4c34-b0d4-1a839220f4fc,The Damnation of Faust,Hector Berlioz,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+2219ab3c-c872-4a94-aec3-6a2703c19a90,Prince Igor,Alexander Borodin,Ovlur,tenor,comprimario_tenor,small,opera,2026-04-26 20:20:59.436774
+223d090a-05b6-4e90-9b23-a4d35b696d2e,Nabucco,Giuseppe Verdi,Abdallo,tenor,comprimario_tenor,small,opera,2026-04-26 18:58:46.291908
+224233d4-4115-4ea9-9a7f-4a86d54dc713,I Puritani,Vincenzo Bellini,Sir Bruno Robertson,tenor,comprimario_tenor,small,opera,2026-04-26 18:58:46.291908
+22546d77-d467-4d1e-98e0-a627cd2f2863,Stabat Mater Op 53,Karol Szymanowski,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+22779380-f684-4b90-9d78-68e2381924d6,Don Quichotte,Jules Massenet,Rodriguez,tenor,comprimario_tenor,small,opera,2026-04-26 20:26:11.596639
+229caf29-a36b-4e3b-88a7-0ece10d56110,L'Enfance du Christ,Hector Berlioz,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+22d309ff-2f93-4f8e-a01c-1e1a7301b6c9,Rusalka,Antonin Dvorak,The Witch Jezibaba,mezzo_soprano,dramatic_mezzo,secondary,opera,2026-04-26 19:01:41.337283
+22f31c93-491f-4d13-8d20-9ba3835b9736,Judas Maccabaeus,George Frideric Handel,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+22fdf7e9-b649-43c2-92c6-98f7e824eda2,Athalia,George Frideric Handel,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+2309e92e-246b-4be2-aa8d-9b729bdceb2e,Stabat Mater Op 53,Karol Szymanowski,Baritone Solo,baritone,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+235bf87a-ea26-4d4e-92ba-a1c1412c42d0,Ariadne auf Naxos,Richard Strauss,The Music Master,baritone,lyric_baritone,secondary,opera,2026-04-26 20:20:59.436774
+23c66ed0-3e8d-42e0-9e07-64fd0d87672b,Samson et Dalila,Camille Saint-Saens,A Philistine Messenger,tenor,comprimario_tenor,small,opera,2026-04-26 18:57:01.888083
+24083f7d-e997-4eb7-a96d-0304a52b74bb,Easter Oratorio BWV 249,Johann Sebastian Bach,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+2412ce95-4524-446c-866a-c1bfbbebbaec,Gotterdammerung,Richard Wagner,Gunther,baritone,lyric_baritone,secondary,opera,2026-04-26 20:22:59.252405
+24156add-4deb-4966-b37e-5823b4717db8,Requiem in C minor,Luigi Cherubini,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+24613437-58db-4f4d-b331-083d933367c8,War and Peace,Sergei Prokofiev,Sonya,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 20:22:59.252405
+2585d5e2-00ed-492e-a99a-12f5eee2b944,Simon Boccanegra,Giuseppe Verdi,Simon Boccanegra,baritone,lyric_baritone,lead,opera,2026-04-26 18:57:01.888083
+25996d0b-d423-40e7-9d74-bbaec226c1dd,Roberto Devereux,Gaetano Donizetti,Duke of Nottingham,baritone,lyric_baritone,secondary,opera,2026-04-26 20:22:59.252405
+25fcea0d-9890-4a73-98c0-09113e1aebb3,Le Nozze di Figaro,Wolfgang Amadeus Mozart,Basilio,tenor,comprimario_tenor,secondary,opera,2026-04-26 18:48:43.492581
+262d7703-0e16-4874-b534-ad6a45932c9c,Romeo et Juliette,Charles Gounod,Gertrude,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 18:57:01.888083
+263a80d4-9a07-428b-80ac-27b8cd770ccc,Turandot,Giacomo Puccini,Turandot,soprano,dramatic_soprano,lead,opera,2026-04-26 18:54:05.133147
+266e0c9c-8735-403d-b0f5-6faa0ee6cc88,Ascension Oratorio BWV 11,Johann Sebastian Bach,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+268139d1-a16b-4015-9258-c6da57ed61eb,Belshazzar,George Frideric Handel,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+26b2b04e-44ca-4cda-ac69-e984f2364a43,Scenes from Goethe's Faust,Robert Schumann,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+26bb0f33-7d45-4bd5-b0a2-816883c7e130,The Armed Man A Mass for Peace,Karl Jenkins,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+26eba8d4-e16d-4af8-9fbf-3f0b1f33dcc7,A Midsummer Night's Dream,Benjamin Britten,Hippolyta,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 20:26:11.596639
+2731f148-560c-487b-b43d-47fbfd90492a,The Damnation of Faust,Hector Berlioz,Baritone Solo,baritone,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+273eb2e6-4e57-48b4-ad9e-40d022c74448,L'Enfance du Christ,Hector Berlioz,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+277f9275-c0f3-4089-80d1-aa979d95abff,Iphigenie en Tauride,Christoph Willibald Gluck,Pylade,tenor,lyric_tenor,secondary,opera,2026-04-26 20:26:11.596639
+278f2e62-01a4-4106-af02-e21b861f4cde,La Fanciulla del West,Giacomo Puccini,Nick,tenor,comprimario_tenor,small,opera,2026-04-26 19:01:41.337283
+2794ecf8-fddb-4494-9eb3-f7dd3cbdb67d,Requiem in C minor,Luigi Cherubini,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+27d2ac33-0696-402e-b7a9-a540c1d93b33,Vespro della Beata Vergine,Claudio Monteverdi,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+27d47666-6fab-45de-9b4d-cf3c4c8e8240,The Spectre's Bride,Antonin Dvorak,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+28057a86-375b-4594-8124-e4bf5778cfee,The Seasons,Joseph Haydn,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+28864376-303e-4fa9-baa1-afeb9469d60c,Eugene Onegin,Pyotr Ilyich Tchaikovsky,Olga,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 18:55:25.267066
+288e8cab-f7fc-448f-b16a-4bdb472dae98,Ascension Oratorio BWV 11,Johann Sebastian Bach,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+28aeed58-9a1e-4689-8164-f6825c16e4ee,Die Meistersinger von Nurnberg,Richard Wagner,David,tenor,lyric_tenor,secondary,opera,2026-04-26 20:20:59.436774
+295664b6-1d3e-43af-8f81-46cc70407bd9,Rusalka,Antonin Dvorak,The Kitchen Boy,soprano,soubrette,small,opera,2026-04-26 19:01:41.337283
+2981962a-ac0c-4bb0-9cdd-a723cec192cf,Don Giovanni,Wolfgang Amadeus Mozart,Masetto,baritone,lyric_baritone,secondary,opera,2026-04-26 18:48:43.492581
+2997f629-03b7-49c8-b88c-f3156ed624d7,Caractacus Op 35,Edward Elgar,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+29d43eb2-171c-4631-a02b-3a3153573931,Peter Grimes,Benjamin Britten,Reverend Horace Adams,tenor,comprimario_tenor,small,opera,2026-04-26 20:26:11.596639
+29e9ca86-0a83-4016-8374-0430baa6704f,Gianni Schicchi,Giacomo Puccini,Gianni Schicchi,baritone,lyric_baritone,lead,opera,2026-04-26 19:01:41.337283
+2a74a0c8-33a2-446d-992c-09cde8dca8aa,Rejoice in the Lamb Op 30,Benjamin Britten,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+2a9fd839-0e31-416c-b92b-ae5580b65949,Les Contes d'Hoffmann,Jacques Offenbach,Crespel,baritone,lyric_baritone,small,opera,2026-04-26 18:58:46.291908
+2aa4ab55-13f2-43f7-b86c-87cdd01dd9cc,La Forza del Destino,Giuseppe Verdi,Padre Guardiano,bass,dramatic_bass,secondary,opera,2026-04-26 18:57:01.888083
+2b07c49f-d92f-41bc-a5d4-10ba7051b614,Suor Angelica,Giacomo Puccini,Suor Genovieffa,soprano,soubrette,small,opera,2026-04-26 19:01:41.337283
+2b0f4ef1-4025-4c9d-a04f-6d960f41bedc,Requiem in D minor,Wolfgang Amadeus Mozart,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+2b297f1f-3fee-42a2-8646-5727d03bf256,Les Contes d'Hoffmann,Jacques Offenbach,Lindorf,baritone,dramatic_baritone,secondary,opera,2026-04-26 18:58:46.291908
+2bbb8b46-c745-4b2e-b578-5d366809bbcd,L'Italiana in Algeri,Gioachino Rossini,Elvira,soprano,soubrette,secondary,opera,2026-04-26 20:20:59.436774
+2bd19a99-84aa-4c64-9631-de4a0b73ac42,Manon,Jules Massenet,Guillot de Morfontaine,tenor,comprimario_tenor,small,opera,2026-04-26 18:58:46.291908
+2be65ef6-f3d2-4289-bbc9-ef670f5cd42e,Don Carlo,Giuseppe Verdi,Don Carlo,tenor,spinto_tenor,lead,opera,2026-04-26 18:58:46.291908
+2bf22526-9f4c-498b-a448-bf104c7e1fcf,Aida,Giuseppe Verdi,Amonasro,baritone,dramatic_baritone,secondary,opera,2026-04-26 18:54:05.133147
+2c2067ac-137d-4e69-8526-c292db0c04da,Der Freischutz,Carl Maria von Weber,The Hermit,bass,lyric_bass,small,opera,2026-04-26 20:20:59.436774
+2c4fba11-a4df-4256-b267-90e3e9c5458a,La Gioconda,Amilcare Ponchielli,Alvise Badoero,bass,dramatic_bass,secondary,opera,2026-04-26 18:57:01.888083
+2c54eefd-7cb0-4cf6-b36c-ff609afe91fe,Cosi fan tutte,Wolfgang Amadeus Mozart,Fiordiligi,soprano,lyric_soprano,lead,opera,2026-04-26 18:57:01.888083
+2c9bcc43-716c-4622-ad6a-6c094ccd5949,The Cunning Little Vixen,Leos Janacek,The Vixen,soprano,lyric_soprano,lead,opera,2026-04-26 20:26:11.596639
+2d0665b8-a5b7-4e31-8dea-f1a9b3d52e22,Elijah,Felix Mendelssohn,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+2d1a7d0b-e8be-4206-ba4c-aef1b2100fc8,Macbeth,Giuseppe Verdi,Malcolm,tenor,comprimario_tenor,small,opera,2026-04-26 19:01:41.337283
+2e568c53-5ffa-43bb-b8e2-26a145346de4,Lucia di Lammermoor,Gaetano Donizetti,Enrico Ashton,baritone,lyric_baritone,lead,opera,2026-04-26 18:54:05.133147
+2e5e9c60-e5fd-4746-9031-f93d6b751ed8,The Cunning Little Vixen,Leos Janacek,The Fox,soprano,soubrette,secondary,opera,2026-04-26 20:26:11.596639
+2e6cb711-63cf-4205-8b73-e4b224f9f251,Die Meistersinger von Nurnberg,Richard Wagner,Magdalene,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 20:20:59.436774
+2e76350a-0ee5-4e33-93c3-2ea16c6689d7,A Child of Our Time,Michael Tippett,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+2e9c87e7-1aca-4d58-8bf1-50fab074f9ba,La Traviata,Giuseppe Verdi,Alfredo Germont,tenor,lyric_tenor,lead,opera,2026-04-26 18:48:43.492581
+2ec56014-e0e6-4920-91b2-26b435759fe2,La Clemenza di Tito,Wolfgang Amadeus Mozart,Publio,bass,lyric_bass,secondary,opera,2026-04-26 20:26:11.596639
+2f011c21-0bf8-4b95-b28d-2c88e661a7b0,Mors et Vita,Charles Gounod,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+2f1cb55d-d134-4066-8210-60314b192f44,Der Freischutz,Carl Maria von Weber,Agathe,soprano,lyric_soprano,lead,opera,2026-04-26 20:20:59.436774
+2f26abd6-9b1e-4d52-96bc-c58ff1468e99,Giulio Cesare,George Frideric Handel,Nireno,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 20:20:59.436774
+2f2c0d5b-f928-4824-87fb-b7e9fd66d627,Saul,George Frideric Handel,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+2fdad5de-642c-4187-aaf1-818cee74aecc,Lady Macbeth of Mtsensk,Dmitri Shostakovich,A Shabby Peasant,tenor,comprimario_tenor,small,opera,2026-04-26 20:26:11.596639
+2fe31a5d-091f-48ad-b3df-085d96b5a437,Parsifal,Richard Wagner,Gurnemanz,bass,lyric_bass,lead,opera,2026-04-26 20:20:59.436774
+3050196d-9990-473e-8cc6-226ffedbf89d,Saint Ludmila,Antonin Dvorak,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+3054e0c9-3cfa-4f4b-a8a1-a153d008d870,La Boheme,Giacomo Puccini,Mimi,soprano,lyric_soprano,lead,opera,2026-04-26 18:48:43.492581
+308a96de-7465-43dc-aa2d-3e4c7e9d2fd0,Der Rosenkavalier,Richard Strauss,The Marschallin,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 18:55:25.267066
+3092e39c-88f3-462e-89a8-eb49ef3fef73,Maria Stuarda,Gaetano Donizetti,Elisabetta,mezzo_soprano,dramatic_mezzo,lead,opera,2026-04-26 20:20:59.436774
+309a00a1-d82e-481c-a759-bf0c6cf59ac8,Siegfried,Richard Wagner,Brunnhilde,soprano,dramatic_soprano,lead,opera,2026-04-26 20:22:59.252405
+309ef5a9-bdd3-415c-8e61-9f0065ff37a9,Ariadne auf Naxos,Richard Strauss,The Major-Domo,tenor,comprimario_tenor,small,opera,2026-04-26 20:20:59.436774
+30a532c0-af62-42ff-abf9-d004480f14ae,Hamlet,Ambroise Thomas,Horatio,baritone,lyric_baritone,secondary,opera,2026-04-26 20:22:59.252405
+30e89d7f-43e1-4025-bc88-03eded89741c,Susanna,George Frideric Handel,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+311cfb35-0204-4c38-94b0-29e2462af539,Christmas Oratorio BWV 248,Johann Sebastian Bach,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+31625d2f-02d0-4f17-a77d-3ac759acb7d5,Les Huguenots,Giacomo Meyerbeer,Raoul de Nangis,tenor,spinto_tenor,lead,opera,2026-04-26 20:26:11.596639
+317e43af-0565-46c3-b67b-dd44d3cc2f5e,Les Beatitudes,Cesar Franck,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+31b331f9-465b-4afc-8c60-e07594faae48,Spring Symphony Op 44,Benjamin Britten,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,symphonic,2026-04-27 19:51:55.063557
+322793a4-0f19-487e-b221-2978110aa29a,Les Contes d'Hoffmann,Jacques Offenbach,Olympia,soprano,coloratura_soprano,lead,opera,2026-04-26 18:58:46.291908
+322954fe-51f5-453f-9b9e-4e5cec6852c4,Il Trovatore,Giuseppe Verdi,Count di Luna,baritone,lyric_baritone,lead,opera,2026-04-26 18:54:05.133147
+322d302e-e556-456e-ac98-3737f26f9e8e,Lakme,Leo Delibes,Miss Ellen,soprano,soubrette,small,opera,2026-04-26 20:22:59.252405
+324e828e-840a-42ca-83fe-f4a9830c1d9d,Luisa Miller,Giuseppe Verdi,Laura,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 19:01:41.337283
+3256c808-5c6f-4e20-84df-8d7a5276ff48,Mass in F minor Op 130,Anton Bruckner,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+32664336-eca6-40e6-99c9-4cf76472786e,Das Rheingold,Richard Wagner,Loge,tenor,spinto_tenor,lead,opera,2026-04-26 20:22:59.252405
+32929c84-07e5-4160-8219-d1945cda8f99,Lulu,Alban Berg,The Prince,tenor,comprimario_tenor,small,opera,2026-04-26 20:26:11.596639
+32b5444f-12f3-43df-b8e8-09856f3b6f2d,Salome,Richard Strauss,Herod,tenor,spinto_tenor,lead,opera,2026-04-26 18:58:46.291908
+32fd5fb7-3282-4d13-8fc6-da5abf563c82,La Forza del Destino,Giuseppe Verdi,Fra Melitone,baritone,buffo_baritone,secondary,opera,2026-04-26 18:57:01.888083
+338ed131-6e24-487d-b2ad-52c07a0f6694,Lulu,Alban Berg,Dr Schon,baritone,dramatic_baritone,lead,opera,2026-04-26 20:26:11.596639
+33a1bca7-c5c5-43bb-a661-7cfd289146ed,Manon,Jules Massenet,Des Grieux,tenor,lyric_tenor,lead,opera,2026-04-26 18:58:46.291908
+33bd9707-0d96-4aba-8017-4fc4e7064665,Carmen,Georges Bizet,Don Jose,tenor,spinto_tenor,lead,opera,2026-04-26 18:48:43.492581
+3435b94a-f5dd-4b38-b009-c7b2ac5e4a59,Lauda Sion,Felix Mendelssohn,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+3463f02a-9205-4a5e-a893-cab1fb2b7e14,Romeo et Juliette,Charles Gounod,Frere Laurent,bass,lyric_bass,secondary,opera,2026-04-26 18:57:01.888083
+349f9ece-429f-4d21-ae26-120804e102d4,Manon,Jules Massenet,Count des Grieux,bass,lyric_bass,secondary,opera,2026-04-26 18:58:46.291908
+34b3e715-0a71-4d03-8251-19f67c459fcb,Der Freischutz,Carl Maria von Weber,Kuno,bass,lyric_bass,small,opera,2026-04-26 20:20:59.436774
+34c2f523-2bbf-4cb9-8492-eadacc8dc7da,Theodora,George Frideric Handel,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+35440b3d-b1ac-4176-a9d9-22067c9ea590,Macbeth,Giuseppe Verdi,Macbeth,baritone,dramatic_baritone,lead,opera,2026-04-26 19:01:41.337283
+3549f279-6b4d-4f1d-9d29-bd27bf4ba48d,Les Contes d'Hoffmann,Jacques Offenbach,Schlemil,baritone,comprimario_baritone,small,opera,2026-04-26 18:58:46.291908
+3566e6e3-2030-4356-9c88-abdafa961255,Madama Butterfly,Giacomo Puccini,The Bonze,bass,dramatic_bass,small,opera,2026-04-26 18:54:05.133147
+356befef-3a9e-47dd-abfd-3a374d28c79d,Mass in C minor K 427,Wolfgang Amadeus Mozart,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+358b3641-6e79-4a9a-be86-0fdf20e5510b,Andrea Chenier,Umberto Giordano,Carlo Gerard,baritone,dramatic_baritone,lead,opera,2026-04-26 19:01:41.337283
+35a015e9-2b0f-4e1c-a6cb-7d0386661cf1,Khovanshchina,Modest Mussorgsky,Emma,soprano,lyric_soprano,secondary,opera,2026-04-26 20:22:59.252405
+35bafc8e-09bc-491b-b0c6-6f398201165e,Turandot,Giacomo Puccini,Pang,tenor,comprimario_tenor,secondary,opera,2026-04-26 18:54:05.133147
+3636e72f-c14b-4848-8d04-a15c09400d60,Peter Grimes,Benjamin Britten,Bob Boles,tenor,comprimario_tenor,secondary,opera,2026-04-26 20:26:11.596639
+36cab1db-bdcc-4601-9b81-11c0075abc9f,Don Carlo,Giuseppe Verdi,A Monk,bass,comprimario_bass,small,opera,2026-04-26 18:58:46.291908
+36f70aba-f93a-41ce-9cbd-c06b8f8ef87f,Tannhauser,Richard Wagner,Venus,mezzo_soprano,dramatic_mezzo,lead,opera,2026-04-26 20:20:59.436774
+378c49d2-ab49-464d-a140-1d34616b1cf3,Boris Godunov,Modest Mussorgsky,Marina Mniszech,mezzo_soprano,dramatic_mezzo,secondary,opera,2026-04-26 19:01:41.337283
+37cdd552-80fc-4a64-bae9-14e56e6fffca,La Fanciulla del West,Giacomo Puccini,Jack Rance,baritone,dramatic_baritone,lead,opera,2026-04-26 19:01:41.337283
+381bb3de-bfff-4397-99ae-d3ce42995e1f,Samson,George Frideric Handel,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+382a0478-1634-40aa-a2eb-04c653887a84,Les Huguenots,Giacomo Meyerbeer,Marcel,bass,dramatic_bass,secondary,opera,2026-04-26 20:26:11.596639
+3855036f-fbad-4350-8537-c987282355fb,Khovanshchina,Modest Mussorgsky,Susanna,soprano,soubrette,small,opera,2026-04-26 20:22:59.252405
+3870a3a1-8821-456a-8679-bf897173dd60,Pagliacci,Ruggero Leoncavallo,Silvio,baritone,lyric_baritone,secondary,opera,2026-04-26 18:55:25.267066
+38883618-f74e-4484-a3c1-18778cd8a910,Dialogues of the Carmelites,Francis Poulenc,Madame de Croissy,mezzo_soprano,dramatic_mezzo,secondary,opera,2026-04-26 20:22:59.252405
+38906b4e-3984-441f-aedf-57124a17895f,Deborah,George Frideric Handel,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+38bc7ddf-2da5-44e8-9844-dcbe1b14b146,Elijah,Felix Mendelssohn,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+38cc9846-49be-4058-bd62-51ca2a6a8e56,Arabella,Richard Strauss,Adelaide,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 20:26:11.596639
+38e290b9-b453-4944-870e-d94f192a1471,Ernani,Giuseppe Verdi,Giovanna,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 19:01:41.337283
+3957b405-bf14-4c47-8394-6d2d29a9fe14,La Clemenza di Tito,Wolfgang Amadeus Mozart,Annio,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 20:26:11.596639
+39bcb767-1713-474b-a386-18cb1c2752a2,Werther,Jules Massenet,Schmidt,tenor,comprimario_tenor,small,opera,2026-04-26 18:57:01.888083
+39da3642-cbb2-4f95-a842-ebca5d2b26f5,Salome,Richard Strauss,Narraboth,tenor,lyric_tenor,secondary,opera,2026-04-26 18:58:46.291908
+3a1afc8e-f266-4705-8023-e95705f6f7eb,L'Italiana in Algeri,Gioachino Rossini,Haly,baritone,comprimario_baritone,small,opera,2026-04-26 20:20:59.436774
+3a39a988-c1ff-4b29-949e-ce5b903e1019,Carmen,Georges Bizet,Zuniga,bass,lyric_bass,small,opera,2026-04-26 18:48:43.492581
+3b1da76d-150d-4079-8a46-49a54eb12325,The Light of Life Op 29,Edward Elgar,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+3b3128ce-b30d-4bad-9241-316aa3c5d251,Don Giovanni,Wolfgang Amadeus Mozart,Leporello,bass,buffo_bass,lead,opera,2026-04-26 18:48:43.492581
+3ba1ee67-cd51-4fa7-9f63-0e917c96ba8b,Mefistofele,Arrigo Boito,Elena,soprano,lyric_soprano,secondary,opera,2026-04-26 19:01:41.337283
+3be48de8-662b-4b9e-addc-2a54b1681f79,Eugene Onegin,Pyotr Ilyich Tchaikovsky,Madame Larina,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 18:55:25.267066
+3c4e869f-9d51-467d-a281-406fc339ed6c,Spring Symphony Op 44,Benjamin Britten,Tenor Solo,tenor,concert_solo,lead,symphonic,2026-04-27 19:51:55.063557
+3c5f70e7-4cf7-4ae4-899e-a44b8a5840e3,The Dream of Gerontius,Edward Elgar,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+3d1e1732-bc0a-4ff3-84e9-1e3b4a00cebf,Mass in E flat major D 950,Franz Schubert,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+3d6757d6-68d2-48f6-b607-40df8a707b04,Lady Macbeth of Mtsensk,Dmitri Shostakovich,Boris Ismailov,bass,dramatic_bass,secondary,opera,2026-04-26 20:26:11.596639
+3dd63a44-d769-4331-92b5-472a7b449687,Rigoletto,Giuseppe Verdi,Countess Ceprano,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 18:54:05.133147
+3de210f1-ab87-483b-81d1-c5e81e79ef40,I Puritani,Vincenzo Bellini,Sir Richard Forth,baritone,lyric_baritone,secondary,opera,2026-04-26 18:58:46.291908
+3de6c95e-8adf-437f-a43a-8ab08aad7663,Romeo et Juliette,Charles Gounod,The Duke,bass,comprimario_bass,small,opera,2026-04-26 18:57:01.888083
+3e8ff0a8-9f16-4085-bebe-ef568542d00c,Khovanshchina,Modest Mussorgsky,The Scrivener,tenor,comprimario_tenor,small,opera,2026-04-26 20:22:59.252405
+3ea20518-a9e0-40fc-b6ac-f2f7dcd52a19,Tosca,Giacomo Puccini,Cesare Angelotti,bass,lyric_bass,secondary,opera,2026-04-26 18:54:05.133147
+3edc6ef7-4053-4cbe-ab29-bfaab7e073e2,La Resurrezione HWV 47,George Frideric Handel,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+3efb0caa-c526-4d99-b5f3-5a262aad161d,Te Deum,Zoltan Kodaly,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+3f2e8520-bb83-46ee-b309-992962773b0d,Mass in E flat major D 950,Franz Schubert,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+3f442d14-104a-454e-adc5-11f6f30784c7,Der Rosenkavalier,Richard Strauss,Annina,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 18:55:25.267066
+3f5ee454-16ca-4d46-9ca2-34f865e3c9f8,Elijah,Felix Mendelssohn,Baritone Solo,baritone,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+3f876b5d-bbe7-49ac-abf3-27e3ed80016d,The Damnation of Faust,Hector Berlioz,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+3f8f432a-88a3-4aa9-91f8-706bbfaa76d5,Otello,Giuseppe Verdi,Desdemona,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 18:54:05.133147
+3f9c5a79-1567-4362-9817-0478ac43cdd4,Messa da Requiem,Giuseppe Verdi,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+4005404d-45dc-4038-a8d2-5bc43f91b25d,Carmen,Georges Bizet,Escamillo,baritone,lyric_baritone,lead,opera,2026-04-26 18:48:43.492581
+4015e157-ddf6-406e-b749-942db28e9292,Jenufa,Leos Janacek,Jenufa,soprano,lyric_soprano,lead,opera,2026-04-26 19:01:41.337283
+403899f7-a5ac-4a33-8db5-94aea54d51ce,Turandot,Giacomo Puccini,Liu,soprano,lyric_soprano,secondary,opera,2026-04-26 18:54:05.133147
+404d7fca-623f-43c8-88dd-bd29bd3a20de,Semiramide,Gioachino Rossini,Arsace,mezzo_soprano,lyric_coloratura_mezzo,lead,opera,2026-04-26 20:22:59.252405
+405ed155-0e82-4b70-8580-09e85fbd92c3,Un Ballo in Maschera,Giuseppe Verdi,A Judge,tenor,comprimario_tenor,small,opera,2026-04-26 18:55:25.267066
+40a3a72c-63d3-4c36-aea9-7933c4ba4bfe,Hercules,George Frideric Handel,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+40c3968b-dc62-490b-ba6f-de3b6cadbfeb,Das Paradies und die Peri Op 50,Robert Schumann,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+40f39a74-e4ce-444a-8d1d-e3058854be39,Messa da Requiem,Giuseppe Verdi,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+413f8e90-2076-4a06-9b2e-b3d1a2f404d4,Arabella,Richard Strauss,Mandryka,baritone,lyric_baritone,lead,opera,2026-04-26 20:26:11.596639
+418c8465-69c2-40f5-9d6a-25b80dea4e61,Manon,Jules Massenet,Lescaut,baritone,lyric_baritone,secondary,opera,2026-04-26 18:58:46.291908
+4195b957-e1fe-4f42-b11d-f5d0dfe109a2,Messiah,George Frideric Handel,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+41a1ab12-ec50-44e4-b920-7e2b1440e87c,La Forza del Destino,Giuseppe Verdi,Don Carlo,baritone,lyric_baritone,lead,opera,2026-04-26 18:57:01.888083
+41c6875e-66dc-4284-8887-097eb6b077d4,Turandot,Giacomo Puccini,Timur,bass,lyric_bass,secondary,opera,2026-04-26 18:54:05.133147
+41c896b4-6dcf-4654-9afc-c7fe5061086d,The Legend of Saint Elisabeth,Franz Liszt,Baritone Solo,baritone,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+423a546b-81da-4cf7-a45c-5de49eb365ba,I Vespri Siciliani,Giuseppe Verdi,Arrigo,tenor,spinto_tenor,lead,opera,2026-04-26 20:22:59.252405
+428c73c1-dc51-4db6-a7e9-7f88a8d911d5,The Seven Last Words of Our Saviour on the Cross,Joseph Haydn,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+434e47ab-a265-4a44-abcf-c6bc3c7863c3,Macbeth,Giuseppe Verdi,Macduff,tenor,lyric_tenor,secondary,opera,2026-04-26 19:01:41.337283
+436ade24-1638-463e-8529-37a42ef580e7,Die Zauberflote,Wolfgang Amadeus Mozart,Pamina,soprano,lyric_soprano,lead,opera,2026-04-26 18:54:05.133147
+44083a05-c983-4f69-b336-35eacb5e2362,Wozzeck,Alban Berg,The Doctor,bass,buffo_bass,secondary,opera,2026-04-26 20:22:59.252405
+4412d87a-d19d-44d2-9e06-f97a7cc198a1,Madama Butterfly,Giacomo Puccini,Kate Pinkerton,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 18:54:05.133147
+44465533-84cb-4e6e-8f8f-5bbe74d3122a,Mass,Leonard Bernstein,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+44bc08dc-fc52-4bb5-9c73-12667d87b8af,Triumphlied Op 55,Johannes Brahms,Baritone Solo,baritone,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+450ae3e3-503a-4525-867f-26fc30cbba3c,Thais,Jules Massenet,Nicias,tenor,lyric_tenor,secondary,opera,2026-04-26 20:22:59.252405
+4533ccb2-9660-43e6-9157-bc4d2260fa9b,Romeo et Juliette Op 17,Hector Berlioz,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,symphonic,2026-04-27 19:53:06.44092
+453c0cac-277b-46f7-94c8-ce261c210ceb,Khovanshchina,Modest Mussorgsky,Marfa,mezzo_soprano,dramatic_mezzo,lead,opera,2026-04-26 20:22:59.252405
+458bf2f8-8f02-4c48-88cf-60fbe4ea95bb,Mefistofele,Arrigo Boito,Mefistofele,bass,dramatic_bass,lead,opera,2026-04-26 19:01:41.337283
+45988790-cb64-4fae-b797-418958f94167,Requiem,John Rutter,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+45a58866-da00-462f-8ea5-0abd4e9707b3,L'Allegro il Penseroso ed il Moderato,George Frideric Handel,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+45aca867-fd89-442a-8acd-109a3bd1ba3b,Billy Budd,Benjamin Britten,Mr Redburn,baritone,lyric_baritone,secondary,opera,2026-04-26 20:26:11.596639
+45f73c4d-ce2e-4683-8976-7ed9882abc99,Norma,Vincenzo Bellini,Clotilde,soprano,soubrette,small,opera,2026-04-26 18:55:25.267066
+467f3e1a-d0f9-4527-b815-0a3af44f0a24,Un Ballo in Maschera,Giuseppe Verdi,Renato,baritone,lyric_baritone,lead,opera,2026-04-26 18:55:25.267066
+46ae6ad4-c78c-42c6-876c-cd20070dcda2,Don Giovanni,Wolfgang Amadeus Mozart,Don Ottavio,tenor,lyric_tenor,lead,opera,2026-04-26 18:48:43.492581
+46d19540-125a-4ed9-a990-adce920c8bfa,Parsifal,Richard Wagner,Parsifal,tenor,heldentenor,lead,opera,2026-04-26 20:20:59.436774
+471f9ed7-04fa-4f67-b30e-e3359df3bf80,Romeo et Juliette,Charles Gounod,Juliette,soprano,lyric_coloratura_soprano,lead,opera,2026-04-26 18:57:01.888083
+472671c3-e84d-4756-a0aa-d86230158ed6,Das Paradies und die Peri Op 50,Robert Schumann,Baritone Solo,baritone,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+474e95fd-89c2-43a4-aa14-893e277a7c80,Thais,Jules Massenet,Palemon,bass,lyric_bass,secondary,opera,2026-04-26 20:22:59.252405
+47c85a11-7ee3-49ad-b10a-75b1f8e34ca7,Sancta Civitas,Ralph Vaughan Williams,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+47e845ee-d66f-4a61-a8a6-4b50368a9904,Mass in E flat major D 950,Franz Schubert,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+47fd3539-93dd-442f-9847-95599ad0f609,Lucia di Lammermoor,Gaetano Donizetti,Arturo,tenor,comprimario_tenor,small,opera,2026-04-26 18:54:05.133147
+48419e92-e984-475c-8422-1949af48a05a,The Kingdom Op 51,Edward Elgar,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+48697769-ce9a-4525-be7f-3557adf3696d,Semiramide,Gioachino Rossini,Azema,soprano,soubrette,small,opera,2026-04-26 20:22:59.252405
+48983d4b-1fce-44a2-96ca-2e65e469115f,Rigoletto,Giuseppe Verdi,Count Ceprano,bass,comprimario_bass,small,opera,2026-04-26 18:54:05.133147
+48e190c6-0dd0-4351-b9bf-459bad71fa78,Dialogues of the Carmelites,Francis Poulenc,The Chevalier de la Force,tenor,lyric_tenor,secondary,opera,2026-04-26 20:22:59.252405
+49437491-88ca-4e19-ae60-149cda1b9194,Te Deum,Zoltan Kodaly,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+4947ef51-b07f-4eef-844d-5944dc1b6a41,A Midsummer Night's Dream,Benjamin Britten,Hermia,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 20:26:11.596639
+4991b47a-dde6-4053-b969-01786392090e,La Boheme,Giacomo Puccini,Colline,bass,lyric_bass,secondary,opera,2026-04-26 18:48:43.492581
+49e6d6be-997f-4b53-9ec7-a977b212fdb3,Manon Lescaut,Giacomo Puccini,Manon Lescaut,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 18:57:01.888083
+49f9708d-69f7-435d-9b34-4a3d049ec9da,Idomeneo,Wolfgang Amadeus Mozart,Idomeneo,tenor,lyric_tenor,lead,opera,2026-04-26 20:20:59.436774
+4a10b33d-ca48-4ee4-bd92-f72f9b88c630,Norma,Vincenzo Bellini,Oroveso,bass,lyric_bass,secondary,opera,2026-04-26 18:55:25.267066
+4a1cf64d-45c1-42cd-8bbd-2a359789b16f,Saul,George Frideric Handel,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+4a8c8d51-391b-42ef-879b-34826b6f410f,Nelson Mass,Joseph Haydn,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+4a8ed3ca-49a1-4048-bf2e-b1ffc9ede9f0,Das Paradies und die Peri Op 50,Robert Schumann,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+4afd8b02-99f6-4cfc-b270-dbf023de09ee,Rejoice in the Lamb Op 30,Benjamin Britten,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+4b28d7df-c3ec-40e5-a526-0a4d7213e1a0,Le Nozze di Figaro,Wolfgang Amadeus Mozart,Don Curzio,tenor,comprimario_tenor,small,opera,2026-04-26 18:48:43.492581
+4b39ca16-08f3-4193-bc59-ea11fbf85e5a,The Cunning Little Vixen,Leos Janacek,The Forester's Wife,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 20:26:11.596639
+4b3d41d0-2f90-4600-b047-14504be81f72,Wozzeck,Alban Berg,Margret,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 20:22:59.252405
+4b57296d-98b8-4eda-a5d8-182f63e885e5,Otello,Giuseppe Verdi,Otello,tenor,dramatic_tenor,lead,opera,2026-04-26 18:54:05.133147
+4b898d75-f738-4be1-95ac-bff273a967ad,Die Walkure,Richard Wagner,Waltraute,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 18:58:46.291908
+4bd95356-656d-4be4-ab12-5261a750ab54,Salome,Richard Strauss,Jochanaan,baritone,dramatic_baritone,lead,opera,2026-04-26 18:58:46.291908
+4bfeb52f-1529-4325-a661-47b022a86ff1,Tristan und Isolde,Richard Wagner,Tristan,tenor,heldentenor,lead,opera,2026-04-26 18:58:46.291908
+4c44c9aa-af12-4e29-a13f-457e78425374,The Rake's Progress,Igor Stravinsky,Mother Goose,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 20:26:11.596639
+4c8d340f-eb9d-43c2-b0ce-8abaa5e7e3d8,Don Carlo,Giuseppe Verdi,Princess Eboli,mezzo_soprano,dramatic_mezzo,lead,opera,2026-04-26 18:58:46.291908
+4d1da8c8-76a2-4d25-9a4f-7b7c51e670dd,Die Meistersinger von Nurnberg,Richard Wagner,Walther von Stolzing,tenor,heldentenor,lead,opera,2026-04-26 20:20:59.436774
+4d41d2de-00dd-446c-84ef-a9929cf53b14,A Child of Our Time,Michael Tippett,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+4dbdf59f-b7ed-4753-b136-7614ccd96d4e,Spring Symphony Op 44,Benjamin Britten,Soprano Solo,soprano,concert_solo,lead,symphonic,2026-04-27 19:51:55.063557
+4dd4589e-f3bc-4e67-9750-d5309e62552d,Siegfried,Richard Wagner,Alberich,baritone,dramatic_baritone,secondary,opera,2026-04-26 20:22:59.252405
+4dde3310-4930-41b0-9ad4-075b5bd69c76,Otello,Giuseppe Verdi,Cassio,tenor,lyric_tenor,secondary,opera,2026-04-26 18:54:05.133147
+4ead8cda-27c6-436f-b26a-a562be18361d,Semele,George Frideric Handel,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+4efe86f4-c173-445d-8ba8-e73c9404d612,Susanna,George Frideric Handel,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+4f42ad0e-7064-4b04-a74d-3765e622c4c9,The Seven Last Words of Our Saviour on the Cross,Joseph Haydn,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+4fbe0359-8ead-4f28-9698-fbacfc961a2c,Werther,Jules Massenet,Charlotte,mezzo_soprano,lyric_mezzo,lead,opera,2026-04-26 18:57:01.888083
+4fd96606-9665-45b5-8c72-6b0d02284022,Tosca,Giacomo Puccini,Baron Scarpia,baritone,dramatic_baritone,lead,opera,2026-04-26 18:54:05.133147
+4fe26b14-b1c2-45ef-9f54-3270d1a0945f,Semiramide,Gioachino Rossini,Assur,baritone,lyric_baritone,secondary,opera,2026-04-26 20:22:59.252405
+4ff3879a-eb10-4e74-91de-acca3db3ebc9,Mass in C minor K 427,Wolfgang Amadeus Mozart,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+4ff5f7dc-0ab9-41c0-8127-8dc1b84672a6,Requiem,Herbert Howells,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+503ccaf8-47e2-474a-8463-3641e781cc0c,Cosi fan tutte,Wolfgang Amadeus Mozart,Ferrando,tenor,lyric_tenor,lead,opera,2026-04-26 18:57:01.888083
+50a631db-12e1-4d87-b518-46dfecfe00e4,La Resurrezione HWV 47,George Frideric Handel,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+50da109f-ce0b-41af-810d-e4e198105108,I Vespri Siciliani,Giuseppe Verdi,Procida,bass,lyric_bass,secondary,opera,2026-04-26 20:22:59.252405
+50e4b884-87d2-4aca-b07b-d54aafbe4670,La Boheme,Giacomo Puccini,Musetta,soprano,soubrette,secondary,opera,2026-04-26 18:48:43.492581
+50f9a519-2691-4361-b2ff-d89a39178823,The Bartered Bride,Bedrich Smetana,Micha,bass,comprimario_bass,small,opera,2026-04-26 19:01:41.337283
+515aa275-c34d-432d-b3b6-78b3e454cf56,Romeo et Juliette Op 17,Hector Berlioz,Tenor Solo,tenor,concert_solo,lead,symphonic,2026-04-27 19:53:06.44092
+516225f6-7f5c-47ab-ae19-de3dbd17826c,Symphony No 8 Symphony of a Thousand,Gustav Mahler,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,symphonic,2026-04-26 20:28:53.719839
+5176eab8-1487-44d1-a75b-224a9262e10a,Don Pasquale,Gaetano Donizetti,A Notary,bass,comprimario_bass,small,opera,2026-04-26 18:57:01.888083
+51d5548a-bca1-435f-85f3-17ab646c3774,Requiem Op 48,Gabriel Faure,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+51db5da0-be4c-4243-b9fb-52102a635e0b,Passion According to St Luke,Krzysztof Penderecki,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+522ea966-4e5d-4cd9-8a06-ed4c6da6b2cd,Il Tabarro,Giacomo Puccini,Frugola,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 19:01:41.337283
+5232b80e-adb8-49b2-a62c-f8659d133614,Siegfried,Richard Wagner,Fafner,bass,dramatic_bass,secondary,opera,2026-04-26 20:22:59.252405
+523a97c3-4bec-49a0-b32d-8bb93d972036,Rigoletto,Giuseppe Verdi,Marullo,baritone,comprimario_baritone,small,opera,2026-04-26 18:54:05.133147
+532a80c5-a48e-42ad-baaf-aa2515de41e0,A Mass of Life,Frederick Delius,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,symphonic,2026-04-27 19:53:06.44092
+532faa9d-3071-4415-af21-f569e68df510,Aida,Giuseppe Verdi,Amneris,mezzo_soprano,dramatic_mezzo,lead,opera,2026-04-26 18:54:05.133147
+5368b753-ff60-4d56-8852-4e0d05c559fa,Theresienmesse,Joseph Haydn,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+536986c7-6985-4be1-9d9a-55749bd8ccdb,Anna Bolena,Gaetano Donizetti,Lord Riccardo Percy,tenor,lyric_tenor,secondary,opera,2026-04-26 20:20:59.436774
+536bdcf8-a393-4088-958e-d06dbb8bcd65,Lucia di Lammermoor,Gaetano Donizetti,Edgardo,tenor,lyric_tenor,lead,opera,2026-04-26 18:54:05.133147
+540abddc-7ef1-4c56-95f5-f8dec13f8c81,Gotterdammerung,Richard Wagner,Gutrune,soprano,lyric_soprano,secondary,opera,2026-04-26 20:22:59.252405
+549e9a7c-7f15-444f-9de7-e1c40433f010,Parsifal,Richard Wagner,Titurel,bass,comprimario_bass,small,opera,2026-04-26 20:20:59.436774
+54dfa8a6-f38e-4854-92a2-5b783e766332,Jephtha,George Frideric Handel,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+5510edb3-ed7a-4fbe-9f27-b7e676d98e10,Hora Novissima,Horatio Parker,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+551838d2-8d70-48bc-8b4c-07bc38999568,Lohengrin,Richard Wagner,Lohengrin,tenor,heldentenor,lead,opera,2026-04-26 18:55:25.267066
+5522a8a7-7c9c-4fe3-a060-495561eae57d,Le Nozze di Figaro,Wolfgang Amadeus Mozart,Barbarina,soprano,soubrette,small,opera,2026-04-26 18:48:43.492581
+55669803-df8b-46a4-a49e-012e7f849acc,Samson,George Frideric Handel,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+55c99953-f9c8-49bb-be1b-acd4b0701fcd,War and Peace,Sergei Prokofiev,Anatol Kuragin,tenor,lyric_tenor,secondary,opera,2026-04-26 20:22:59.252405
+55e47362-2348-4687-864e-8c251abcf145,Pelleas et Melisande,Claude Debussy,Pelleas,tenor,lyric_tenor,lead,opera,2026-04-26 20:22:59.252405
+55f0dbb4-cc26-49e9-a6b1-8adc5877c771,Werther,Jules Massenet,Johann,baritone,comprimario_baritone,small,opera,2026-04-26 18:57:01.888083
+560c37f9-106b-4e5c-aeb4-8e3e08915b53,St Matthew Passion,Johann Sebastian Bach,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+565786aa-f953-46fd-9f21-12d3bfa025dd,Requiem in B minor,Antonin Dvorak,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+56c29673-cc32-4e68-9c17-1190f77db59d,Stabat Mater,Giovanni Battista Pergolesi,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+57940108-79ce-47c5-926f-bca27601cc2d,La Resurrezione HWV 47,George Frideric Handel,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+579c5ca7-d4b9-4038-a26a-a96e72acb4f3,Khovanshchina,Modest Mussorgsky,Prince Ivan Khovansky,bass,dramatic_bass,lead,opera,2026-04-26 20:22:59.252405
+57b4a08c-9996-4a0a-ab83-99a8aa1a16f4,Coronation Mass K 317,Wolfgang Amadeus Mozart,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+57b7f5ad-7f02-4b04-9cda-3893a12f1384,Faust,Charles Gounod,Siebel,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 18:55:25.267066
+57dfe168-bce2-42a4-94ce-a69586f1087a,Simon Boccanegra,Giuseppe Verdi,Paolo Albiani,baritone,dramatic_baritone,secondary,opera,2026-04-26 18:57:01.888083
+5857cbe0-312b-4e8d-bca5-82f0a8e5be25,Dona Nobis Pacem,Ralph Vaughan Williams,Baritone Solo,baritone,concert_solo,lead,symphonic,2026-04-27 19:55:04.175513
+58d8f284-6421-47fc-8ffe-2ac9b4086ef4,Mass in B minor,Johann Sebastian Bach,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+58de4441-942b-4492-bc7c-806db5bd4d88,A Mass of Life,Frederick Delius,Baritone Solo,baritone,concert_solo,lead,symphonic,2026-04-27 19:53:06.44092
+58e2cfd7-761a-4f7f-bb4d-e3fe46536b37,Katya Kabanova,Leos Janacek,Dikoj,bass,lyric_bass,secondary,opera,2026-04-26 20:26:11.596639
+591d0784-78f1-4545-aba3-00448e7232fe,Magnificat in D major BWV 243,Johann Sebastian Bach,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+5962fc88-ab62-4c90-aa97-9ce9f9fb0dc1,Gotterdammerung,Richard Wagner,Brunnhilde,soprano,dramatic_soprano,lead,opera,2026-04-26 20:22:59.252405
+59753b37-9f1b-4342-bb13-139db7681ae9,Carmina Burana,Carl Orff,Baritone Solo,baritone,concert_solo,lead,symphonic,2026-04-26 20:30:01.34038
+599e2d8b-0409-4e4d-a8ac-11e0473234eb,Passion According to St Luke,Krzysztof Penderecki,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+59a271c0-cbc1-4b6c-b48a-6ce9344c92e1,Das Rheingold,Richard Wagner,Mime,tenor,comprimario_tenor,secondary,opera,2026-04-26 20:22:59.252405
+59eade78-0a8f-4cab-8275-287019e1812f,Die erste Walpurgisnacht Op 60,Felix Mendelssohn,Baritone Solo,baritone,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+59f03e80-5038-470c-a190-ea2a98997445,Hodie,Ralph Vaughan Williams,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+5a136c87-0c27-4ce8-8c15-cde014e099c1,Das Paradies und die Peri Op 50,Robert Schumann,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+5a67f2ca-d87d-4d08-a3e2-2d112f434b00,Te Deum in C major,Anton Bruckner,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+5a95a5a1-eb2b-4a56-8b08-7087354cdbd2,Les Contes d'Hoffmann,Jacques Offenbach,Spalanzani,tenor,comprimario_tenor,small,opera,2026-04-26 18:58:46.291908
+5a976950-d14c-4bf9-8c44-3bd3382adc45,Jephtha,George Frideric Handel,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+5a9accc4-e880-470e-bb64-dc0aa9538d57,Rusalka,Antonin Dvorak,The Gamekeeper,baritone,lyric_baritone,small,opera,2026-04-26 19:01:41.337283
+5ab322a2-6132-4d20-907e-fe7d33f28bac,L'elisir d'amore,Gaetano Donizetti,Belcore,baritone,lyric_baritone,secondary,opera,2026-04-26 18:55:25.267066
+5b8a776d-ec3d-422b-b8fb-16513b9960b4,Rusalka,Antonin Dvorak,The Foreign Princess,soprano,lyric_spinto_soprano,secondary,opera,2026-04-26 19:01:41.337283
+5b9ea935-ab2e-4f65-9941-7ca1372aca93,The Bartered Bride,Bedrich Smetana,Hata,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 19:01:41.337283
+5bbfa6bf-df2a-4a0a-b1a4-7b7f23d1c853,Ode for St Cecilia's Day HWV 76,George Frideric Handel,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+5bf4612c-e1ef-4340-ab31-a09e2f635f73,Te Deum in C major,Anton Bruckner,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+5c03a5dc-9968-450b-b208-3257d277421a,Eugene Onegin,Pyotr Ilyich Tchaikovsky,Triquet,tenor,comprimario_tenor,small,opera,2026-04-26 18:55:25.267066
+5c71bc09-ffff-4178-853f-f715122452c7,Die Meistersinger von Nurnberg,Richard Wagner,Nightwatchman,bass,comprimario_bass,small,opera,2026-04-26 20:20:59.436774
+5c7a7e40-10bf-4d05-bd92-4a81793c842e,Cosi fan tutte,Wolfgang Amadeus Mozart,Dorabella,mezzo_soprano,lyric_mezzo,lead,opera,2026-04-26 18:57:01.888083
+5c8cf4ac-3d17-4c70-85bf-b9a010e83392,Faust,Charles Gounod,Marguerite,soprano,lyric_soprano,lead,opera,2026-04-26 18:55:25.267066
+5ca6cb32-f738-4f9e-9dfa-7d2a2247d5c5,Les Huguenots,Giacomo Meyerbeer,Comte de Saint-Bris,baritone,lyric_baritone,secondary,opera,2026-04-26 20:26:11.596639
+5d0a22f3-5d16-4e21-885b-e9cc30df4139,Don Carlo,Giuseppe Verdi,Philip II,bass,dramatic_bass,lead,opera,2026-04-26 18:58:46.291908
+5d3bc021-448b-4723-9b56-2161560cab52,The Creation,Joseph Haydn,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+5d4b4805-34dd-4c9b-a52b-76128b424ba5,La Gioconda,Amilcare Ponchielli,Barnaba,baritone,dramatic_baritone,lead,opera,2026-04-26 18:57:01.888083
+5d4d2a9c-d2ac-495d-bda7-3d07dc4574f2,Don Pasquale,Gaetano Donizetti,Ernesto,tenor,lyric_tenor,lead,opera,2026-04-26 18:57:01.888083
+5d88020c-3243-448f-836f-89b868075f57,Aida,Giuseppe Verdi,A Messenger,tenor,comprimario_tenor,small,opera,2026-04-26 18:54:05.133147
+5d92547b-8334-4eec-93b8-ab6e37dd7673,La Sonnambula,Vincenzo Bellini,A Notary,tenor,comprimario_tenor,small,opera,2026-04-26 18:58:46.291908
+5df56d14-dea4-4d81-9b8b-a4692e874070,Symphony No 9 in D minor Op 125,Ludwig van Beethoven,Soprano Solo,soprano,concert_solo,lead,symphonic,2026-04-26 20:28:53.719839
+5e073516-ece1-4829-afac-1ba8428eb1f8,Rejoice in the Lamb Op 30,Benjamin Britten,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+5e183e75-ec9f-40fb-95a9-9498ae36eeb9,Christus,Franz Liszt,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+5e2e7603-b7e5-4ae6-91e6-3764b15f2be2,Oedipus Rex,Igor Stravinsky,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+5e9d3e10-6b86-422c-b75b-9bc359454c94,La Fanciulla del West,Giacomo Puccini,Dick Johnson,tenor,spinto_tenor,lead,opera,2026-04-26 19:01:41.337283
+5f1c647f-e6d6-4fe9-891c-8bf690595681,Maria Stuarda,Gaetano Donizetti,Giorgio Talbot,bass,lyric_bass,secondary,opera,2026-04-26 20:20:59.436774
+5f233dc0-879b-47a7-a366-97da1cf6e6a6,Un Ballo in Maschera,Giuseppe Verdi,Tom,bass,lyric_bass,small,opera,2026-04-26 18:55:25.267066
+5f40418b-cb45-4bff-b54e-3f687ebc02cf,Die Fledermaus,Johann Strauss II,Rosalinde,soprano,lyric_soprano,lead,opera,2026-04-26 20:20:59.436774
+5f440057-364c-411e-b4f8-ca0948fa9db8,Giulio Cesare,George Frideric Handel,Achilla,bass,lyric_bass,secondary,opera,2026-04-26 20:20:59.436774
+5f5c211e-6851-4d5f-8cba-64b2d43c52a5,La Gioconda,Amilcare Ponchielli,La Gioconda,soprano,dramatic_soprano,lead,opera,2026-04-26 18:57:01.888083
+5fc1e312-8a6e-495c-8ff6-46753139bba9,The Apostles,Edward Elgar,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+60a7dcf0-0bae-4c38-8fc2-f9d53301bbeb,Luisa Miller,Giuseppe Verdi,Miller,baritone,lyric_baritone,secondary,opera,2026-04-26 19:01:41.337283
+60d11364-2b2d-45c2-b2fc-5a829ca38785,Pagliacci,Ruggero Leoncavallo,Canio,tenor,dramatic_tenor,lead,opera,2026-04-26 18:55:25.267066
+61802978-2f55-4fd2-8022-7a44fd8d9dac,Lulu,Alban Berg,Lulu,soprano,coloratura_soprano,lead,opera,2026-04-26 20:26:11.596639
+61dfe107-7af7-44bf-9297-e6e736937848,Il Tabarro,Giacomo Puccini,Il Tinca,tenor,comprimario_tenor,small,opera,2026-04-26 19:01:41.337283
+62241247-e875-4d4f-a0b3-25f51a2ffb21,Hamlet,Ambroise Thomas,Hamlet,baritone,lyric_baritone,lead,opera,2026-04-26 20:22:59.252405
+628adc4e-f622-4324-9d23-1b007a86d36c,The Light of Life Op 29,Edward Elgar,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+62bbd22d-137f-4cdc-8f2e-fa94cca66959,The Queen of Spades,Pyotr Ilyich Tchaikovsky,Surin,bass,comprimario_bass,small,opera,2026-04-26 18:58:46.291908
+62cb8425-f607-4caf-8805-8fc1781d9a41,Otello,Giuseppe Verdi,Iago,baritone,dramatic_baritone,lead,opera,2026-04-26 18:54:05.133147
+630ecc14-a5a9-45d0-b5db-f0e008e36998,Die Entfuhrung aus dem Serail,Wolfgang Amadeus Mozart,Osmin,bass,buffo_bass,secondary,opera,2026-04-26 20:26:11.596639
+63357f79-e814-449f-8716-f2ce91439981,Rejoice in the Lamb Op 30,Benjamin Britten,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+636cfa89-620a-4401-a4ff-7ba294327079,Guillaume Tell,Gioachino Rossini,Arnold,tenor,spinto_tenor,lead,opera,2026-04-26 20:22:59.252405
+63953a0f-c73c-4c1d-b1b3-d4fb737399b6,La Sonnambula,Vincenzo Bellini,Teresa,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 18:58:46.291908
+63a2a1be-63a2-4b15-9192-87fda0d14062,Idomeneo,Wolfgang Amadeus Mozart,High Priest of Neptune,tenor,comprimario_tenor,small,opera,2026-04-26 20:20:59.436774
+63da71df-3dd6-44c4-9aa8-cd543a76329d,La Fanciulla del West,Giacomo Puccini,Wowkle,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 19:01:41.337283
+63ff318a-0dfa-4117-a7d0-deb0c14ef799,Symphony No 3 in D minor,Gustav Mahler,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,symphonic,2026-04-26 20:30:01.34038
+640a0b54-8249-4cf0-8c84-9665b43e06bb,Romeo et Juliette,Charles Gounod,Paris,baritone,comprimario_baritone,small,opera,2026-04-26 18:57:01.888083
+64bea882-c629-49f7-8bea-eb4f2496d8c1,Die Entfuhrung aus dem Serail,Wolfgang Amadeus Mozart,Konstanze,soprano,coloratura_soprano,lead,opera,2026-04-26 20:26:11.596639
+64c55341-a4ae-4191-9fae-770200db9fb2,Katya Kabanova,Leos Janacek,Tichon,tenor,lyric_tenor,secondary,opera,2026-04-26 20:26:11.596639
+651b20d5-a255-4d94-b2f6-ac122a634cce,La Cenerentola,Gioachino Rossini,Dandini,baritone,lyric_baritone,secondary,opera,2026-04-26 18:55:25.267066
+652ee7da-2634-479b-9b38-5e89d6f7f9ba,Die Walkure,Richard Wagner,Sieglinde,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 18:58:46.291908
+6555df66-ce29-4700-8c1e-6ffa0dadc962,Prince Igor,Alexander Borodin,Eroshka,tenor,comprimario_tenor,small,opera,2026-04-26 20:20:59.436774
+6587bedd-6094-4799-b266-f12962783306,Tosca,Giacomo Puccini,A Jailer,bass,comprimario_bass,small,opera,2026-04-26 18:54:05.133147
+65d0f141-f431-4710-bc18-edc511f63a0c,Lady Macbeth of Mtsensk,Dmitri Shostakovich,Zinovy Ismailov,tenor,comprimario_tenor,secondary,opera,2026-04-26 20:26:11.596639
+65d68ad2-938f-4f19-a71e-8edebb5c753c,Gurrelieder,Arnold Schoenberg,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,symphonic,2026-04-27 19:51:55.063557
+65f830f2-fe77-4909-b7e2-caf57deab6e5,Salome,Richard Strauss,Herodias,mezzo_soprano,dramatic_mezzo,secondary,opera,2026-04-26 18:58:46.291908
+667511c8-91ee-4e9b-ad14-eb0a354c3d98,Lady Macbeth of Mtsensk,Dmitri Shostakovich,Aksinia,soprano,soubrette,small,opera,2026-04-26 20:26:11.596639
+66807ee7-c5aa-4e34-85b3-eeb1a561d86e,Christmas Oratorio BWV 248,Johann Sebastian Bach,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+66856da9-661e-407c-83d5-c2357b82ca5d,Mefistofele,Arrigo Boito,Margherita,soprano,lyric_soprano,lead,opera,2026-04-26 19:01:41.337283
+668b3646-6814-4236-9ff7-5dd7b3b64a62,Tannhauser,Richard Wagner,A Young Shepherd,soprano,soubrette,small,opera,2026-04-26 20:20:59.436774
+66e85850-3460-4af6-8e4b-d0b3e6e9747f,Stabat Mater,Francis Poulenc,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+66f119f1-af21-4971-a030-42f2c4901d7b,Siegfried,Richard Wagner,The Wanderer,baritone,dramatic_baritone,secondary,opera,2026-04-26 20:22:59.252405
+67046916-5b2d-47f6-9c58-6d7f1065e10d,Les Contes d'Hoffmann,Jacques Offenbach,Giulietta,mezzo_soprano,lyric_mezzo,lead,opera,2026-04-26 18:58:46.291908
+6764822d-d2f3-4ef3-9c40-3011cbe3dd89,Israel in Egypt,George Frideric Handel,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+678ffea3-8096-405a-8409-18665c976c84,Giulio Cesare,George Frideric Handel,Giulio Cesare,mezzo_soprano,lyric_mezzo,lead,opera,2026-04-26 20:20:59.436774
+67bf88cf-7138-46bb-aa4c-bd9005aba874,The Rake's Progress,Igor Stravinsky,Nick Shadow,baritone,lyric_baritone,lead,opera,2026-04-26 20:26:11.596639
+67e8f8a2-1288-44d1-bccb-62e1256ef90b,Joshua,George Frideric Handel,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+681ce867-664b-4dfc-99a7-87e6802d37fb,Der Rosenkavalier,Richard Strauss,Valzacchi,tenor,comprimario_tenor,small,opera,2026-04-26 18:55:25.267066
+68489d96-6dd0-4774-8eba-d2f4fbf1e446,Die Fledermaus,Johann Strauss II,Frank,baritone,lyric_baritone,secondary,opera,2026-04-26 20:20:59.436774
+684adf70-71aa-4fa6-96f8-f6c7044a3c93,Rigoletto,Giuseppe Verdi,Gilda,soprano,lyric_coloratura_soprano,lead,opera,2026-04-26 18:54:05.133147
+685e6071-2b94-440a-80e9-90f8388bacda,The Light of Life Op 29,Edward Elgar,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+68a15f05-56e7-443a-ab80-8a545c93fce4,Hercules,George Frideric Handel,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+68abf458-f8a1-4603-9d96-7a6bb9405cff,La Cenerentola,Gioachino Rossini,Clorinda,soprano,soubrette,small,opera,2026-04-26 18:55:25.267066
+68fc1cb2-8185-4eeb-8b92-1b71024149fa,Un Ballo in Maschera,Giuseppe Verdi,Silvano,baritone,comprimario_baritone,small,opera,2026-04-26 18:55:25.267066
+694f814f-b565-4da4-9da3-f25494b09d14,Carmen,Georges Bizet,Morales,baritone,comprimario_baritone,small,opera,2026-04-26 18:48:43.492581
+6969ef3c-78bb-4f62-b316-429377f26807,Tristan und Isolde,Richard Wagner,A Shepherd,tenor,comprimario_tenor,small,opera,2026-04-26 18:58:46.291908
+6976a693-b979-420c-8e18-f5aeb99777fe,Elektra,Richard Strauss,An Old Servant,bass,comprimario_bass,small,opera,2026-04-26 19:01:41.337283
+69ad51aa-dbc7-4ee2-ba0b-090bd2597e81,A Midsummer Night's Dream,Benjamin Britten,Oberon,mezzo_soprano,lyric_mezzo,lead,opera,2026-04-26 20:26:11.596639
+6a6f00cc-80ab-4d4a-8895-afffd03d057f,The Apostles,Edward Elgar,Baritone Solo,baritone,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+6ab34586-929a-494f-87a6-86bee8a72019,La Resurrezione HWV 47,George Frideric Handel,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+6b1dffbf-0842-4640-beb2-e7df20c5c8f0,Lauda Sion,Felix Mendelssohn,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+6b641604-f97e-42f8-b37a-de530abb6aa4,Pelleas et Melisande,Claude Debussy,Golaud,baritone,lyric_baritone,lead,opera,2026-04-26 20:22:59.252405
+6b9054c0-7cb3-4b14-ac77-fefd4c5919d1,Hamlet,Ambroise Thomas,The Ghost,bass,dramatic_bass,small,opera,2026-04-26 20:22:59.252405
+6be399a1-90ba-4925-8e6a-7b6476242449,Messa da Requiem,Giuseppe Verdi,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+6c1ea82a-5ea6-438f-b9b0-adf20a6120ca,Susanna,George Frideric Handel,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+6c38c877-f0de-4ba2-b17c-e92111343f35,Romeo et Juliette,Charles Gounod,Capulet,bass,lyric_bass,secondary,opera,2026-04-26 18:57:01.888083
+6c825ed4-bd1c-4ce9-9668-e2e99a5a2461,Lakme,Leo Delibes,Gerald,tenor,lyric_tenor,lead,opera,2026-04-26 20:22:59.252405
+6ca22bbd-9024-44df-8786-5710ca163461,Theresienmesse,Joseph Haydn,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+6caa00b6-0ad7-4047-8339-c3343725809d,La Gioconda,Amilcare Ponchielli,La Cieca,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 18:57:01.888083
+6cff1fa6-399b-4cac-b3d7-4c524db4f0dd,Das Rheingold,Richard Wagner,Donner,baritone,lyric_baritone,small,opera,2026-04-26 20:22:59.252405
+6d05bb11-11bd-47a8-9539-1fc88ac896b4,Die Zauberflote,Wolfgang Amadeus Mozart,Queen of the Night,soprano,coloratura_soprano,lead,opera,2026-04-26 18:54:05.133147
+6d5bec96-4f62-4451-8382-2219b40ecc66,Billy Budd,Benjamin Britten,Billy Budd,baritone,lyric_baritone,lead,opera,2026-04-26 20:26:11.596639
+6d61394f-9e7a-4853-92de-0741220d8f49,Prince Igor,Alexander Borodin,Yaroslavna,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 20:20:59.436774
+6d70b40a-47bf-4beb-b062-9c02b464dccd,Missa in Angustiis Paukenmesse,Joseph Haydn,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+6d8836f6-cfce-4628-b7cf-59424d1f431e,Christus am Olberge,Ludwig van Beethoven,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+6ddeaf82-4762-49a5-a13a-a4b7538cdd2e,Acis and Galatea,George Frideric Handel,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+6e103fc7-8cd4-4fab-b74d-0bff7f2bef40,Wozzeck,Alban Berg,Andres,tenor,lyric_tenor,small,opera,2026-04-26 20:22:59.252405
+6e7b782b-4e71-4726-8375-910394d1312f,Elektra,Richard Strauss,The Trainbearer,soprano,soubrette,small,opera,2026-04-26 19:01:41.337283
+6e810892-7616-4691-8486-10416b342232,Christus,Franz Liszt,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+6e9c5b48-8090-4555-ba13-b508713c4745,Lulu,Alban Berg,The Animal Tamer,bass,comprimario_bass,small,opera,2026-04-26 20:26:11.596639
+6ea9175b-517e-4f90-9439-ac2066e5dc90,Tosca,Giacomo Puccini,Spoletta,tenor,comprimario_tenor,small,opera,2026-04-26 18:54:05.133147
+6ead100a-a3fb-41de-8460-636a23882820,The Rake's Progress,Igor Stravinsky,Keeper of the Madhouse,bass,comprimario_bass,small,opera,2026-04-26 20:26:11.596639
+6eb490e0-8bed-4ff1-aa1d-4bc5bc462223,Die Fledermaus,Johann Strauss II,Gabriel von Eisenstein,tenor,lyric_tenor,lead,opera,2026-04-26 20:20:59.436774
+6ec4282f-f470-4203-8c21-b0b53933671b,Falstaff,Giuseppe Verdi,Bardolph,tenor,comprimario_tenor,small,opera,2026-04-26 18:57:01.888083
+6f637f61-0b08-4e11-8db8-67dd935b1d6d,Arabella,Richard Strauss,Arabella,soprano,lyric_soprano,lead,opera,2026-04-26 20:26:11.596639
+6fb35ea3-273f-449a-adfb-8f21d6cb87bc,L'elisir d'amore,Gaetano Donizetti,Nemorino,tenor,lyric_tenor,lead,opera,2026-04-26 18:55:25.267066
+6fbfb88d-3ebd-4bbd-af86-7340786b03ef,Tristan und Isolde,Richard Wagner,King Marke,bass,dramatic_bass,secondary,opera,2026-04-26 18:58:46.291908
+6fed4c9b-a252-41c6-aa05-3a107f543af8,Giulio Cesare,George Frideric Handel,Sesto,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 20:20:59.436774
+6ff2d67e-9c27-4f81-a8a9-03826233b9f7,Stabat Mater,Gioachino Rossini,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+704fb0a3-8be6-4fd8-a5eb-7bdedabd6606,The Queen of Spades,Pyotr Ilyich Tchaikovsky,Tomsky,baritone,lyric_baritone,small,opera,2026-04-26 18:58:46.291908
+705e6430-7310-4cde-baa2-133d7b0a189b,Te Deum Op 22,Hector Berlioz,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+70810837-101c-49ec-9531-96b20aca1874,Cavalleria Rusticana,Pietro Mascagni,Santuzza,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 18:55:25.267066
+70b89f13-6bf8-4ad5-814a-15a3e1595157,Madama Butterfly,Giacomo Puccini,Cio-Cio-San,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 18:54:05.133147
+70ba5ca3-c69b-4ac7-9cb5-b6274b781082,Passio,Arvo Part,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+70de4b50-75f7-41f5-8a7e-36a0e2777862,Boris Godunov,Modest Mussorgsky,Rangoni,baritone,dramatic_baritone,secondary,opera,2026-04-26 19:01:41.337283
+70f7f47c-b073-40be-8240-57503be890a7,Maria Stuarda,Gaetano Donizetti,Lord Guglielmo Cecil,baritone,lyric_baritone,secondary,opera,2026-04-26 20:20:59.436774
+71442233-ce3c-4a8b-b073-30c86b578b2c,Don Giovanni,Wolfgang Amadeus Mozart,Zerlina,soprano,soubrette,secondary,opera,2026-04-26 18:48:43.492581
+719d699a-1e0c-443b-9b1c-1740ef656924,Dialogues of the Carmelites,Francis Poulenc,Blanche de la Force,soprano,lyric_soprano,lead,opera,2026-04-26 20:22:59.252405
+727547a6-2e0e-412f-97c7-c99c939981e9,The Bartered Bride,Bedrich Smetana,Esmeralda,soprano,soubrette,small,opera,2026-04-26 19:01:41.337283
+72a466ad-dc8b-47b2-bc89-ea563b485c87,Coronation Mass K 317,Wolfgang Amadeus Mozart,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+72c85287-27aa-4a99-af8b-4686328101e9,Werther,Jules Massenet,Werther,tenor,lyric_tenor,lead,opera,2026-04-26 18:57:01.888083
+72ce32a5-d849-40ff-9ee3-c50997d8fc0a,The Kingdom Op 51,Edward Elgar,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+733e192a-59bb-4c0f-816a-c238d738d775,Die Fledermaus,Johann Strauss II,Dr Blind,tenor,comprimario_tenor,small,opera,2026-04-26 20:20:59.436774
+7363518b-eba2-4dfe-ab90-b6b33c42bfe4,Oedipus Rex,Igor Stravinsky,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+736db2db-a6ce-494d-9524-acf03669dc3a,Symphony No 9 in D minor Op 125,Ludwig van Beethoven,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,symphonic,2026-04-26 20:28:53.719839
+73ac496f-bee8-4062-801c-eb3f3a162e71,The Apostles,Edward Elgar,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+74e877e5-df25-47da-9624-9397b76df444,Guillaume Tell,Gioachino Rossini,Ruodi,tenor,comprimario_tenor,small,opera,2026-04-26 20:22:59.252405
+75113758-af2a-46ae-b45d-833380a9f3f1,Dixit Dominus HWV 232,George Frideric Handel,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+751aebe6-b414-462d-8267-b61060d0f3ad,The Spectre's Bride,Antonin Dvorak,Baritone Solo,baritone,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+757fdfde-5a83-489e-aca9-287ca180c137,Madama Butterfly,Giacomo Puccini,Sharpless,baritone,lyric_baritone,lead,opera,2026-04-26 18:54:05.133147
+758e4e59-be51-4e81-ab64-41c090f05d55,Requiem in B minor,Antonin Dvorak,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+75cf1580-ecb4-44a1-a354-4d822c343c8c,L'Allegro il Penseroso ed il Moderato,George Frideric Handel,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+76092d78-26f9-4d9d-8563-f3bc7d650184,Luisa Miller,Giuseppe Verdi,Wurm,bass,lyric_bass,secondary,opera,2026-04-26 19:01:41.337283
+7660ee01-b58d-498f-8b1b-bbe92323a3c6,Don Quichotte,Jules Massenet,Juan,tenor,comprimario_tenor,small,opera,2026-04-26 20:26:11.596639
+76622fc8-31f7-4511-a627-5e5128622e93,Parsifal,Richard Wagner,Klingsor,baritone,dramatic_baritone,secondary,opera,2026-04-26 20:20:59.436774
+766bad6b-2c35-4a26-9294-9a014ec66002,Gurrelieder,Arnold Schoenberg,Tenor Solo,tenor,concert_solo,lead,symphonic,2026-04-27 19:51:55.063557
+76bd932a-42bd-4174-ba2a-b2f8221f26cb,Judas Maccabaeus,George Frideric Handel,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+76cb8b7b-3a67-4dcd-968b-b66db56becda,Samson et Dalila,Camille Saint-Saens,An Old Hebrew,bass,lyric_bass,small,opera,2026-04-26 18:57:01.888083
+7739b647-ad7a-42af-b898-8ee9154d60a5,Missa in Angustiis Paukenmesse,Joseph Haydn,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+773cb650-634b-4f5f-a991-00dc3641e888,Don Carlo,Giuseppe Verdi,Rodrigo,baritone,lyric_baritone,lead,opera,2026-04-26 18:58:46.291908
+7751929d-e79f-4fef-bfc7-a1abccbe3591,Don Quichotte,Jules Massenet,Dulcinee,mezzo_soprano,lyric_mezzo,lead,opera,2026-04-26 20:26:11.596639
+77b78b0a-3e17-4c47-8b7b-62167d3475a6,Les Huguenots,Giacomo Meyerbeer,Bois-Rose,tenor,comprimario_tenor,small,opera,2026-04-26 20:26:11.596639
+77ea5715-7198-452d-9e65-1070c4cad1cc,Romeo et Juliette,Charles Gounod,Romeo,tenor,lyric_tenor,lead,opera,2026-04-26 18:57:01.888083
+781ab0ac-c145-43e8-a8cf-7538d26d42d8,Il Barbiere di Siviglia,Gioachino Rossini,Figaro,baritone,lyric_baritone,lead,opera,2026-04-26 18:54:05.133147
+7853dc56-4eb9-492e-8982-a334ee5dfb52,Giulio Cesare,George Frideric Handel,Cornelia,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 20:20:59.436774
+787e0fac-eed6-43dc-8772-517ef56fcbb1,War and Peace,Sergei Prokofiev,Pierre Bezukhov,tenor,lyric_tenor,lead,opera,2026-04-26 20:22:59.252405
+78f721b2-1e54-4735-b4cb-a4b6c68c42b7,Otello,Giuseppe Verdi,A Herald,baritone,comprimario_baritone,small,opera,2026-04-26 18:54:05.133147
+7926916e-2603-440b-ab90-eb54738b1e5b,Symphony No 2 Resurrection,Gustav Mahler,Soprano Solo,soprano,concert_solo,lead,symphonic,2026-04-26 20:28:53.719839
+7949f2a6-df42-4e3d-bb58-ed89e686f99d,Falstaff,Giuseppe Verdi,Ford,baritone,lyric_baritone,secondary,opera,2026-04-26 18:57:01.888083
+799c07f9-6adf-4ca0-b810-892f39c70999,Thais,Jules Massenet,Athanael,baritone,lyric_baritone,lead,opera,2026-04-26 20:22:59.252405
+79c9fdbb-f8e5-4981-aa4e-ff00c1e1eb9e,Samson,George Frideric Handel,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+7a0e9b91-450d-480f-b3c6-dbd5f0063b74,Manon Lescaut,Giacomo Puccini,The Innkeeper,bass,comprimario_bass,small,opera,2026-04-26 18:57:01.888083
+7a52cb3e-a927-43ae-8d84-2d14379fc13d,Gianni Schicchi,Giacomo Puccini,Marco,baritone,comprimario_baritone,small,opera,2026-04-26 19:01:41.337283
+7a99ef68-a208-4492-b379-ff7c973df852,La Forza del Destino,Giuseppe Verdi,Leonora,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 18:57:01.888083
+7adce6eb-d201-4b4e-a203-9edde97b8fe3,La Forza del Destino,Giuseppe Verdi,Don Alvaro,tenor,spinto_tenor,lead,opera,2026-04-26 18:57:01.888083
+7ae2853e-95df-44b3-b761-4c5359efe0c5,Missa in Angustiis Paukenmesse,Joseph Haydn,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+7ae484f5-02c3-4f69-a73c-e61478a1e07d,Les Contes d'Hoffmann,Jacques Offenbach,Coppelius,baritone,dramatic_baritone,secondary,opera,2026-04-26 18:58:46.291908
+7aea5d82-093e-438e-a014-abe1c93f21e7,Manon Lescaut,Giacomo Puccini,Chevalier Des Grieux,tenor,spinto_tenor,lead,opera,2026-04-26 18:57:01.888083
+7b268eed-6206-45e3-8a2d-07d5b66683c5,I Puritani,Vincenzo Bellini,Elvira,soprano,lyric_coloratura_soprano,lead,opera,2026-04-26 18:58:46.291908
+7b4193cb-0bbc-4ab4-b9b4-1127d6f02e05,Wozzeck,Alban Berg,The Drum Major,tenor,dramatic_tenor,secondary,opera,2026-04-26 20:22:59.252405
+7b6242b0-9be1-49f0-82e4-d80f77524ca7,La Sonnambula,Vincenzo Bellini,Alessio,bass,comprimario_bass,small,opera,2026-04-26 18:58:46.291908
+7b9adc95-4a9a-4907-add0-bbebe75fd0c6,Herodiade,Jules Massenet,Herod,tenor,spinto_tenor,lead,opera,2026-04-26 20:26:11.596639
+7be34bf3-8a69-412f-8614-26338b6b2247,Ariadne auf Naxos,Richard Strauss,Ariadne,soprano,dramatic_soprano,lead,opera,2026-04-26 20:20:59.436774
+7c33be69-1e21-4c5e-9db9-f349ed6334d5,Ariadne auf Naxos,Richard Strauss,The Composer,mezzo_soprano,lyric_mezzo,lead,opera,2026-04-26 20:20:59.436774
+7c4dc9bb-ee62-4d82-ab5b-4edad677b77f,Un Ballo in Maschera,Giuseppe Verdi,Amelia,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 18:55:25.267066
+7c613f99-863e-4daf-9109-dd126cdd9763,Peter Grimes,Benjamin Britten,Hobson,bass,comprimario_bass,small,opera,2026-04-26 20:26:11.596639
+7c64913c-7d65-4a1c-8ec0-87c177586171,Symphony No 2 Resurrection,Gustav Mahler,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,symphonic,2026-04-26 20:28:53.719839
+7c7710f7-2cb0-4b4e-9d4d-5ff92be03bac,Gotterdammerung,Richard Wagner,Hagen,bass,dramatic_bass,lead,opera,2026-04-26 20:22:59.252405
+7cb25815-3db2-4e5a-873b-d2a9247dae68,Symphony No 13 Babi Yar,Dmitri Shostakovich,Bass Solo,bass,concert_solo,lead,symphonic,2026-04-27 19:53:06.44092
+7cf684d9-f21e-4a30-8a0e-2ae48512c3dd,Die Walkure,Richard Wagner,Fricka,mezzo_soprano,dramatic_mezzo,secondary,opera,2026-04-26 18:58:46.291908
+7cfc601e-f50a-47f2-a4a5-4b79845f0687,Der Freischutz,Carl Maria von Weber,Caspar,bass,dramatic_bass,secondary,opera,2026-04-26 20:20:59.436774
+7d4ad64a-5c09-4222-b941-2bf9ac71fab3,Orfeo ed Euridice,Christoph Willibald Gluck,Orfeo,mezzo_soprano,lyric_mezzo,lead,opera,2026-04-26 20:20:59.436774
+7d7d6b2f-7c41-408d-9fcf-ef0736a1133b,Ariadne auf Naxos,Richard Strauss,Naiad,soprano,lyric_soprano,small,opera,2026-04-26 20:20:59.436774
+7de9f37c-1df9-4a5c-9ef7-63d270eab9d8,Ariadne auf Naxos,Richard Strauss,Dryad,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 20:20:59.436774
+7e221a00-3a88-4dc5-839d-2afc5ad931c6,Nabucco,Giuseppe Verdi,Anna,soprano,soubrette,small,opera,2026-04-26 18:58:46.291908
+7ecf6574-48c4-4f07-9cca-d93f29321a93,Saul,George Frideric Handel,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+7f218b42-6715-4735-b2fd-57b20633d155,Adriana Lecouvreur,Francesco Cilea,Prince of Bouillon,bass,lyric_bass,small,opera,2026-04-26 19:01:41.337283
+7f52e23d-06f1-4188-b93e-f9a0951ab7e2,Messa da Requiem,Giuseppe Verdi,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+7f62086e-cb26-4d32-ac9e-8927252ddd7b,War and Peace,Sergei Prokofiev,Napoleon,baritone,lyric_baritone,small,opera,2026-04-26 20:22:59.252405
+7f9128ef-de0c-4c50-b77f-f11e0e87bfa4,Belshazzar,George Frideric Handel,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+7fcc6190-e4c2-4ba8-9ada-27f0e70d3959,Deborah,George Frideric Handel,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+7fd0bd58-ef7d-4937-9353-a7ced6f195bc,Samson et Dalila,Camille Saint-Saens,Abimelech,bass,dramatic_bass,secondary,opera,2026-04-26 18:57:01.888083
+7ff982e7-64df-4284-abb7-b25678896ae0,Das Rheingold,Richard Wagner,Froh,tenor,lyric_tenor,small,opera,2026-04-26 20:22:59.252405
+80330e1e-c00e-45f8-8928-fb7c48401410,Gotterdammerung,Richard Wagner,First Norn,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 20:22:59.252405
+804b206e-3e4d-4893-88d8-bdec0952a415,Madama Butterfly,Giacomo Puccini,Prince Yamadori,baritone,lyric_baritone,small,opera,2026-04-26 18:54:05.133147
+8051453d-ba0c-4023-adf5-1f600c5ce485,Gotterdammerung,Richard Wagner,Siegfried,tenor,heldentenor,lead,opera,2026-04-26 20:22:59.252405
+81823185-fe83-4663-ae2f-7031b1a53edf,Saint Ludmila,Antonin Dvorak,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+8189fb43-79e3-4aba-8bbc-1df64d466949,Herodiade,Jules Massenet,Vitellius,baritone,lyric_baritone,secondary,opera,2026-04-26 20:26:11.596639
+81f0c412-16d3-4f92-97e0-120399e3fc35,Christus am Olberge,Ludwig van Beethoven,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+8229346c-cfd2-4673-9873-694c2405a652,Werther,Jules Massenet,The Bailiff,bass,lyric_bass,small,opera,2026-04-26 18:57:01.888083
+82445648-f3c9-4e33-b6ed-e60ee552d21d,Song of Destiny Op 54,Johannes Brahms,Soprano Solo,soprano,concert_solo,lead,symphonic,2026-04-27 19:55:04.175513
+82976760-2208-4d05-be9a-0659a7f6ef5d,Norma,Vincenzo Bellini,Adalgisa,mezzo_soprano,lyric_mezzo,lead,opera,2026-04-26 18:55:25.267066
+82e8edaa-dd16-4d3c-845f-cf978e0cfc9b,The Legend of Saint Elisabeth,Franz Liszt,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+83832ec0-bcee-4a62-9d03-a188475a4d06,Mass in D major Op 86,Antonin Dvorak,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+83cf6476-2e52-4dd9-acf9-c1998989f583,Gurrelieder,Arnold Schoenberg,Bass Solo,bass,concert_solo,lead,symphonic,2026-04-27 19:51:55.063557
+856f971d-6174-4d95-a5fd-9d5cebbe64eb,La Traviata,Giuseppe Verdi,Annina,soprano,soubrette,secondary,opera,2026-04-26 18:48:43.492581
+857683c9-b922-49dd-b3e9-75d6e95a062a,Peter Grimes,Benjamin Britten,Mrs Sedley,mezzo_soprano,dramatic_mezzo,small,opera,2026-04-26 20:26:11.596639
+85b1a495-4dc8-40db-9e9a-b4d9282c42f2,Jenufa,Leos Janacek,Kostelnicka,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 19:01:41.337283
+85c8b3f7-942a-41eb-8099-733accc3d5b3,War Requiem,Benjamin Britten,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+862cb85e-afe5-4e61-b8cc-877a47729041,Tosca,Giacomo Puccini,Floria Tosca,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 18:54:05.133147
+87400b85-8366-4401-b6f3-67200a0501d8,The Rake's Progress,Igor Stravinsky,Anne Trulove,soprano,lyric_soprano,lead,opera,2026-04-26 20:26:11.596639
+87483f18-fa6a-4a2a-afb7-998fab6b477e,The Bartered Bride,Bedrich Smetana,Vasek,tenor,lyric_tenor,secondary,opera,2026-04-26 19:01:41.337283
+87edadc2-3e70-4ab3-bb70-411a2a23760f,Theodora,George Frideric Handel,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+8838d94d-ec32-4d03-9b6f-27b4570e70a7,Il Barbiere di Siviglia,Gioachino Rossini,Count Almaviva,tenor,lyric_tenor,lead,opera,2026-04-26 18:54:05.133147
+8840ce69-62a9-4e7d-8f20-7f5734ed8eb9,Carmen,Georges Bizet,Remendado,tenor,comprimario_tenor,small,opera,2026-04-26 18:48:43.492581
+88938db3-0435-4891-aa59-c9f6b4854fde,Il Barbiere di Siviglia,Gioachino Rossini,Don Basilio,bass,lyric_bass,secondary,opera,2026-04-26 18:54:05.133147
+88bdb4c3-c4f9-4c1d-8ca3-528984641675,Guillaume Tell,Gioachino Rossini,Hedwige,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 20:22:59.252405
+89befce4-f573-42e7-b54d-ce1462dd5df2,Suor Angelica,Giacomo Puccini,The Abbess,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 19:01:41.337283
+89c64755-1672-486e-add1-cb6dd54672e0,Turandot,Giacomo Puccini,Pong,tenor,comprimario_tenor,secondary,opera,2026-04-26 18:54:05.133147
+89cfea99-104e-4140-a93e-9dc0e9b2c0b2,The Queen of Spades,Pyotr Ilyich Tchaikovsky,Herman,tenor,dramatic_tenor,lead,opera,2026-04-26 18:58:46.291908
+8a08f61d-73c4-4764-ba62-ada0b6179a36,Siegfried,Richard Wagner,Erda,mezzo_soprano,dramatic_mezzo,small,opera,2026-04-26 20:22:59.252405
+8a2676ee-4a40-4ff2-86f0-53cd862aa7e2,Vespro della Beata Vergine,Claudio Monteverdi,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+8a42e80c-2f1b-4521-801c-e690df753b2d,The Legend of Saint Elisabeth,Franz Liszt,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+8a7d7dda-ce90-472d-b8fe-45cbd8190bd0,Samson et Dalila,Camille Saint-Saens,Dalila,mezzo_soprano,dramatic_mezzo,lead,opera,2026-04-26 18:57:01.888083
+8a9775e2-521f-4664-add9-fd8e35661900,Missa Brevis Op 63,Benjamin Britten,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+8addf936-f4cc-4ac1-ba66-da31eed0dab0,Salome,Richard Strauss,Second Nazarene,bass,comprimario_bass,small,opera,2026-04-26 18:58:46.291908
+8b1b6ccc-abc9-414f-8355-43219713a869,Acis and Galatea,George Frideric Handel,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+8b1deaf2-8048-4379-84e8-85b5f6a62a96,Die Walkure,Richard Wagner,Hunding,bass,dramatic_bass,secondary,opera,2026-04-26 18:58:46.291908
+8b290df3-6f32-4801-baa7-22710247ba5b,Eugene Onegin,Pyotr Ilyich Tchaikovsky,Tatyana,soprano,lyric_soprano,lead,opera,2026-04-26 18:55:25.267066
+8b3494b2-88b3-4269-b81d-88b22d34b7a9,I Vespri Siciliani,Giuseppe Verdi,Danieli,tenor,comprimario_tenor,small,opera,2026-04-26 20:22:59.252405
+8b3574ef-62a1-40f7-9fa3-8f4d04e205d2,Elektra,Richard Strauss,Aegisth,tenor,spinto_tenor,secondary,opera,2026-04-26 19:01:41.337283
+8b4b7f56-b4ee-4e35-8b89-e88153a8b9e3,Stabat Mater Op 53,Karol Szymanowski,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+8b5b64e8-2901-4f7e-8168-76108898a148,Pelleas et Melisande,Claude Debussy,Melisande,soprano,lyric_soprano,lead,opera,2026-04-26 20:22:59.252405
+8b79973e-e93c-4f76-a8a8-4b0b71ca6504,Cantata Profana,Bela Bartok,Baritone Solo,baritone,concert_solo,lead,symphonic,2026-04-27 19:58:58.058831
+8ba3c19e-980d-4555-a967-c4d074b4c078,War and Peace,Sergei Prokofiev,Prince Andrei,baritone,lyric_baritone,lead,opera,2026-04-26 20:22:59.252405
+8bc298b5-fbf8-4d49-9399-885bbec4104e,Herodiade,Jules Massenet,A Young Babylonian,soprano,lyric_soprano,small,opera,2026-04-26 20:26:11.596639
+8c15477b-cad7-49a8-9d8c-bfe38705b6cc,The Bartered Bride,Bedrich Smetana,Jenik,tenor,lyric_tenor,lead,opera,2026-04-26 19:01:41.337283
+8c5a2686-d695-4d7b-8bd5-bc4d5f694ebd,Anna Bolena,Gaetano Donizetti,Smeton,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 20:20:59.436774
+8cab9ceb-3027-41d1-908c-86c554097a10,Lucia di Lammermoor,Gaetano Donizetti,Normanno,tenor,comprimario_tenor,small,opera,2026-04-26 18:54:05.133147
+8cdbb4ed-dfbb-4bef-a323-4f7ec704d765,Symphony No 9 in D minor Op 125,Ludwig van Beethoven,Tenor Solo,tenor,concert_solo,lead,symphonic,2026-04-26 20:28:53.719839
+8cf7d235-6033-4b47-8c4b-5fd09a7077db,Die Zauberflote,Wolfgang Amadeus Mozart,First Lady,soprano,lyric_soprano,secondary,opera,2026-04-26 18:54:05.133147
+8d0bc804-ba73-4a31-bc11-303d6beabf84,Macbeth,Giuseppe Verdi,A Doctor,bass,comprimario_bass,small,opera,2026-04-26 19:01:41.337283
+8d13783f-fd4f-4c5f-bcd6-8795ca045aec,Der Rosenkavalier,Richard Strauss,Sophie,soprano,lyric_soprano,lead,opera,2026-04-26 18:55:25.267066
+8d278a72-b5da-4ab7-8d48-1ee069a1f024,Il Trovatore,Giuseppe Verdi,Azucena,mezzo_soprano,dramatic_mezzo,lead,opera,2026-04-26 18:54:05.133147
+8d313ff3-1f9f-4558-84ce-462b9b563105,Christus am Olberge,Ludwig van Beethoven,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+8de68eff-3a30-4895-bbfb-d10692c8f116,War and Peace,Sergei Prokofiev,Helene,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 20:22:59.252405
+8df7ad47-0c00-49d5-abde-36cee3b6baeb,Falstaff,Giuseppe Verdi,Nannetta,soprano,soubrette,secondary,opera,2026-04-26 18:57:01.888083
+8e0d5e13-4de5-476d-b064-9a7467bbf24e,Anna Bolena,Gaetano Donizetti,Giovanna Seymour,mezzo_soprano,lyric_mezzo,lead,opera,2026-04-26 20:20:59.436774
+8e352570-6373-4996-9d62-d7e37df0bb29,Carmen,Georges Bizet,Carmen,mezzo_soprano,dramatic_mezzo,lead,opera,2026-04-26 18:48:43.492581
+8e531dfc-9b66-40f9-9f1d-d557d54ac48c,A Midsummer Night's Dream,Benjamin Britten,Theseus,bass,lyric_bass,secondary,opera,2026-04-26 20:26:11.596639
+8e5ab1e1-28c3-48cb-9fb3-1a6e9312dcfe,Rigoletto,Giuseppe Verdi,The Duke of Mantua,tenor,lyric_tenor,lead,opera,2026-04-26 18:54:05.133147
+8e71c311-ce84-4469-a3ad-6e176fa92eb6,Missa Solemnis Op 123,Ludwig van Beethoven,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+8e98a491-85ca-448a-80e2-e45aed6fb632,Die Entfuhrung aus dem Serail,Wolfgang Amadeus Mozart,Belmonte,tenor,lyric_tenor,lead,opera,2026-04-26 20:26:11.596639
+8ea2620f-f65e-4740-a124-f2629f60f255,The Queen of Spades,Pyotr Ilyich Tchaikovsky,Polina,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 18:58:46.291908
+8eaa766c-d9be-4302-b89d-b3a6c6af3b2d,Nelson Mass,Joseph Haydn,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+8ecbbc13-a1b3-46d4-a974-0389a4a02ba4,Symphony No 4 in G major,Gustav Mahler,Soprano Solo,soprano,concert_solo,lead,symphonic,2026-04-26 20:30:01.34038
+8f5d1fe3-211b-4804-8039-1c2f5ce5f048,Billy Budd,Benjamin Britten,Claggart,bass,dramatic_bass,lead,opera,2026-04-26 20:26:11.596639
+901cbebb-738b-49cb-b60b-efa30fa15eb9,Arabella,Richard Strauss,Zdenka,soprano,lyric_soprano,lead,opera,2026-04-26 20:26:11.596639
+902b47db-8946-469f-aece-0ccf8500a8ac,Rigoletto,Giuseppe Verdi,Maddalena,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 18:54:05.133147
+910165da-be5b-4869-af2f-5f55cd04bc51,Lobgesang Op 52,Felix Mendelssohn,Tenor Solo,tenor,concert_solo,lead,symphonic,2026-04-27 19:56:19.320672
+91225161-037f-4225-ba24-068218559a0c,Don Carlo,Giuseppe Verdi,Elisabetta di Valois,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 18:58:46.291908
+912a7884-dca6-448e-b786-d19d04499e03,La Traviata,Giuseppe Verdi,Flora Bervoix,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 18:48:43.492581
+91303073-f586-4ceb-ba9d-f31fa7a470b1,La Sonnambula,Vincenzo Bellini,Count Rodolfo,bass,lyric_bass,secondary,opera,2026-04-26 18:58:46.291908
+917c0f4c-cb81-4f1d-8952-22ea491fa002,Un Ballo in Maschera,Giuseppe Verdi,Oscar,soprano,soubrette,secondary,opera,2026-04-26 18:55:25.267066
+91d3739f-3743-494b-9483-c392e1c1c676,Mass in G major D 167,Franz Schubert,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+91d407bf-93c9-48ad-abdc-ffb1b47e84f0,Idomeneo,Wolfgang Amadeus Mozart,Ilia,soprano,lyric_soprano,lead,opera,2026-04-26 20:20:59.436774
+91fc4e26-5928-4091-8014-bf75c969357e,La Boheme,Giacomo Puccini,Benoit,bass,buffo_bass,small,opera,2026-04-26 18:48:43.492581
+92123039-cf02-4a88-80f3-88c030f1125d,Requiem in D minor,Wolfgang Amadeus Mozart,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+9234a308-32bb-40f2-9ff9-3ade781c6385,Petite Messe Solennelle,Gioachino Rossini,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+923cba20-79cc-43c6-a8dc-e6cc92861c40,Stabat Mater Op 58,Antonin Dvorak,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+92fe6d59-424e-43da-bdfe-c6de3312b86c,Elektra,Richard Strauss,The Confidante,soprano,lyric_soprano,small,opera,2026-04-26 19:01:41.337283
+937b5bd2-c081-4877-87c3-bd3bc70da230,Guillaume Tell,Gioachino Rossini,Gesler,bass,dramatic_bass,secondary,opera,2026-04-26 20:22:59.252405
+93996655-90c2-462a-8e65-9f1e553598da,The Armed Man A Mass for Peace,Karl Jenkins,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+940ebb28-fc92-4bf3-aa6d-48cbbe1e5e82,The Bartered Bride,Bedrich Smetana,Marenka,soprano,lyric_soprano,lead,opera,2026-04-26 19:01:41.337283
+94192504-0bcb-4e45-8f0c-c744d00d71b9,Die Meistersinger von Nurnberg,Richard Wagner,Beckmesser,baritone,lyric_baritone,secondary,opera,2026-04-26 20:20:59.436774
+944359cf-5042-44de-b7d0-907bc257c7ed,Mefistofele,Arrigo Boito,Faust,tenor,lyric_tenor,lead,opera,2026-04-26 19:01:41.337283
+9453586e-5987-47e9-8205-8353d3e3230f,Requiem,Andrew Lloyd Webber,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+9458fa99-383c-4770-b5d9-726707f5be06,Tannhauser,Richard Wagner,Tannhauser,tenor,heldentenor,lead,opera,2026-04-26 20:20:59.436774
+94969d5f-09aa-4fdc-aeb5-df66e54e4821,Mass in E flat major D 950,Franz Schubert,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+94d2b148-16a0-4609-8f92-03c3c85129c8,Das Lied von der Erde,Gustav Mahler,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,symphonic,2026-04-26 20:28:53.719839
+951d8b23-531b-431f-8edb-117568424e14,Requiem in C minor,Luigi Cherubini,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+951f02f2-b365-4fcd-81ec-4f4ef5673833,Jephtha,George Frideric Handel,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+9550f26b-d233-4a9f-8bb1-3b680db613b1,Adriana Lecouvreur,Francesco Cilea,Princess of Bouillon,mezzo_soprano,dramatic_mezzo,lead,opera,2026-04-26 19:01:41.337283
+95a825ed-ae0d-4188-a5da-19a68705e06c,La Boheme,Giacomo Puccini,Marcello,baritone,lyric_baritone,lead,opera,2026-04-26 18:48:43.492581
+95a87e85-3386-4101-ad62-bc8c41840a1e,Boris Godunov,Modest Mussorgsky,Grigory,tenor,lyric_tenor,lead,opera,2026-04-26 19:01:41.337283
+960e8ae5-9842-4781-9305-5fc402e2a634,Aida,Giuseppe Verdi,Radames,tenor,spinto_tenor,lead,opera,2026-04-26 18:54:05.133147
+96281929-67cc-4f8c-b3a5-9c7f60e99cab,L'Allegro il Penseroso ed il Moderato,George Frideric Handel,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+968e062c-5491-41b4-b836-3dfec851c904,Falstaff,Giuseppe Verdi,Fenton,tenor,lyric_tenor,secondary,opera,2026-04-26 18:57:01.888083
+96b9f625-9970-43c6-8965-718bec2a4280,Hamlet,Ambroise Thomas,Ophelie,soprano,lyric_coloratura_soprano,lead,opera,2026-04-26 20:22:59.252405
+96bcd0ed-ed0b-4e39-9dc1-d4e1f4ea8d6f,The Queen of Spades,Pyotr Ilyich Tchaikovsky,Chekalinsky,tenor,comprimario_tenor,small,opera,2026-04-26 18:58:46.291908
+96efa1e4-5715-4eba-8bca-09ee821426d1,La Forza del Destino,Giuseppe Verdi,Preziosilla,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 18:57:01.888083
+96ff553f-18d5-4190-8c6d-29c62dc8aaae,St Paul,Felix Mendelssohn,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+9709288a-ea61-4872-881a-f11ef4032cfc,Dona Nobis Pacem,Ralph Vaughan Williams,Soprano Solo,soprano,concert_solo,lead,symphonic,2026-04-27 19:55:04.175513
+9743a667-1cd8-47fc-a87f-d45280cb0403,Tristan und Isolde,Richard Wagner,Melot,baritone,comprimario_baritone,small,opera,2026-04-26 18:58:46.291908
+9796d325-6022-498c-84e2-d690c973c845,Maria Stuarda,Gaetano Donizetti,Roberto Earl of Leicester,tenor,lyric_tenor,lead,opera,2026-04-26 20:20:59.436774
+97b1394a-9392-45c1-aa82-7798319f933b,The Apostles,Edward Elgar,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+97d7fc70-69da-4b6d-a489-995f7104b913,Gurrelieder,Arnold Schoenberg,Soprano Solo,soprano,concert_solo,lead,symphonic,2026-04-27 19:51:55.063557
+98d17eec-1118-4ee0-99e6-537170a0a225,La Cenerentola,Gioachino Rossini,Angelina,mezzo_soprano,lyric_coloratura_mezzo,lead,opera,2026-04-26 18:55:25.267066
+98d4a44f-f986-4ac8-8ffb-57d20894a0d2,Mors et Vita,Charles Gounod,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+9903344b-28c1-49c5-a90c-704f7bc6d720,Saul,George Frideric Handel,Baritone Solo,baritone,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+9917013b-ed9e-43a3-9e8a-cfafaaedb474,Oedipus Rex,Igor Stravinsky,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+99376aca-3139-4deb-b872-ab9abfc67e83,Werther,Jules Massenet,Albert,baritone,lyric_baritone,secondary,opera,2026-04-26 18:57:01.888083
+99962302-22b6-4597-b39f-6608a68ee267,Te Deum,Giuseppe Verdi,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+99f2668e-ebcf-4876-88e0-01f19e2f1de7,Missa Solemnis Op 123,Ludwig van Beethoven,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+9a0896f5-4758-42ee-a4b1-f5e7b1940207,Missa in Angustiis Paukenmesse,Joseph Haydn,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+9a17e8e5-f96e-49db-a13f-396871a8e068,Turandot,Giacomo Puccini,A Mandarin,baritone,comprimario_baritone,small,opera,2026-04-26 18:54:05.133147
+9a4a5453-f640-4c3b-a54b-58ccc4ffa4e2,Lulu,Alban Berg,Alwa,tenor,lyric_tenor,secondary,opera,2026-04-26 20:26:11.596639
+9a895f60-7f62-4980-a792-6f56c34d7f14,St Matthew Passion,Johann Sebastian Bach,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+9aa8949c-3935-44bf-be71-edcd71f6bfbb,Requiem in B minor,Antonin Dvorak,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+9aed257e-5831-4460-b460-d686bf20021e,Cosi fan tutte,Wolfgang Amadeus Mozart,Guglielmo,baritone,lyric_baritone,lead,opera,2026-04-26 18:57:01.888083
+9b095572-2b29-446f-a9bc-6adb4615ec99,Peter Grimes,Benjamin Britten,Swallow,bass,lyric_bass,small,opera,2026-04-26 20:26:11.596639
+9b0edd36-87ee-48ff-b2ad-332ee0b055ec,Nabucco,Giuseppe Verdi,Abigaille,soprano,dramatic_soprano,lead,opera,2026-04-26 18:58:46.291908
+9b18e287-89c7-4cec-8f4f-0d32bb2ab8ac,Gurrelieder,Arnold Schoenberg,Baritone Solo,baritone,concert_solo,lead,symphonic,2026-04-27 19:51:55.063557
+9b42c39e-864d-464c-a16c-84500693b98b,L'Italiana in Algeri,Gioachino Rossini,Mustafa,bass,buffo_bass,lead,opera,2026-04-26 20:20:59.436774
+9b5afd84-ba86-4d99-9ca9-50110e7b7d66,The Bartered Bride,Bedrich Smetana,Kecal,bass,buffo_bass,secondary,opera,2026-04-26 19:01:41.337283
+9b671feb-a25c-43af-861d-ee9b6adbc156,Susanna,George Frideric Handel,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+9bcb9925-44bd-4926-9700-97f9f77f9839,Le Nozze di Figaro,Wolfgang Amadeus Mozart,Bartolo,bass,buffo_bass,secondary,opera,2026-04-26 18:48:43.492581
+9c0cc260-d605-4f4f-bfc7-767a6713fa7c,Simon Boccanegra,Giuseppe Verdi,Gabriele Adorno,tenor,lyric_tenor,secondary,opera,2026-04-26 18:57:01.888083
+9c2b2bbf-11ce-45b7-a7eb-1420b86b4dd5,Il Trovatore,Giuseppe Verdi,Ruiz,tenor,comprimario_tenor,small,opera,2026-04-26 18:54:05.133147
+9c2f872d-2fe4-4350-b4ac-f7318d996946,Pagliacci,Ruggero Leoncavallo,Nedda,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 18:55:25.267066
+9c8de32c-7e10-460d-b39c-a594b37592d2,Symphony No 8 Symphony of a Thousand,Gustav Mahler,Bass Solo,bass,concert_solo,lead,symphonic,2026-04-26 20:28:53.719839
+9cbb7e19-f635-479c-a89f-bcbd9a0da1f1,Tristan und Isolde,Richard Wagner,Kurwenal,baritone,lyric_baritone,secondary,opera,2026-04-26 18:58:46.291908
+9ccaeb4b-bbbe-45bd-b8b8-d63df3a8febb,The Bells Op 35,Sergei Rachmaninoff,Baritone Solo,baritone,concert_solo,lead,symphonic,2026-04-27 19:53:06.44092
+9cda5be2-f6be-4abf-8148-c12167e8c03a,Die Walkure,Richard Wagner,Gerhilde,soprano,lyric_soprano,small,opera,2026-04-26 18:58:46.291908
+9da1adcc-0149-4a78-9664-24f656ed8362,Die Entfuhrung aus dem Serail,Wolfgang Amadeus Mozart,Pedrillo,tenor,lyric_tenor,secondary,opera,2026-04-26 20:26:11.596639
+9de3ec7c-edd3-4350-8f55-29b2021e16a1,Faust,Charles Gounod,Valentin,baritone,lyric_baritone,secondary,opera,2026-04-26 18:55:25.267066
+9e16caa1-8d9d-44f2-bcad-42088905fd0f,The Legend of Saint Elisabeth,Franz Liszt,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+9e2d1633-0945-4c68-80ef-51a4e62fbfc1,Requiem in C minor,Luigi Cherubini,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+9e4df092-ced7-4533-bd88-d6eb078bec00,Rigoletto,Giuseppe Verdi,Sparafucile,bass,dramatic_bass,secondary,opera,2026-04-26 18:54:05.133147
+9e4fed83-74f1-4418-8599-2ee8c7e062ae,Les Beatitudes,Cesar Franck,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+9eb6205d-8403-48d4-8b9a-efcc8fd44c3a,Katya Kabanova,Leos Janacek,Kabanicha,mezzo_soprano,dramatic_mezzo,secondary,opera,2026-04-26 20:26:11.596639
+9eedac22-1698-4e1e-b435-43569361f0aa,Arabella,Richard Strauss,Dominik,baritone,comprimario_baritone,small,opera,2026-04-26 20:26:11.596639
+9f45fc4b-e260-4767-8f82-84f69a20be69,Andrea Chenier,Umberto Giordano,The Incredible One,tenor,comprimario_tenor,small,opera,2026-04-26 19:01:41.337283
+9f6b7bc0-b74e-439e-9022-aba14fbc5f8e,Dixit Dominus HWV 232,George Frideric Handel,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+9f70edf6-094b-45ca-9502-adeb314e177d,Arabella,Richard Strauss,Count Waldner,bass,lyric_bass,secondary,opera,2026-04-26 20:26:11.596639
+9f8ff30f-5416-4935-835b-bbf98add211e,Nabucco,Giuseppe Verdi,Ismaele,tenor,lyric_tenor,secondary,opera,2026-04-26 18:58:46.291908
+9f992a5f-de8d-4244-8f50-7b096fad8d92,Gianni Schicchi,Giacomo Puccini,Simone,bass,lyric_bass,small,opera,2026-04-26 19:01:41.337283
+9fa274c6-ba79-4897-bb62-12d2e17bda38,La Clemenza di Tito,Wolfgang Amadeus Mozart,Sesto,mezzo_soprano,lyric_mezzo,lead,opera,2026-04-26 20:26:11.596639
+9fc3226e-e5cf-4321-a944-b02a2e2b368b,Dialogues of the Carmelites,Francis Poulenc,The Marquis de la Force,baritone,lyric_baritone,secondary,opera,2026-04-26 20:22:59.252405
+9ff63698-d086-44be-b12f-5bb5d4657306,The Seven Last Words of Our Saviour on the Cross,Joseph Haydn,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+9ff88fe2-9a3a-4fea-8fba-23d98a3d44e1,Faust,Charles Gounod,Faust,tenor,lyric_tenor,lead,opera,2026-04-26 18:55:25.267066
+a005ac7e-67d9-4384-a253-aa72604a3564,The Bells Op 35,Sergei Rachmaninoff,Soprano Solo,soprano,concert_solo,lead,symphonic,2026-04-27 19:53:06.44092
+a01fe628-67da-4c80-bc5f-1eb9f84b338a,Stabat Mater,Gioachino Rossini,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+a0ae94b6-6929-43c0-a781-e77f5723e5ad,Theresienmesse,Joseph Haydn,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+a10ab939-3f7f-4b37-9334-b966ab1e0503,Don Carlo,Giuseppe Verdi,The Grand Inquisitor,bass,dramatic_bass,secondary,opera,2026-04-26 18:58:46.291908
+a1342658-f98a-406a-8af4-a9322812b2fa,Aida,Giuseppe Verdi,The King of Egypt,bass,comprimario_bass,small,opera,2026-04-26 18:54:05.133147
+a1434a3d-bae8-4372-86a8-c390a686acdc,Hora Novissima,Horatio Parker,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+a16e5278-0082-4cb3-9741-0e13c6499d71,Gianni Schicchi,Giacomo Puccini,Lauretta,soprano,lyric_soprano,lead,opera,2026-04-26 19:01:41.337283
+a18d9a89-d59c-4738-9b87-770a67b96791,St Paul,Felix Mendelssohn,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+a1e398f9-f887-481c-a894-7204108499d8,La Traviata,Giuseppe Verdi,Gastone,tenor,comprimario_tenor,small,opera,2026-04-26 18:48:43.492581
+a1f72d2e-08eb-449a-a178-b7715285ea47,A Midsummer Night's Dream,Benjamin Britten,Helena,soprano,lyric_soprano,secondary,opera,2026-04-26 20:26:11.596639
+a2353b01-740b-4fb2-a4af-cd192b3d0c65,Jenufa,Leos Janacek,His Wife,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 19:01:41.337283
+a273ed50-e1da-4fa4-b308-f48de36e2772,Die Entfuhrung aus dem Serail,Wolfgang Amadeus Mozart,Blonde,soprano,soubrette,secondary,opera,2026-04-26 20:26:11.596639
+a27a6b66-3260-4f38-9be5-267442d0aca8,Thais,Jules Massenet,Thais,soprano,lyric_soprano,lead,opera,2026-04-26 20:22:59.252405
+a28f85e8-05f2-42bf-81c7-f82caa696dc7,Turandot,Giacomo Puccini,Emperor Altoum,tenor,comprimario_tenor,small,opera,2026-04-26 18:54:05.133147
+a2ade115-0ca1-4dd7-a8fb-931fbff484bc,Wozzeck,Alban Berg,The Captain,tenor,comprimario_tenor,secondary,opera,2026-04-26 20:22:59.252405
+a3110fc6-c3e9-48f0-b128-4d98da9fee8b,Messe de Requiem Op 54,Camille Saint-Saens,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+a3947e8d-0ea8-4356-9d45-8f9c97f26d30,Samson et Dalila,Camille Saint-Saens,Samson,tenor,dramatic_tenor,lead,opera,2026-04-26 18:57:01.888083
+a3b05621-48e5-4218-9370-b245f9131edd,Manon,Jules Massenet,Javotte,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 18:58:46.291908
+a3f25f38-62be-4d6b-b0cb-c8e09ece690f,Rusalka,Antonin Dvorak,The Water Goblin,bass,lyric_bass,secondary,opera,2026-04-26 19:01:41.337283
+a4766605-ca71-4a53-9145-71cf8c0cb112,Le Nozze di Figaro,Wolfgang Amadeus Mozart,Susanna,soprano,soubrette,lead,opera,2026-04-26 18:48:43.492581
+a4c95cce-40ed-408c-91ac-c60f05cd44ce,Die Fledermaus,Johann Strauss II,Ida,soprano,soubrette,small,opera,2026-04-26 20:20:59.436774
+a5887fa9-4c88-460b-9241-d5fc06fd1f2b,I Vespri Siciliani,Giuseppe Verdi,Bethune,bass,comprimario_bass,small,opera,2026-04-26 20:22:59.252405
+a5b43ee3-1818-423e-83b2-44a77f91a228,La Forza del Destino,Giuseppe Verdi,The Marquis of Calatrava,bass,comprimario_bass,small,opera,2026-04-26 18:57:01.888083
+a5ba4e4d-99c0-403c-af24-657d37714a89,Stabat Mater,Giovanni Battista Pergolesi,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+a5c7e8f0-39b6-47f1-8265-895c71edf055,Madama Butterfly,Giacomo Puccini,Goro,tenor,comprimario_tenor,secondary,opera,2026-04-26 18:54:05.133147
+a5da92ef-bb14-452a-bd19-8041d85dc2aa,Alto Rhapsody Op 53,Johannes Brahms,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+a624a71a-e283-4cd1-9dcc-afaa628a7fca,Die Fledermaus,Johann Strauss II,Prince Orlofsky,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 20:20:59.436774
+a6303c7d-a470-4244-b032-79faa6ea5214,La Gioconda,Amilcare Ponchielli,Laura Adorno,mezzo_soprano,dramatic_mezzo,lead,opera,2026-04-26 18:57:01.888083
+a66bdb9d-b8af-4288-8e3c-379065e10c9d,Requiem Op 9,Gabriel Durufle,Baritone Solo,baritone,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+a68ea7af-1718-4b52-bb60-46e43e7f829d,Cavalleria Rusticana,Pietro Mascagni,Alfio,baritone,lyric_baritone,secondary,opera,2026-04-26 18:55:25.267066
+a6acfb03-85cc-435d-8cd7-4277ac6edce4,Katya Kabanova,Leos Janacek,Boris,tenor,lyric_tenor,lead,opera,2026-04-26 20:26:11.596639
+a752a3d7-7893-4e18-9239-5c96d7de4bb3,Esther,George Frideric Handel,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+a7876a20-fa01-49c4-95b4-f2647aa6918e,Kullervo Symphony Op 7,Jean Sibelius,Baritone Solo,baritone,concert_solo,lead,symphonic,2026-04-27 20:00:57.351155
+a7b8047f-c8f8-482b-bc62-e9354440073e,Christmas Oratorio BWV 248,Johann Sebastian Bach,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+a7e0f347-4a24-4ef6-8e5b-7ab995bc5363,Das Rheingold,Richard Wagner,Alberich,baritone,dramatic_baritone,lead,opera,2026-04-26 20:22:59.252405
+a82a8f72-bbeb-4ff9-9717-fa99a70c77cf,Siegfried,Richard Wagner,Forest Bird,soprano,lyric_soprano,small,opera,2026-04-26 20:22:59.252405
+a8b1f476-6adf-43aa-903f-c787e197df97,Nelson Mass,Joseph Haydn,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+a8b57d83-4a3b-4795-a8c5-c59e6edf182d,Die Zauberflote,Wolfgang Amadeus Mozart,Papageno,baritone,lyric_baritone,lead,opera,2026-04-26 18:54:05.133147
+a8cf8681-6bf0-4d24-a10f-e523af709315,Pagliacci,Ruggero Leoncavallo,Beppe,tenor,lyric_tenor,secondary,opera,2026-04-26 18:55:25.267066
+a966ccd1-f318-4c43-b5ed-9f6f91823a56,Boris Godunov,Modest Mussorgsky,Fyodor,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 19:01:41.337283
+aa099292-cead-4816-9e90-741368273a6c,Symphony No 3 Op 36 Symphony of Sorrowful Songs,Henryk Gorecki,Soprano Solo,soprano,concert_solo,lead,symphonic,2026-04-27 19:58:58.058831
+aa162591-2569-4824-b558-01073b0c265a,Anna Bolena,Gaetano Donizetti,Sir Hervey,tenor,comprimario_tenor,small,opera,2026-04-26 20:20:59.436774
+aa254d8f-c66b-4ab8-bfcc-818438a9888d,Suor Angelica,Giacomo Puccini,The Monitress,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 19:01:41.337283
+aa69f327-ef6b-4928-8403-cc9da31b25b2,Elektra,Richard Strauss,Klytamnestra,mezzo_soprano,dramatic_mezzo,lead,opera,2026-04-26 19:01:41.337283
+aa987688-41be-46eb-99a2-6fb862ffdab5,Guillaume Tell,Gioachino Rossini,Jemmy,soprano,soubrette,secondary,opera,2026-04-26 20:22:59.252405
+aab98bd2-7bf1-4fb9-be6d-46d4d0b15dc0,Rigoletto,Giuseppe Verdi,Rigoletto,baritone,lyric_baritone,lead,opera,2026-04-26 18:54:05.133147
+aad77e36-d828-4882-9770-6362e8e174cd,Easter Oratorio BWV 249,Johann Sebastian Bach,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+aae084da-10fe-4317-8695-ea3e0770475a,Lohengrin,Richard Wagner,King Heinrich,bass,lyric_bass,secondary,opera,2026-04-26 18:55:25.267066
+aaf0c9ed-4130-4a49-bae2-6d12a777fb00,Hamlet,Ambroise Thomas,The King,bass,lyric_bass,secondary,opera,2026-04-26 20:22:59.252405
+ab1e97c3-651e-4d18-bb13-6fe8b2f29318,Lohengrin,Richard Wagner,Elsa von Brabant,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 18:55:25.267066
+ab318c24-f1ba-4563-a7b5-00d89f68adf1,Billy Budd,Benjamin Britten,Red Whiskers,tenor,comprimario_tenor,small,opera,2026-04-26 20:26:11.596639
+ab473452-1d9c-4f6b-8779-0be7ee7ac47d,St John Passion,Johann Sebastian Bach,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+ab553661-fc22-43e8-8bdf-8ee0a8862ece,Manon Lescaut,Giacomo Puccini,Lescaut,baritone,lyric_baritone,secondary,opera,2026-04-26 18:57:01.888083
+ab58fdbb-79a3-4227-b661-a3cb43eff419,Pelleas et Melisande,Claude Debussy,Yniold,soprano,soubrette,small,opera,2026-04-26 20:22:59.252405
+ab6c7283-6dd4-4a5a-a74b-880ae3a7dc72,Roberto Devereux,Gaetano Donizetti,Roberto Devereux,tenor,lyric_tenor,lead,opera,2026-04-26 20:22:59.252405
+ab6d6fea-ca18-4a75-9040-054f73f9b0dc,Gloria,Francis Poulenc,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+abd21a7f-38f1-43de-bf7a-3fffcd34a7fc,Magnificat in D major BWV 243,Johann Sebastian Bach,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+ac3eebb6-938a-48f1-9541-3d1eeedd22b1,Les Huguenots,Giacomo Meyerbeer,Marguerite de Valois,soprano,lyric_coloratura_soprano,lead,opera,2026-04-26 20:26:11.596639
+ac51b3af-d0cc-4378-842d-cb272c746b06,Ernani,Giuseppe Verdi,Don Carlo,baritone,lyric_baritone,lead,opera,2026-04-26 19:01:41.337283
+acad8f2e-e1b7-4ad6-bfb6-f5c582339e23,Katya Kabanova,Leos Janacek,Glasa,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 20:26:11.596639
+acb0b4ff-0191-476d-b873-09efb38bf2ae,Die Fledermaus,Johann Strauss II,Adele,soprano,soubrette,lead,opera,2026-04-26 20:20:59.436774
+acdc42aa-f152-4784-95ae-1d8d6a6391c3,Les Contes d'Hoffmann,Jacques Offenbach,Antonia,soprano,lyric_soprano,lead,opera,2026-04-26 18:58:46.291908
+acf7b66c-9294-490b-94d3-adafc1ea6a11,A German Requiem,Johannes Brahms,Baritone Solo,baritone,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+ad5b62cf-5ff5-4dbe-84f4-c1cb00766f30,St John Passion,Johann Sebastian Bach,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+ada658ff-e8e7-4822-9295-c3784a3cd77d,Hamlet,Ambroise Thomas,Laerte,tenor,lyric_tenor,secondary,opera,2026-04-26 20:22:59.252405
+adca9b64-3954-4166-b64f-d73f617092ab,Vespro della Beata Vergine,Claudio Monteverdi,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+af671091-6110-425e-9ec7-1c51178cc4a3,Roberto Devereux,Gaetano Donizetti,Lord Cecil,tenor,comprimario_tenor,small,opera,2026-04-26 20:22:59.252405
+afbce0ce-246a-4975-8fdb-e67dfdf037cb,Parsifal,Richard Wagner,Second Knight,bass,comprimario_bass,small,opera,2026-04-26 20:20:59.436774
+afbd23d2-75cb-499e-bdaa-603cb676afab,Messe de Requiem Op 54,Camille Saint-Saens,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+afcce6a4-b626-4de4-8aef-b8b17cf615fd,Roberto Devereux,Gaetano Donizetti,Sara,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 20:22:59.252405
+aff52326-3ca7-49a3-8366-a0ffd69719ca,Die Zauberflote,Wolfgang Amadeus Mozart,Tamino,tenor,lyric_tenor,lead,opera,2026-04-26 18:54:05.133147
+b00c1fe7-f20e-4b60-9664-ebd3c2d69127,Idomeneo,Wolfgang Amadeus Mozart,Elettra,soprano,dramatic_soprano,secondary,opera,2026-04-26 20:20:59.436774
+b019ca77-4fe0-436c-b639-12f55a8a0d32,Hercules,George Frideric Handel,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+b089a0ea-ae6e-4c4b-94c9-63b074afc2c7,Guillaume Tell,Gioachino Rossini,Walter Furst,bass,lyric_bass,secondary,opera,2026-04-26 20:22:59.252405
+b1164bcf-0b9b-4733-86bc-273573774389,Tannhauser,Richard Wagner,Landgrave Hermann,bass,lyric_bass,secondary,opera,2026-04-26 20:20:59.436774
+b11f1589-59f1-44a1-9bd1-11033816d9cc,St John Passion,Johann Sebastian Bach,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+b23e7b89-712e-4720-be86-ffbed5b09891,Nabucco,Giuseppe Verdi,Zaccaria,bass,dramatic_bass,lead,opera,2026-04-26 18:58:46.291908
+b26b0c0e-b661-4843-9bd1-079bd8e14bb4,Messiah,George Frideric Handel,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+b2864bdc-0c30-4db3-b784-44a986be2c87,Les Contes d'Hoffmann,Jacques Offenbach,Nicklausse,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 18:58:46.291908
+b29228c1-9441-4698-900e-89631dc87e32,Oedipus Rex,Igor Stravinsky,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+b2c1b810-ada5-44e2-80bb-5da9a810f3d7,La Sonnambula,Vincenzo Bellini,Elvino,tenor,lyric_tenor,lead,opera,2026-04-26 18:58:46.291908
+b2ffb5c2-b927-4b7d-bcef-b161699b1609,Lohengrin,Richard Wagner,Ortrud,mezzo_soprano,dramatic_mezzo,lead,opera,2026-04-26 18:55:25.267066
+b3314450-2d50-4284-b3a3-0feab7b861a8,Die Zauberflote,Wolfgang Amadeus Mozart,Sarastro,bass,dramatic_bass,lead,opera,2026-04-26 18:54:05.133147
+b3e60ed1-c8e0-4628-b5f8-02a1f9251463,Dialogues of the Carmelites,Francis Poulenc,Sister Constance,soprano,soubrette,secondary,opera,2026-04-26 20:22:59.252405
+b4191265-d347-439b-ad23-61cec4590e95,Le Nozze di Figaro,Wolfgang Amadeus Mozart,Antonio,bass,comprimario_bass,small,opera,2026-04-26 18:48:43.492581
+b447906a-e355-45a9-9973-fbab8021c83c,I Puritani,Vincenzo Bellini,Lord Arthur Talbot,tenor,lyric_tenor,lead,opera,2026-04-26 18:58:46.291908
+b4a7b2d3-76f1-4e9a-aebb-f5a09dd42578,La Boheme,Giacomo Puccini,Parpignol,tenor,comprimario_tenor,small,opera,2026-04-26 18:48:43.492581
+b4bb1d15-5166-49c4-8d6e-ad40d05661c7,Khovanshchina,Modest Mussorgsky,Prince Vasily Golitsyn,tenor,lyric_tenor,secondary,opera,2026-04-26 20:22:59.252405
+b4c19b08-8c90-43be-a6b2-4332de2a3aa9,Tosca,Giacomo Puccini,The Sacristan,baritone,buffo_baritone,secondary,opera,2026-04-26 18:54:05.133147
+b59ca679-db61-45a7-9116-9967d73db722,Tannhauser,Richard Wagner,Elisabeth,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 20:20:59.436774
+b5c1f7aa-d725-4427-adb1-1dccce5f1547,Jenufa,Leos Janacek,Grandmother Buryjovka,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 19:01:41.337283
+b5c47af3-0fe2-4c55-83a4-9e3146ed11d2,Passio,Arvo Part,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+b5de8703-d238-47ca-98a3-483532dc427b,Il Trovatore,Giuseppe Verdi,Ferrando,bass,lyric_bass,secondary,opera,2026-04-26 18:54:05.133147
+b6d8faa3-fc47-4685-a9c2-9d175a6e7d4b,L'Enfance du Christ,Hector Berlioz,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+b6e6cd02-415c-4f8d-81f8-e4d6303ceb73,Scenes from Goethe's Faust,Robert Schumann,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+b72b0245-8559-40ef-a624-ee9130cf519e,Billy Budd,Benjamin Britten,Mr Flint,baritone,lyric_baritone,secondary,opera,2026-04-26 20:26:11.596639
+b73e3fd1-6a25-4ad4-b19f-826dc330aa4a,The Bells Op 35,Sergei Rachmaninoff,Tenor Solo,tenor,concert_solo,lead,symphonic,2026-04-27 19:53:06.44092
+b7562928-7945-4c9e-8f6e-86eb1b994a7c,Lakme,Leo Delibes,Mallika,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 20:22:59.252405
+b7a9ac5a-5700-4019-91cb-ffd9bbdca54f,Les Huguenots,Giacomo Meyerbeer,Urban,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 20:26:11.596639
+b7b4b51c-ee0c-497d-8197-306233872418,Un Ballo in Maschera,Giuseppe Verdi,Ulrica,mezzo_soprano,dramatic_mezzo,secondary,opera,2026-04-26 18:55:25.267066
+b7f442fa-3599-423f-b2a7-dab54ea089dd,Tristan und Isolde,Richard Wagner,A Sailor,tenor,comprimario_tenor,small,opera,2026-04-26 18:58:46.291908
+b7f9f02a-20bc-464e-a366-74ed0ed5a2d5,Symphony No 9 in D minor Op 125,Ludwig van Beethoven,Baritone Solo,baritone,concert_solo,lead,symphonic,2026-04-26 20:28:53.719839
+b813a673-3b0f-4858-972c-a9ea96a10ad2,Parsifal,Richard Wagner,First Knight,tenor,comprimario_tenor,small,opera,2026-04-26 20:20:59.436774
+b8188cd4-4e9d-408d-a799-72bf30c29069,Don Quichotte,Jules Massenet,Sancho Panza,baritone,lyric_baritone,secondary,opera,2026-04-26 20:26:11.596639
+b82238bd-20c4-4a1d-b4e4-1e47d3ecc088,Tannhauser,Richard Wagner,Wolfram von Eschenbach,baritone,lyric_baritone,secondary,opera,2026-04-26 20:20:59.436774
+b85ea940-098a-4cc3-bb4b-8f9b5f4bbff4,Athalia,George Frideric Handel,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+b90fc23e-1383-43f5-8bd2-253612d36356,Faust,Charles Gounod,Wagner,baritone,comprimario_baritone,small,opera,2026-04-26 18:55:25.267066
+b952514e-bebf-4721-90ac-8101286eddb8,Ascension Oratorio BWV 11,Johann Sebastian Bach,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+b98bc2f0-72a4-4dba-8efd-ae3f824128bf,Mass in B minor,Johann Sebastian Bach,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+ba2ce262-5ba6-48a9-9650-ea6a445ae316,Mass,Leonard Bernstein,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+ba4ff1b5-1d9d-4529-b3cb-0e8cc181ad97,Norma,Vincenzo Bellini,Flavio,tenor,comprimario_tenor,small,opera,2026-04-26 18:55:25.267066
+baa727a7-3c87-4e6d-bde8-b6ebbc2a76d1,Semiramide,Gioachino Rossini,Idreno,tenor,lyric_tenor,secondary,opera,2026-04-26 20:22:59.252405
+bac30f56-7315-4564-95d1-1947fd4e3aae,Die Zauberflote,Wolfgang Amadeus Mozart,Monostatos,tenor,comprimario_tenor,secondary,opera,2026-04-26 18:54:05.133147
+bafbe68a-2097-4ee6-803e-0ed68b9c170f,Saint Nicolas Op 42,Benjamin Britten,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+bb06bdc0-86a3-4c8d-9896-44b496931a3a,Pagliacci,Ruggero Leoncavallo,Tonio,baritone,dramatic_baritone,lead,opera,2026-04-26 18:55:25.267066
+bb0e7692-1b25-45a7-bfd4-4f16c68fec5d,Le Nozze di Figaro,Wolfgang Amadeus Mozart,Marcellina,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 18:48:43.492581
+bb217f70-a8e5-4c5d-a9aa-6fade87b8e11,Les Beatitudes,Cesar Franck,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+bb23dd60-c342-4f8e-9da2-4939b159f3bc,Peter Grimes,Benjamin Britten,Ned Keene,baritone,lyric_baritone,secondary,opera,2026-04-26 20:26:11.596639
+bb61317f-dbc1-4315-b2b3-0adeafd5bdec,Boris Godunov,Modest Mussorgsky,Pimen,bass,lyric_bass,secondary,opera,2026-04-26 19:01:41.337283
+bb671eff-2f5f-4c49-9c50-202b50164876,Giulio Cesare,George Frideric Handel,Tolomeo,baritone,lyric_baritone,secondary,opera,2026-04-26 20:20:59.436774
+bbbf4547-0833-4e91-90f9-59c4ce4fa1ec,Le Nozze di Figaro,Wolfgang Amadeus Mozart,Countess Almaviva,soprano,lyric_soprano,lead,opera,2026-04-26 18:48:43.492581
+bbe20c53-fded-4fc0-83d3-42a62d118595,Idomeneo,Wolfgang Amadeus Mozart,Idamante,mezzo_soprano,lyric_mezzo,lead,opera,2026-04-26 20:20:59.436774
+bbe34bf7-c6d6-408d-adbe-85da93549919,Elektra,Richard Strauss,Elektra,soprano,dramatic_soprano,lead,opera,2026-04-26 19:01:41.337283
+bc54e04c-e513-40bc-81d4-eddcbc7a84ed,Die erste Walpurgisnacht Op 60,Felix Mendelssohn,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+bc7bffe1-9fe7-4aca-8374-14f2099aee85,Guillaume Tell,Gioachino Rossini,Guillaume Tell,baritone,lyric_baritone,lead,opera,2026-04-26 20:22:59.252405
+bcb8ffb7-80bb-4cc7-925e-7f944d2ec74d,Roberto Devereux,Gaetano Donizetti,Sir Gualtiero Raleigh,bass,comprimario_bass,small,opera,2026-04-26 20:22:59.252405
+bcc3759a-517e-49fe-8527-b1db03851622,Otello,Giuseppe Verdi,Emilia,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 18:54:05.133147
+bce211a7-93a1-43e2-8e8f-50cc4e5a6e4e,Don Giovanni,Wolfgang Amadeus Mozart,Don Giovanni,baritone,lyric_baritone,lead,opera,2026-04-26 18:48:43.492581
+bce6b474-ea7a-4416-922f-4544cd2b3f07,Mass in D major Op 86,Antonin Dvorak,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+bd0ba728-fc53-41a4-9ae6-9762e6536350,La Boheme,Giacomo Puccini,Schaunard,baritone,lyric_baritone,secondary,opera,2026-04-26 18:48:43.492581
+bd120c2c-d86c-4ad6-b4ce-4958e889689a,The Cunning Little Vixen,Leos Janacek,The Schoolmaster,tenor,lyric_tenor,secondary,opera,2026-04-26 20:26:11.596639
+bd1d6c0e-87c4-415f-9985-062db30ddd06,Le Nozze di Figaro,Wolfgang Amadeus Mozart,Count Almaviva,baritone,lyric_baritone,lead,opera,2026-04-26 18:48:43.492581
+bd995616-c399-4a01-bef0-400806882d8d,Eugene Onegin,Pyotr Ilyich Tchaikovsky,Prince Gremin,bass,lyric_bass,secondary,opera,2026-04-26 18:55:25.267066
+bdc2b008-cf33-455b-8a4d-38cf932ae82d,War and Peace,Sergei Prokofiev,Natasha,soprano,lyric_soprano,lead,opera,2026-04-26 20:22:59.252405
+be2b6a78-7623-4743-bf02-8b7265aa24c5,Elijah,Felix Mendelssohn,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+bf544724-0d32-4b7f-8432-61a4fb23ee4b,Nanie Op 82,Johannes Brahms,Soprano Solo,soprano,concert_solo,lead,symphonic,2026-04-27 19:55:04.175513
+bf731c83-efb3-46d2-aba4-4b5b28edbfbf,Mass in B minor,Johann Sebastian Bach,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+bf7339f8-8584-4cc5-95c0-8c55490c5603,Adriana Lecouvreur,Francesco Cilea,Michonnet,baritone,lyric_baritone,secondary,opera,2026-04-26 19:01:41.337283
+bfb00023-5c8e-4bef-bede-b4e992214ba3,Stabat Mater Op 58,Antonin Dvorak,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+bfd690d2-4298-46a7-a43c-d842483c0ec1,Passio,Arvo Part,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+c00b00d3-0023-40eb-9aef-4e3e469cc403,Don Quichotte,Jules Massenet,Don Quichotte,bass,lyric_bass,lead,opera,2026-04-26 20:26:11.596639
+c0126a0e-6e7c-4eb3-a3e4-afeb5fe73efc,Petite Messe Solennelle,Gioachino Rossini,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+c0529a2a-bc62-4656-af55-f19dab544e23,Gianni Schicchi,Giacomo Puccini,Rinuccio,tenor,lyric_tenor,secondary,opera,2026-04-26 19:01:41.337283
+c07d257b-eda8-42c8-9ab6-f5e636cef411,Don Carlo,Giuseppe Verdi,Tebaldo,soprano,soubrette,small,opera,2026-04-26 18:58:46.291908
+c0a70a82-b5e0-4410-91ea-f492624ec9d3,Guillaume Tell,Gioachino Rossini,Mathilde,soprano,lyric_soprano,lead,opera,2026-04-26 20:22:59.252405
+c0c36abb-a094-4477-8e7f-d9d4e538fa40,Siegfried,Richard Wagner,Siegfried,tenor,heldentenor,lead,opera,2026-04-26 20:22:59.252405
+c18de595-9fd5-44e3-aa06-dda64b58fd80,Symphony No 8 Symphony of a Thousand,Gustav Mahler,Baritone Solo,baritone,concert_solo,lead,symphonic,2026-04-26 20:28:53.719839
+c1c2df80-65ab-4378-9766-a7132141c89b,Die Meistersinger von Nurnberg,Richard Wagner,Eva,soprano,lyric_soprano,lead,opera,2026-04-26 20:20:59.436774
+c1d4e7b4-b4fc-42c6-9ded-308e13557b29,Iphigenie en Tauride,Christoph Willibald Gluck,Oreste,baritone,lyric_baritone,lead,opera,2026-04-26 20:26:11.596639
+c24991de-7f13-4fae-8fce-15e7a9873adc,Mefistofele,Arrigo Boito,Pantalis,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 19:01:41.337283
+c26853e1-2588-49dd-9117-b8a1883c9679,Don Pasquale,Gaetano Donizetti,Norina,soprano,lyric_coloratura_soprano,lead,opera,2026-04-26 18:57:01.888083
+c27733c6-d3e3-4ddc-97f4-b5ed883bd96e,Giulio Cesare,George Frideric Handel,Cleopatra,soprano,lyric_coloratura_soprano,lead,opera,2026-04-26 20:20:59.436774
+c29e0013-ad05-440b-bb43-61586358420a,Four Last Songs,Richard Strauss,Soprano Solo,soprano,concert_solo,lead,symphonic,2026-04-27 19:51:55.063557
+c2b103e5-ea10-4599-a456-9a506c06dedf,Theresienmesse,Joseph Haydn,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+c2c9aa37-5507-4c87-879b-e06a16d2b265,Scenes from Goethe's Faust,Robert Schumann,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+c2d3e69d-b6ab-4755-b869-cfb8bd047aec,Nabucco,Giuseppe Verdi,Nabucco,baritone,dramatic_baritone,lead,opera,2026-04-26 18:58:46.291908
+c2ef24f2-cbed-4422-be64-ba6bc5b2f263,Les Contes d'Hoffmann,Jacques Offenbach,Dr Miracle,baritone,dramatic_baritone,secondary,opera,2026-04-26 18:58:46.291908
+c2fe86bd-c15d-49b7-b32c-808b9b3ebd14,Anna Bolena,Gaetano Donizetti,Lord Rochefort,bass,lyric_bass,secondary,opera,2026-04-26 20:20:59.436774
+c3b3a792-dba6-488b-976b-2f9b803d9c6b,Dialogues of the Carmelites,Francis Poulenc,Madame Lidoine,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 20:22:59.252405
+c3c75bc0-8b14-4857-a9e0-a4a8c79799c7,St Matthew Passion,Johann Sebastian Bach,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+c43a0c01-f9b8-47f7-b732-2ea635e58aba,La Redemption,Charles Gounod,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+c43cd26a-ff2c-4282-8f14-f8d4e83e1b5d,Nabucco,Giuseppe Verdi,Fenena,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 18:58:46.291908
+c4885b62-c9e6-4ed7-82e6-8fb2585ce6b9,Ernani,Giuseppe Verdi,Ernani,tenor,spinto_tenor,lead,opera,2026-04-26 19:01:41.337283
+c55f1d94-e6bd-4109-a262-0a380de80975,Cantata Profana,Bela Bartok,Tenor Solo,tenor,concert_solo,lead,symphonic,2026-04-27 19:58:58.058831
+c5bf5942-87b7-40e9-b60e-b236b3e58097,Billy Budd,Benjamin Britten,Dansker,bass,lyric_bass,secondary,opera,2026-04-26 20:26:11.596639
+c5dd9bc6-bcdc-4250-bbe4-23ff4141d485,Manon,Jules Massenet,Rosette,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 18:58:46.291908
+c61c3c4f-1f8d-4187-a6e0-e7dcda9dc720,Pelleas et Melisande,Claude Debussy,Genevieve,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 20:22:59.252405
+c6384f8d-a69b-45f1-a7c9-dc057ff56360,Gotterdammerung,Richard Wagner,Alberich,baritone,dramatic_baritone,secondary,opera,2026-04-26 20:22:59.252405
+c65b6393-5739-4613-bd2e-8169a70c2157,Cavalleria Rusticana,Pietro Mascagni,Mamma Lucia,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 18:55:25.267066
+c6899114-0b9b-4e28-aa8f-42cdf6c55215,La Forza del Destino,Giuseppe Verdi,Curra,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 18:57:01.888083
+c6bb8e4f-f427-4ddd-8e96-93d8e517e3ef,Il Barbiere di Siviglia,Gioachino Rossini,Doctor Bartolo,bass,buffo_bass,lead,opera,2026-04-26 18:54:05.133147
+c7130c4d-2e0a-4e3e-a844-6d4db92ead28,Herodiade,Jules Massenet,John the Baptist,baritone,lyric_baritone,lead,opera,2026-04-26 20:26:11.596639
+c730ebb9-75ce-43b5-b093-224dbca6cdb3,Petite Messe Solennelle,Gioachino Rossini,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+c74cb681-aeda-42b1-b731-fe2aacb7e494,Chichester Psalms,Leonard Bernstein,Baritone Solo,baritone,concert_solo,lead,symphonic,2026-04-27 19:55:04.175513
+c7525f5d-4f9e-48cf-bf22-8e821efb5ebb,La Traviata,Giuseppe Verdi,Marquis d'Obigny,bass,comprimario_bass,small,opera,2026-04-26 18:48:43.492581
+c78f2b61-de81-464e-a9b5-f2182b9256d4,Turandot,Giacomo Puccini,Ping,baritone,lyric_baritone,secondary,opera,2026-04-26 18:54:05.133147
+c7eef492-82c7-458a-99b5-75ee7e8fa76a,Gianni Schicchi,Giacomo Puccini,Gherardo,tenor,comprimario_tenor,small,opera,2026-04-26 19:01:41.337283
+c8195e93-7f9a-4498-bb94-f3e3cfb9378a,Coronation Mass K 317,Wolfgang Amadeus Mozart,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+c84226a8-1278-43ad-8314-0183e460d904,La Cenerentola,Gioachino Rossini,Alidoro,bass,lyric_bass,secondary,opera,2026-04-26 18:55:25.267066
+c85bfeb6-327a-4f3d-acad-cf951068b761,Caractacus Op 35,Edward Elgar,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+c8bd2b71-357a-4eb0-a201-965b1109b5ef,Carmen,Georges Bizet,Mercedes,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 18:48:43.492581
+c8d6a716-9efe-4633-8efb-8323315b83e1,Das Rheingold,Richard Wagner,Fricka,mezzo_soprano,dramatic_mezzo,secondary,opera,2026-04-26 20:22:59.252405
+c95f840d-f4b8-4874-bce7-2c16407f2900,St Paul,Felix Mendelssohn,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+c98fa012-b9ce-400c-92e9-ebf4993af7cf,Der Rosenkavalier,Richard Strauss,The Italian Singer,tenor,lyric_tenor,small,opera,2026-04-26 18:55:25.267066
+c9aacfaa-510b-4a26-9a72-515add82681f,Aida,Giuseppe Verdi,High Priestess,soprano,lyric_soprano,small,opera,2026-04-26 18:54:05.133147
+c9b475dc-ce50-4f56-9991-482505fed7fd,Salome,Richard Strauss,A Page,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 18:58:46.291908
+c9cbf763-5e9e-446c-a640-2b2ea1728334,Stabat Mater Op 58,Antonin Dvorak,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+c9cde879-69af-4f6e-b22a-b37fcd189133,Il Trovatore,Giuseppe Verdi,Leonora,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 18:54:05.133147
+c9d99122-a886-445f-8195-925031c48fc6,Symphony No 8 Symphony of a Thousand,Gustav Mahler,Tenor Solo,tenor,concert_solo,lead,symphonic,2026-04-26 20:28:53.719839
+ca008c4e-6418-422d-bba8-2db80a6cc1b5,Suor Angelica,Giacomo Puccini,Suor Angelica,soprano,lyric_soprano,lead,opera,2026-04-26 19:01:41.337283
+ca209b8f-78c6-4fa6-9256-ff2a20aa17a9,War Requiem,Benjamin Britten,Baritone Solo,baritone,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+ca4494d0-a449-40de-800c-ce8acee971b4,Missa Solemnis Op 123,Ludwig van Beethoven,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+ca62e706-85f1-4343-8b9e-7e21f074499f,Romeo et Juliette,Charles Gounod,Mercutio,baritone,lyric_baritone,secondary,opera,2026-04-26 18:57:01.888083
+ca97fd11-a8aa-4754-ae73-aaf6a5c452ad,The Spectre's Bride,Antonin Dvorak,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+caa362bf-d59e-4f67-a4a8-dbc13b16cccd,Das Rheingold,Richard Wagner,Freia,soprano,lyric_soprano,secondary,opera,2026-04-26 20:22:59.252405
+cabe4b53-8e6c-4e45-a7c9-31da74f4324c,L'Italiana in Algeri,Gioachino Rossini,Lindoro,tenor,lyric_tenor,lead,opera,2026-04-26 20:20:59.436774
+cb05b231-cded-410c-bacc-d68a5f82733c,Cavalleria Rusticana,Pietro Mascagni,Turiddu,tenor,spinto_tenor,lead,opera,2026-04-26 18:55:25.267066
+cb18be51-f359-4ffd-8427-5a69f35598b1,Prince Igor,Alexander Borodin,Prince Igor,baritone,lyric_baritone,lead,opera,2026-04-26 20:20:59.436774
+cb355ecc-b713-4528-97d1-a76361b6251c,Petite Messe Solennelle,Gioachino Rossini,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+cb6589f5-ca8b-4e54-92b3-94f72a52ceb0,Lakme,Leo Delibes,Rose,soprano,soubrette,small,opera,2026-04-26 20:22:59.252405
+cb7639c4-23d7-4048-b0d4-b2f8df784ab1,Anna Bolena,Gaetano Donizetti,Enrico VIII,bass,dramatic_bass,lead,opera,2026-04-26 20:20:59.436774
+cb99a5a6-517a-42cc-9a38-8cb86e0bbc47,Grande Messe des Morts Op 5,Hector Berlioz,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+cbbd340a-7079-4667-b74b-b31225784b89,Macbeth,Giuseppe Verdi,Lady Macbeth,soprano,dramatic_soprano,lead,opera,2026-04-26 19:01:41.337283
+cbd65478-b3d5-40ed-b706-fd9d3af44af2,Joshua,George Frideric Handel,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+cc5e3816-9010-43be-89ad-805e740dfc1e,Khovanshchina,Modest Mussorgsky,Prince Andrei Khovansky,tenor,lyric_tenor,secondary,opera,2026-04-26 20:22:59.252405
+cc62f41b-3e18-4a8d-a68b-2ad059146b8a,L'elisir d'amore,Gaetano Donizetti,Giannetta,soprano,soubrette,small,opera,2026-04-26 18:55:25.267066
+cc8293fb-76b8-4025-9659-641b7f41471b,I Puritani,Vincenzo Bellini,Governor of the Fortress,bass,comprimario_bass,small,opera,2026-04-26 18:58:46.291908
+cc8d7449-a8c9-4e2f-84a0-55d752d26221,The Creation,Joseph Haydn,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+cd04da59-e094-4d1d-a9be-924c6031894a,Billy Budd,Benjamin Britten,Donald,baritone,comprimario_baritone,small,opera,2026-04-26 20:26:11.596639
+cd2b561e-6670-4473-87ee-c5771649a930,Katya Kabanova,Leos Janacek,Varvara,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 20:26:11.596639
+cddbc4a3-6d14-48df-9ae1-e77f78b3b857,Cavalleria Rusticana,Pietro Mascagni,Lola,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 18:55:25.267066
+ce247ba9-59e3-4168-8a8c-041c85a8c03b,Mass,Leonard Bernstein,Baritone Solo,baritone,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+ce287d29-84e8-4b50-b3f2-0093f0e2988a,Faust,Charles Gounod,Mephistopheles,bass,dramatic_bass,lead,opera,2026-04-26 18:55:25.267066
+ce3b4783-f049-4223-892e-e0d19f783f12,Dixit Dominus HWV 232,George Frideric Handel,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+ce43c6d7-fcd1-4e29-842d-cf2ee27db521,Don Giovanni,Wolfgang Amadeus Mozart,The Commendatore,bass,dramatic_bass,secondary,opera,2026-04-26 18:48:43.492581
+ce51d004-8341-46c5-a88a-b0657f4b95ad,Requiem in B minor,Antonin Dvorak,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+ce757daa-8074-40ac-bb1d-a2a1cfd53e7a,Athalia,George Frideric Handel,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+ce995ed1-0873-4001-ae14-85a95fa3d13e,Iphigenie en Tauride,Christoph Willibald Gluck,Diana,soprano,lyric_soprano,small,opera,2026-04-26 20:26:11.596639
+ceb6b0e7-cebc-4ac2-81ab-86e9d3f30794,Saint Ludmila,Antonin Dvorak,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+cef12835-e4e9-48c3-a583-4b786db2986a,Alexander's Feast,George Frideric Handel,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+cf024186-aec1-4e32-8241-b0bafdcde0f3,The Bartered Bride,Bedrich Smetana,The Circus Master,baritone,lyric_baritone,small,opera,2026-04-26 19:01:41.337283
+cf4f24e0-93a5-4cce-af51-6f3d91f8fae7,Der Freischutz,Carl Maria von Weber,Max,tenor,lyric_tenor,lead,opera,2026-04-26 20:20:59.436774
+cfbbbc14-3fed-447c-91ea-d1e6798f5215,Les Contes d'Hoffmann,Jacques Offenbach,Dapertutto,baritone,dramatic_baritone,secondary,opera,2026-04-26 18:58:46.291908
+cfbe362f-e04a-49da-912e-356f88fa9ca1,Hora Novissima,Horatio Parker,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+cfe0d11e-5d83-4427-b87d-32db169515e1,Parsifal,Richard Wagner,Amfortas,baritone,dramatic_baritone,lead,opera,2026-04-26 20:20:59.436774
+d0119ce1-00ad-4308-ae80-e46d864c0421,The Queen of Spades,Pyotr Ilyich Tchaikovsky,Lisa,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 18:58:46.291908
+d0121b2e-3cfc-4804-ac87-2e542e309777,Parsifal,Richard Wagner,Kundry,mezzo_soprano,dramatic_mezzo,lead,opera,2026-04-26 20:20:59.436774
+d08d1e52-e078-4a3d-9a56-0d52639881c8,Simon Boccanegra,Giuseppe Verdi,Jacopo Fiesco,bass,dramatic_bass,lead,opera,2026-04-26 18:57:01.888083
+d0b97cf0-3955-42ff-bc0f-bcfc084593cd,Tosca,Giacomo Puccini,Mario Cavaradossi,tenor,spinto_tenor,lead,opera,2026-04-26 18:54:05.133147
+d0ca2fe4-0a37-4913-b60d-f8f340a58efe,Salome,Richard Strauss,Salome,soprano,dramatic_soprano,lead,opera,2026-04-26 18:58:46.291908
+d0ef2f33-590e-4451-beaa-3b4bd8872954,Gianni Schicchi,Giacomo Puccini,La Ciesca,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 19:01:41.337283
+d12ba3d9-aed1-4871-be6b-e7cf7ae8dd01,Die Walkure,Richard Wagner,Brunnhilde,soprano,dramatic_soprano,lead,opera,2026-04-26 18:58:46.291908
+d13d2a3e-b3c5-4ba6-969b-11fe1b290e6a,Carmen,Georges Bizet,Frasquita,soprano,soubrette,secondary,opera,2026-04-26 18:48:43.492581
+d14c1e01-33d3-4920-9be1-5e0a05971050,Eugene Onegin,Pyotr Ilyich Tchaikovsky,Lensky,tenor,lyric_tenor,lead,opera,2026-04-26 18:55:25.267066
+d1621e3e-546a-4e56-b45e-db283a67684a,Die Walkure,Richard Wagner,Wotan,baritone,dramatic_baritone,lead,opera,2026-04-26 18:58:46.291908
+d16bc581-d427-456c-9486-bf29b7e6cf08,The Creation,Joseph Haydn,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+d1bf0f0c-ba1d-41df-a908-337ee0fac737,Les Pecheurs de Perles,Georges Bizet,Leila,soprano,lyric_soprano,lead,opera,2026-04-26 20:20:59.436774
+d1d50eff-0da8-4bfb-b1d2-5dd64e162a4a,Arabella,Richard Strauss,Lamoral,bass,comprimario_bass,small,opera,2026-04-26 20:26:11.596639
+d1d706c3-c3e1-4677-9b1d-2436e01c9477,Madama Butterfly,Giacomo Puccini,Suzuki,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 18:54:05.133147
+d1fed580-1e4e-4f48-a15f-d930e1270fc3,I Vespri Siciliani,Giuseppe Verdi,Elena,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 20:22:59.252405
+d29173f9-37bb-46b8-b5c3-ea51490140cb,Lohengrin,Richard Wagner,Friedrich von Telramund,baritone,dramatic_baritone,secondary,opera,2026-04-26 18:55:25.267066
+d291a0bc-4a2f-46cd-81e7-45bf8db6d141,Norma,Vincenzo Bellini,Norma,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 18:55:25.267066
+d2c3b6d5-ea62-4280-a540-bd51a3e2c498,Cosi fan tutte,Wolfgang Amadeus Mozart,Despina,soprano,soubrette,secondary,opera,2026-04-26 18:57:01.888083
+d2c6cb0c-67a0-4cf6-bfa2-1ab7a65505b8,L'Italiana in Algeri,Gioachino Rossini,Taddeo,baritone,lyric_baritone,secondary,opera,2026-04-26 20:20:59.436774
+d2f2e109-db94-41eb-aa97-8f5b12f61c69,Acis and Galatea,George Frideric Handel,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+d32f3b08-0dfc-42a6-9a3a-28ec6dea55dc,St John Passion,Johann Sebastian Bach,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+d370c6ef-cb4e-408f-8160-6a57b0e8c534,Il Tabarro,Giacomo Puccini,Michele,baritone,dramatic_baritone,lead,opera,2026-04-26 19:01:41.337283
+d3758b4e-19b1-49c2-ac60-7d8716961915,Rusalka,Antonin Dvorak,Rusalka,soprano,lyric_soprano,lead,opera,2026-04-26 19:01:41.337283
+d3cb541c-a145-4020-97b1-0fded29ffeca,Il Trovatore,Giuseppe Verdi,Ines,soprano,soubrette,small,opera,2026-04-26 18:54:05.133147
+d3da6906-dc62-4271-b6ff-2750bec4b5f8,Der Rosenkavalier,Richard Strauss,Baron Ochs,bass,lyric_bass,lead,opera,2026-04-26 18:55:25.267066
+d4d8117d-39ae-4964-9671-9bb81641f6a3,Mass in G major D 167,Franz Schubert,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+d4e1a575-9693-45d6-afb9-87cbc35083bc,Falstaff,Giuseppe Verdi,Meg Page,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 18:57:01.888083
+d5260003-49ec-406d-8457-7eaff93529f6,Roberto Devereux,Gaetano Donizetti,Elisabetta,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 20:22:59.252405
+d54d76af-2881-4aeb-b8ee-070626f028be,Judas Maccabaeus,George Frideric Handel,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+d54e1d2a-5dfa-4ea7-a244-10d894ef65b1,Stabat Mater,Gioachino Rossini,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+d55d6443-9ba1-416c-9d49-fa98bbdccf2c,Kullervo Symphony Op 7,Jean Sibelius,Soprano Solo,soprano,concert_solo,lead,symphonic,2026-04-27 20:00:57.351155
+d59531d1-b669-40d3-8071-e869925e17bb,Katya Kabanova,Leos Janacek,Katya Kabanova,soprano,lyric_soprano,lead,opera,2026-04-26 20:26:11.596639
+d5961ed9-9144-43b9-b716-981fd4cb51c7,Le Nozze di Figaro,Wolfgang Amadeus Mozart,Figaro,bass,buffo_bass,lead,opera,2026-04-26 18:48:43.492581
+d647b296-a271-4cf2-82aa-58134411f036,Requiem in D minor,Wolfgang Amadeus Mozart,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+d6536137-9420-4c21-a90d-8b1cb4b2766c,Eugene Onegin,Pyotr Ilyich Tchaikovsky,Eugene Onegin,baritone,lyric_baritone,lead,opera,2026-04-26 18:55:25.267066
+d66353a0-eb6d-4d00-8762-85ca26c7ed31,La Cenerentola,Gioachino Rossini,Don Ramiro,tenor,lyric_tenor,lead,opera,2026-04-26 18:55:25.267066
+d693ec4e-acff-44f7-a849-298db7f32b30,Aida,Giuseppe Verdi,Ramfis,bass,dramatic_bass,secondary,opera,2026-04-26 18:54:05.133147
+d6abae12-278e-467b-902f-4f37e2694ffb,Arabella,Richard Strauss,Fiakermilli,soprano,coloratura_soprano,small,opera,2026-04-26 20:26:11.596639
+d6b9b107-865e-4fd2-9760-7663aa9a8e0a,Tristan und Isolde,Richard Wagner,Isolde,soprano,dramatic_soprano,lead,opera,2026-04-26 18:58:46.291908
+d74ef99f-aea1-473c-8898-6a710ac8a896,Les Pecheurs de Perles,Georges Bizet,Zurga,baritone,lyric_baritone,lead,opera,2026-04-26 20:20:59.436774
+d843f5ef-bcc1-495d-bfb6-90e54fc1e9e0,Solomon,George Frideric Handel,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+d853d388-792a-4100-9080-7b36ad7ac9e6,Don Giovanni,Wolfgang Amadeus Mozart,Donna Anna,soprano,dramatic_soprano,lead,opera,2026-04-26 18:48:43.492581
+d8708bc6-b5f0-4126-a0e9-15d276ac09ad,The Cunning Little Vixen,Leos Janacek,The Forester,baritone,lyric_baritone,lead,opera,2026-04-26 20:26:11.596639
+d88898fa-009c-4ded-9e21-a2ad6277025f,Messiah,George Frideric Handel,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+d975ed52-534e-4c3e-bd17-c9c750f5e725,Hodie,Ralph Vaughan Williams,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+d99ce593-5ea9-47f4-83ce-d66dc9ea84cc,Lucia di Lammermoor,Gaetano Donizetti,Lucia,soprano,lyric_coloratura_soprano,lead,opera,2026-04-26 18:54:05.133147
+d9a59420-933d-405e-a22c-e1670491a2f5,Requiem,Herbert Howells,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+d9df7bd1-da7b-451d-a662-fa48f8d331a3,Otello,Giuseppe Verdi,Lodovico,bass,lyric_bass,small,opera,2026-04-26 18:54:05.133147
+d9e7f95a-1da3-4d82-b76a-6896254cfe94,Der Freischutz,Carl Maria von Weber,Annchen,soprano,soubrette,secondary,opera,2026-04-26 20:20:59.436774
+da4ac41a-ad03-4486-b843-1067f72cacef,The Queen of Spades,Pyotr Ilyich Tchaikovsky,Masha,soprano,soubrette,small,opera,2026-04-26 18:58:46.291908
+da8df85b-0413-4b77-98c7-0570aff1b373,A Sea Symphony,Ralph Vaughan Williams,Baritone Solo,baritone,concert_solo,lead,symphonic,2026-04-26 20:30:01.34038
+daaea14b-6e32-4585-88fa-ce36221e480f,Easter Oratorio BWV 249,Johann Sebastian Bach,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+dab34d42-7b43-4830-98e0-ce1042223159,The Seasons,Joseph Haydn,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+dadb18bc-5cfd-4db1-915d-e8df52fbf6d2,Vesperae Solennes de Confessore K 339,Wolfgang Amadeus Mozart,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+dae7859b-cff2-4e86-8506-36e913693e91,Simon Boccanegra,Giuseppe Verdi,Amelia Boccanegra,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 18:57:01.888083
+dae982d1-4d2d-4673-b51c-ac196b616c50,Falstaff,Giuseppe Verdi,Pistol,bass,buffo_bass,small,opera,2026-04-26 18:57:01.888083
+daeb9f96-83bf-4844-a764-b0ec1f9805cb,Romeo et Juliette,Charles Gounod,Stephano,mezzo_soprano,soubrette,small,opera,2026-04-26 18:57:01.888083
+db13c975-a4c7-48e9-92ab-4130e00e6655,Magnificat in D major BWV 243,Johann Sebastian Bach,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+db9a5aa6-5ac9-4867-b164-72d9b3f4542d,The Light of Life Op 29,Edward Elgar,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+dbed2de9-3d8a-49de-b46a-c6507c86c297,Christmas Oratorio BWV 248,Johann Sebastian Bach,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+dc1f8415-8ae6-49e2-8555-b4d421d31d05,Requiem in D minor,Wolfgang Amadeus Mozart,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+dc217101-d80f-436b-92fd-2a726f682cc2,La Gioconda,Amilcare Ponchielli,Isep,tenor,comprimario_tenor,small,opera,2026-04-26 18:57:01.888083
+dc4889ec-f4dc-4160-b0a2-a14cbb1c4a50,Lucia di Lammermoor,Gaetano Donizetti,Raimondo,bass,lyric_bass,secondary,opera,2026-04-26 18:54:05.133147
+dc537b05-6b85-490a-b5d5-e423569314f5,Hercules,George Frideric Handel,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+dc633ca0-aa0c-47e4-a902-8d381451f78c,Lohengrin,Richard Wagner,The Herald,baritone,lyric_baritone,small,opera,2026-04-26 18:55:25.267066
+dcbf3918-f10e-4ccd-b249-238de05bc87c,The Apostles,Edward Elgar,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+dcd839a6-5b98-4dbf-9105-fffcb9058517,Salome,Richard Strauss,First Jew,tenor,comprimario_tenor,small,opera,2026-04-26 18:58:46.291908
+dd1cd089-817a-4b56-9fb1-049d540721ee,Andrea Chenier,Umberto Giordano,Maddalena di Coigny,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 19:01:41.337283
+dd845865-e0dc-4efa-89ba-749501b94c4e,Arabella,Richard Strauss,Elemer,tenor,comprimario_tenor,small,opera,2026-04-26 20:26:11.596639
+dd9eb4cb-fd06-4346-b1ea-01f656e1ab25,Symphony No 14,Dmitri Shostakovich,Soprano Solo,soprano,concert_solo,lead,symphonic,2026-04-27 19:51:55.063557
+ddd8bc1b-022f-4088-81e3-7d8698239541,Elektra,Richard Strauss,A Young Servant,tenor,comprimario_tenor,small,opera,2026-04-26 19:01:41.337283
+de2f8013-66fa-465d-93ad-40bddb834fc4,Semiramide,Gioachino Rossini,Ghost of Nino,bass,comprimario_bass,small,opera,2026-04-26 20:22:59.252405
+de7445c2-a950-4312-adff-c657040326da,Peter Grimes,Benjamin Britten,Peter Grimes,tenor,dramatic_tenor,lead,opera,2026-04-26 20:26:11.596639
+ded9f327-7230-4fbb-81f7-2ca5944a0f52,Mass in D major Op 86,Antonin Dvorak,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+df02ed62-58c2-4445-b763-ed3871658afa,Boris Godunov,Modest Mussorgsky,Boris Godunov,bass,dramatic_bass,lead,opera,2026-04-26 19:01:41.337283
+df33924e-f5f6-42b4-8c1a-9d50e87c468a,Falstaff,Giuseppe Verdi,Doctor Caius,tenor,comprimario_tenor,small,opera,2026-04-26 18:57:01.888083
+df415bef-9d77-4fd2-b902-dcd0df9a0d26,Les Contes d'Hoffmann,Jacques Offenbach,Frantz,tenor,comprimario_tenor,small,opera,2026-04-26 18:58:46.291908
+dfd50bcb-d07c-4218-96f0-75bb2738197b,A Child of Our Time,Michael Tippett,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+dfded633-0466-4388-ac15-2cb37102d29d,The Cunning Little Vixen,Leos Janacek,The Parson,bass,lyric_bass,secondary,opera,2026-04-26 20:26:11.596639
+dff2800f-e22e-49ab-9851-bcf7b4e20f71,Prince Igor,Alexander Borodin,Khan Konchak,bass,lyric_bass,secondary,opera,2026-04-26 20:20:59.436774
+e002e74d-35f3-48cf-ab6f-5cf31ec4d40f,Hora Novissima,Horatio Parker,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+e0e65ffb-dce7-4fe5-966d-838787097763,Orfeo ed Euridice,Christoph Willibald Gluck,Euridice,soprano,lyric_soprano,lead,opera,2026-04-26 20:20:59.436774
+e112e6b6-dab7-40e2-89cb-0437fa301c65,Peter Grimes,Benjamin Britten,Captain Balstrode,baritone,lyric_baritone,secondary,opera,2026-04-26 20:26:11.596639
+e128f7ca-7aab-4b8b-ab63-fa80a9056f07,Psalmus Hungaricus Op 13,Zoltan Kodaly,Tenor Solo,tenor,concert_solo,lead,symphonic,2026-04-27 19:56:19.320672
+e1e97f9f-8696-4fd6-a804-4614396b663a,Athalia,George Frideric Handel,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+e2113a72-4d56-44e5-abda-93b586597b65,Carmina Burana,Carl Orff,Tenor Solo,tenor,concert_solo,lead,symphonic,2026-04-26 20:30:01.34038
+e2374d00-70d0-467a-b849-a003ee109365,La Traviata,Giuseppe Verdi,Doctor Grenvil,bass,lyric_bass,small,opera,2026-04-26 18:48:43.492581
+e279f998-6561-4b04-81f5-21a39a6025a9,Mors et Vita,Charles Gounod,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+e27e579e-ab80-4dae-81f2-8265a134196c,Don Carlo,Giuseppe Verdi,A Herald,tenor,comprimario_tenor,small,opera,2026-04-26 18:58:46.291908
+e2922009-324a-47e9-b1c1-434bff39456e,Lakme,Leo Delibes,Lakme,soprano,lyric_coloratura_soprano,lead,opera,2026-04-26 20:22:59.252405
+e2b088b5-3fa5-4cf2-88c8-f9f6c809ffc9,I Vespri Siciliani,Giuseppe Verdi,Monforte,baritone,lyric_baritone,lead,opera,2026-04-26 20:22:59.252405
+e33d3049-6468-49a8-957a-db726e907fbb,Il Tabarro,Giacomo Puccini,Luigi,tenor,spinto_tenor,lead,opera,2026-04-26 19:01:41.337283
+e3435984-4c12-4114-b098-2d4c663b263d,Ernani,Giuseppe Verdi,Don Riccardo,tenor,comprimario_tenor,small,opera,2026-04-26 19:01:41.337283
+e414ef36-906b-4da7-a0b3-7b0d75d5749f,Die Fledermaus,Johann Strauss II,Alfred,tenor,lyric_tenor,secondary,opera,2026-04-26 20:20:59.436774
+e42b3424-53eb-4be1-b776-f586cbea7fdf,Cosi fan tutte,Wolfgang Amadeus Mozart,Don Alfonso,bass,buffo_bass,lead,opera,2026-04-26 18:57:01.888083
+e48cd9c2-f10b-4b8e-81c0-b1bd7857c041,Israel in Egypt,George Frideric Handel,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+e514748e-8c78-4383-92ad-58a4f3bac922,A Midsummer Night's Dream,Benjamin Britten,Demetrius,baritone,lyric_baritone,secondary,opera,2026-04-26 20:26:11.596639
+e52af37d-abb2-4494-acba-f3fbeb5954e9,Il Barbiere di Siviglia,Gioachino Rossini,Rosina,mezzo_soprano,lyric_coloratura_mezzo,lead,opera,2026-04-26 18:54:05.133147
+e57312b8-d131-4ed8-bae8-f72cafc9ec4d,Die Zauberflote,Wolfgang Amadeus Mozart,The Speaker,bass,lyric_bass,secondary,opera,2026-04-26 18:54:05.133147
+e58c5951-e4ce-4544-81e4-9a87d1df9903,Die erste Walpurgisnacht Op 60,Felix Mendelssohn,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+e5aad06c-f7f3-45f5-a1ef-00cc403dd6b5,Elijah,Felix Mendelssohn,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+e5ca2fd0-a31c-4ba1-a9b2-4ad043f147b4,Messe de Requiem Op 54,Camille Saint-Saens,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+e5dcb78b-1645-4114-8821-bad7a9f138de,Solomon,George Frideric Handel,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+e5e14a83-8ef9-4793-b670-70f77f2ab45d,Jenufa,Leos Janacek,Laca,tenor,lyric_tenor,lead,opera,2026-04-26 19:01:41.337283
+e5fe9029-3c37-4b28-b669-bdf281984bd4,Prince Igor,Alexander Borodin,Konchakovna,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 20:20:59.436774
+e6755a26-6421-4299-ae74-c0035ce8b412,Pelleas et Melisande,Claude Debussy,Arkel,bass,lyric_bass,secondary,opera,2026-04-26 20:22:59.252405
+e6cf1e43-e25d-475a-886f-a6e0b3eebc7b,Te Deum in C major,Anton Bruckner,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+e7252ea5-d905-413c-9c9d-ec49526ef556,War Requiem,Benjamin Britten,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+e773a009-b297-407a-baec-9cbd7df2f51d,Theodora,George Frideric Handel,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+e782c223-b26a-4d28-be8e-ab8d88167307,Solomon,George Frideric Handel,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+e7c0f76a-6bbb-41c4-b089-94379d9390ff,Jenufa,Leos Janacek,Karolka,soprano,soubrette,small,opera,2026-04-26 19:01:41.337283
+e7ed7a0c-5abe-444b-af14-8c4314169d59,Madama Butterfly,Giacomo Puccini,Pinkerton,tenor,lyric_tenor,lead,opera,2026-04-26 18:54:05.133147
+e803406c-4b5d-42fa-94eb-9b7eb67df66c,Manon,Jules Massenet,Manon,soprano,lyric_soprano,lead,opera,2026-04-26 18:58:46.291908
+e8331022-4d7d-4911-be5c-a40094528dd6,Esther,George Frideric Handel,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+e8b0a7b7-d08b-4249-bb5d-892b44c3909c,Das Rheingold,Richard Wagner,Fafner,bass,dramatic_bass,secondary,opera,2026-04-26 20:22:59.252405
+e8d1bcb0-bbef-45f1-b271-81a424ff062b,Missa Solemnis Op 123,Ludwig van Beethoven,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+e9524959-561e-4cbb-b415-c509e5f00114,La Fanciulla del West,Giacomo Puccini,Sonora,baritone,lyric_baritone,secondary,opera,2026-04-26 19:01:41.337283
+e97b1490-0074-492e-9457-8ce0b695af49,Andrea Chenier,Umberto Giordano,Mathieu,baritone,comprimario_baritone,small,opera,2026-04-26 19:01:41.337283
+e9975583-3ab4-4e1b-b231-2a3d6780d3e3,Das Rheingold,Richard Wagner,Fasolt,bass,lyric_bass,secondary,opera,2026-04-26 20:22:59.252405
+ea66b41f-2f1e-4d3f-b7e7-3184ed4ed4af,Ariadne auf Naxos,Richard Strauss,Bacchus,tenor,heldentenor,lead,opera,2026-04-26 20:20:59.436774
+ea86c2c9-9eb4-45ff-a365-b785d2f22fde,La Gioconda,Amilcare Ponchielli,Enzo Grimaldo,tenor,spinto_tenor,lead,opera,2026-04-26 18:57:01.888083
+eaec6e23-0c6e-4a84-ac11-fa0b3b91c8b7,Ode for St Cecilia's Day HWV 76,George Frideric Handel,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+eb5be42d-2f16-4c6a-a958-dc56026e694c,The Rake's Progress,Igor Stravinsky,Baba the Turk,mezzo_soprano,dramatic_mezzo,secondary,opera,2026-04-26 20:26:11.596639
+eb6f4979-7d46-436d-a281-954c377172b1,Suor Angelica,Giacomo Puccini,The Princess,mezzo_soprano,dramatic_mezzo,secondary,opera,2026-04-26 19:01:41.337283
+eb8b7899-93f5-40f4-9ce5-6bf8012729fc,I Puritani,Vincenzo Bellini,Queen Enrichetta,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 18:58:46.291908
+ebcb5e4d-7615-4f4d-897e-16c3b855f5d1,Andrea Chenier,Umberto Giordano,Roucher,baritone,lyric_baritone,small,opera,2026-04-26 19:01:41.337283
+ebd33695-e308-4a49-9b78-c35114c48fa4,Les Beatitudes,Cesar Franck,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+ebde2b84-70e9-4781-afc3-3420df7f55ba,Un Ballo in Maschera,Giuseppe Verdi,Riccardo,tenor,spinto_tenor,lead,opera,2026-04-26 18:55:25.267066
+ebee6451-50a8-4640-8dd1-2e61376f13eb,Israel in Egypt,George Frideric Handel,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+ec00fea2-3520-4fbb-a080-ad4217f51b16,Idomeneo,Wolfgang Amadeus Mozart,Voice of Neptune,bass,comprimario_bass,small,opera,2026-04-26 20:20:59.436774
+ec348088-59ea-470b-a7fd-4389df842999,The Seasons,Joseph Haydn,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+ec376eef-f9db-46bd-b16a-72e0f2390291,Turandot,Giacomo Puccini,Calaf,tenor,spinto_tenor,lead,opera,2026-04-26 18:54:05.133147
+ec3d31ef-519f-4fba-acf5-7b8f8d4daf17,Andrea Chenier,Umberto Giordano,Andrea Chenier,tenor,dramatic_tenor,lead,opera,2026-04-26 19:01:41.337283
+ec4a8d3c-b1d8-40f4-aeec-821d79215dce,Mefistofele,Arrigo Boito,Martha,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 19:01:41.337283
+ec5220f6-e88b-46d6-894e-a57d896c7795,Die Meistersinger von Nurnberg,Richard Wagner,Pogner,bass,lyric_bass,secondary,opera,2026-04-26 20:20:59.436774
+ec61f28b-cb19-4778-b73e-615d1a3b266b,Te Deum in C major,Anton Bruckner,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+ec80f3c7-df36-4575-a43c-384a8b671b28,Lucia di Lammermoor,Gaetano Donizetti,Alisa,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 18:54:05.133147
+ecf4a2c7-523f-41e3-ab2f-24173c96ff72,Prince Igor,Alexander Borodin,Vladimir Igorevich,tenor,lyric_tenor,secondary,opera,2026-04-26 20:20:59.436774
+ed0504fc-ed37-4af3-beff-f3e9fe0e372c,Lulu,Alban Berg,Countess Geschwitz,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 20:26:11.596639
+ed091201-41e1-4f2b-a40d-451578e55de0,Lady Macbeth of Mtsensk,Dmitri Shostakovich,Sonetka,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 20:26:11.596639
+ed16d2fe-f528-4958-9ba7-53cdf1fd5c34,Israel in Egypt,George Frideric Handel,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+ed367a04-d638-40a9-ab60-88a8a42d2776,Les Huguenots,Giacomo Meyerbeer,Valentine,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 20:26:11.596639
+ed46a5d7-02cc-463a-84e3-a39bb59490f0,La Clemenza di Tito,Wolfgang Amadeus Mozart,Servilia,soprano,soubrette,secondary,opera,2026-04-26 20:26:11.596639
+ed53485d-6ecf-49d7-8831-4b245785349d,I Vespri Siciliani,Giuseppe Verdi,Ninetta,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 20:22:59.252405
+ed73b10e-c8df-42f8-9ec7-f88eb3ebed2c,Carmen,Georges Bizet,Michaela,soprano,lyric_soprano,secondary,opera,2026-04-26 18:48:43.492581
+ede54854-f5f2-4e5d-88d9-df54eb0c6071,Ernani,Giuseppe Verdi,Silva,bass,dramatic_bass,secondary,opera,2026-04-26 19:01:41.337283
+edf67495-e758-40c2-8630-0ab2962715c4,Macbeth,Giuseppe Verdi,Banco,bass,lyric_bass,secondary,opera,2026-04-26 19:01:41.337283
+ee095c32-9d2e-4d31-851e-463f1cb86018,The Dream of Gerontius,Edward Elgar,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+ee2ad942-89e2-42c6-a0e8-8387428c9d97,La Fanciulla del West,Giacomo Puccini,Minnie,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 19:01:41.337283
+ee875d4e-48fd-4600-bf79-1f6744e65b37,Samson et Dalila,Camille Saint-Saens,High Priest of Dagon,baritone,dramatic_baritone,secondary,opera,2026-04-26 18:57:01.888083
+eec66a1d-f74b-4f59-928c-1dc7389bae0f,Coronation Mass K 317,Wolfgang Amadeus Mozart,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:51:55.063557
+ef02abcb-2a61-47cb-ab38-1413a6e7a2ca,Norma,Vincenzo Bellini,Pollione,tenor,spinto_tenor,lead,opera,2026-04-26 18:55:25.267066
+ef0e1ff7-69b6-478f-9371-7ef1cf46f9ab,Die Zauberflote,Wolfgang Amadeus Mozart,Papagena,soprano,soubrette,secondary,opera,2026-04-26 18:54:05.133147
+ef6698a7-e112-4ee0-8062-7a70fd43115d,Dialogues of the Carmelites,Francis Poulenc,Father Confessor,baritone,lyric_baritone,small,opera,2026-04-26 20:22:59.252405
+eff74f52-866b-4136-83f5-e4b3212aecc0,Madama Butterfly,Giacomo Puccini,Imperial Commissioner,bass,comprimario_bass,small,opera,2026-04-26 18:54:05.133147
+effe774f-a3f6-4fe9-9586-4e5f6b23ec5b,Il Trovatore,Giuseppe Verdi,Manrico,tenor,spinto_tenor,lead,opera,2026-04-26 18:54:05.133147
+f02a5bb6-de96-4831-be6a-abc9508aca4b,Caractacus Op 35,Edward Elgar,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+f0bb67b9-9091-4e7f-86df-b15711e09dcb,Un Ballo in Maschera,Giuseppe Verdi,Samuel,bass,lyric_bass,small,opera,2026-04-26 18:55:25.267066
+f0e6caec-4704-469e-9c79-f5baaac4ab69,Sancta Civitas,Ralph Vaughan Williams,Baritone Solo,baritone,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+f1371b9a-0e25-4b78-8482-3b0fe944949f,La Cenerentola,Gioachino Rossini,Don Magnifico,bass,buffo_bass,secondary,opera,2026-04-26 18:55:25.267066
+f154b6cd-4f6a-4fca-b449-f9fae6842514,Carmen,Georges Bizet,Dancaire,baritone,comprimario_baritone,small,opera,2026-04-26 18:48:43.492581
+f1d7f760-a8ad-42ee-ba32-5f534ed4a34f,Don Quichotte,Jules Massenet,Pedro,soprano,soubrette,small,opera,2026-04-26 20:26:11.596639
+f2b79c45-e337-4e75-a9f8-8d01d8902ed2,Elektra,Richard Strauss,Chrysothemis,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 19:01:41.337283
+f33d8006-e1f0-4c3a-a0ab-64f4450b0b21,Hamlet,Ambroise Thomas,The Queen,mezzo_soprano,dramatic_mezzo,secondary,opera,2026-04-26 20:22:59.252405
+f40f4930-0502-4311-b865-1bf7c26490ed,Gianni Schicchi,Giacomo Puccini,Zita,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 19:01:41.337283
+f4156f01-8969-4331-ad4e-53b2a8095a54,Belshazzar,George Frideric Handel,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+f42a427f-198d-4faf-9d76-cc4a412a10db,A Midsummer Night's Dream,Benjamin Britten,Titania,soprano,coloratura_soprano,lead,opera,2026-04-26 20:26:11.596639
+f472ba93-5fc3-4f98-acf2-fef48fa47961,Falstaff,Giuseppe Verdi,Alice Ford,soprano,lyric_soprano,lead,opera,2026-04-26 18:57:01.888083
+f4a26067-94e9-41b0-a481-2ef74a9dd449,Jenufa,Leos Janacek,Steva,tenor,lyric_tenor,secondary,opera,2026-04-26 19:01:41.337283
+f4f1fee5-e656-4842-8171-dee9dbc5d46e,Die Zauberflote,Wolfgang Amadeus Mozart,Third Lady,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 18:54:05.133147
+f6110948-cc17-4059-9173-56b94cfe5f0c,Die Walkure,Richard Wagner,Siegmund,tenor,heldentenor,lead,opera,2026-04-26 18:58:46.291908
+f6822ec1-69d4-4877-b19d-439899897e83,Te Deum,Zoltan Kodaly,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+f68d9a1c-482e-4964-8c5c-3e6625a6a4be,Don Pasquale,Gaetano Donizetti,Don Pasquale,bass,buffo_bass,lead,opera,2026-04-26 18:57:01.888083
+f6f353c5-b1eb-4d5f-94b4-b16522792580,The Cunning Little Vixen,Leos Janacek,Harasta,baritone,lyric_baritone,secondary,opera,2026-04-26 20:26:11.596639
+f70bc401-05dd-4f16-beae-8e7c864532c8,La Cenerentola,Gioachino Rossini,Tisbe,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 18:55:25.267066
+f70e5572-126d-44a5-b6b4-7baaf7d879e1,Otello,Giuseppe Verdi,Roderigo,tenor,comprimario_tenor,small,opera,2026-04-26 18:54:05.133147
+f75d7c47-c336-4143-860d-354bcc2f3d55,Manon Lescaut,Giacomo Puccini,Geronte di Ravoir,bass,lyric_bass,secondary,opera,2026-04-26 18:57:01.888083
+f7c85e31-4c51-40d2-a69e-47e96df9c64c,Thais,Jules Massenet,Myrtale,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 20:22:59.252405
+f7e53d1e-42e8-42ea-9138-c16be5ee29e1,La Fanciulla del West,Giacomo Puccini,Ashby,bass,lyric_bass,secondary,opera,2026-04-26 19:01:41.337283
+f7fa4aa6-8478-4f16-a6fb-e296e44701a8,Boris Godunov,Modest Mussorgsky,Shuisky,tenor,comprimario_tenor,secondary,opera,2026-04-26 19:01:41.337283
+f8333eb4-f8b7-45ed-928f-0a1f56598d1f,Stabat Mater Op 58,Antonin Dvorak,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-26 20:30:01.34038
+f84a0c74-ccb8-47dd-8da1-99998d194c65,Nabucco,Giuseppe Verdi,High Priest of Baal,bass,comprimario_bass,small,opera,2026-04-26 18:58:46.291908
+f8559f0a-d7fb-4c4c-bc11-35e37cde637e,Missa Brevis Op 63,Benjamin Britten,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+f886d5c3-97c7-4e1c-8de3-739548c838c4,Alexander's Feast,George Frideric Handel,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+f89a5f7d-aefc-4966-b81b-2f8fb33b1346,Ernani,Giuseppe Verdi,Elvira,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 19:01:41.337283
+f8bccddc-0484-4fb8-8253-75b2c97adc2c,Messe de Requiem Op 54,Camille Saint-Saens,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:56:19.320672
+f8dd929b-1257-4d73-bd12-728040f41399,La Gioconda,Amilcare Ponchielli,Zuane,baritone,comprimario_baritone,small,opera,2026-04-26 18:57:01.888083
+f9425cc0-a8a1-417d-9f86-e7de4ade5969,Alexander's Feast,George Frideric Handel,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:53:06.44092
+f94ca779-2ed9-41c8-ac7c-2df385656c8e,Otello,Giuseppe Verdi,Montano,baritone,comprimario_baritone,small,opera,2026-04-26 18:54:05.133147
+f961692b-650c-4b60-aad2-742cc1919815,La Sonnambula,Vincenzo Bellini,Lisa,soprano,soubrette,secondary,opera,2026-04-26 18:58:46.291908
+f98c8a52-4f98-4889-a56a-acb5b02602b0,Peter Grimes,Benjamin Britten,Auntie,mezzo_soprano,lyric_mezzo,secondary,opera,2026-04-26 20:26:11.596639
+f9c2e7fe-aa29-4c70-a04e-a9e4b97eaf27,Simon Boccanegra,Giuseppe Verdi,Pietro,baritone,comprimario_baritone,small,opera,2026-04-26 18:57:01.888083
+f9f24a8c-86e6-466a-b4cf-be715922a82b,Manon,Jules Massenet,De Bretigny,baritone,comprimario_baritone,small,opera,2026-04-26 18:58:46.291908
+fa9775b5-7a89-4f9f-b448-e299cc0341c2,Mass in B minor,Johann Sebastian Bach,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-26 20:28:53.719839
+fab7ad19-ab9c-43a5-b621-b3fdc7ff28d1,Tannhauser,Richard Wagner,Walther von der Vogelweide,tenor,comprimario_tenor,small,opera,2026-04-26 20:20:59.436774
+faecf32e-f160-45b8-bba1-f09e2aa17ee4,Iphigenie en Tauride,Christoph Willibald Gluck,Iphigenie,soprano,lyric_soprano,lead,opera,2026-04-26 20:26:11.596639
+fb04ba75-adf9-4765-993b-951d2051e0d7,Der Rosenkavalier,Richard Strauss,Octavian,mezzo_soprano,lyric_mezzo,lead,opera,2026-04-26 18:55:25.267066
+fb4f35d4-38dd-4bc7-9063-3b41d45579c0,Adriana Lecouvreur,Francesco Cilea,Adriana Lecouvreur,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 19:01:41.337283
+fb56aff3-d246-40d2-b98b-a542d33874fc,Macbeth,Giuseppe Verdi,A Lady-in-Waiting,mezzo_soprano,lyric_mezzo,small,opera,2026-04-26 19:01:41.337283
+fb7dd427-84be-4545-8064-7986de95c2b4,Die Fledermaus,Johann Strauss II,Dr Falke,baritone,lyric_baritone,secondary,opera,2026-04-26 20:20:59.436774
+fbbac5a3-ce7d-44ba-975f-1c3bc73b143b,Khovanshchina,Modest Mussorgsky,Dosifei,bass,lyric_bass,secondary,opera,2026-04-26 20:22:59.252405
+fbce309a-87ff-43b0-9747-62a1f00eec99,Les Huguenots,Giacomo Meyerbeer,Comte de Nevers,baritone,lyric_baritone,secondary,opera,2026-04-26 20:26:11.596639
+fc0f3f9d-0510-4d73-941d-f992c3fb58ce,The Seven Last Words of Our Saviour on the Cross,Joseph Haydn,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+fc5d96b6-c450-4afe-8fc1-de2f51841b55,Gotterdammerung,Richard Wagner,Third Norn,soprano,lyric_soprano,small,opera,2026-04-26 20:22:59.252405
+fcfa108a-8c99-47bc-beca-c3d6fcf8a197,Iphigenie en Tauride,Christoph Willibald Gluck,A Minister of the Sanctuary,baritone,comprimario_baritone,small,opera,2026-04-26 20:26:11.596639
+fd06b965-5b7a-4903-9644-6a3c0ee19990,La Boheme,Giacomo Puccini,Rodolfo,tenor,lyric_tenor,lead,opera,2026-04-26 18:48:43.492581
+fd7c5c96-4556-4e95-a396-fab11eac6b64,Rigoletto,Giuseppe Verdi,Count Monterone,baritone,dramatic_baritone,small,opera,2026-04-26 18:54:05.133147
+fd8b0d0e-2d32-4cf8-a454-2cad1f9eef4a,Semele,George Frideric Handel,Bass Solo,bass,concert_solo,lead,oratorio,2026-04-27 19:55:04.175513
+fd9850e1-500d-4869-a3cf-fc3a08686024,Don Giovanni,Wolfgang Amadeus Mozart,Donna Elvira,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 18:48:43.492581
+fdc21978-d936-4131-961f-14b7707a7b5e,Jeanne d'Arc au Bucher,Arthur Honegger,Soprano Solo,soprano,concert_solo,lead,oratorio,2026-04-27 19:58:58.058831
+fe16351f-25da-49b5-b97f-a16cefc26ef7,Deborah,George Frideric Handel,Mezzo-Soprano Solo,mezzo_soprano,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+fe7bd4b1-404a-41d0-b831-8c246ba5e9fe,Der Rosenkavalier,Richard Strauss,Faninal,baritone,lyric_baritone,secondary,opera,2026-04-26 18:55:25.267066
+ff334016-23ca-4149-9ae6-2184fb865575,Tristan und Isolde,Richard Wagner,Brangane,mezzo_soprano,dramatic_mezzo,secondary,opera,2026-04-26 18:58:46.291908
+ff8a2a66-742d-405d-ac48-439aae001a14,La Redemption,Charles Gounod,Tenor Solo,tenor,concert_solo,lead,oratorio,2026-04-27 20:00:57.351155
+ff95844d-89b3-4f4e-9f72-d2068080be90,Luisa Miller,Giuseppe Verdi,Count Walter,bass,dramatic_bass,secondary,opera,2026-04-26 19:01:41.337283
+ffa6aca5-fe9f-467d-b9e2-2d8020a718df,Dialogues of the Carmelites,Francis Poulenc,Mother Marie,mezzo_soprano,lyric_mezzo,lead,opera,2026-04-26 20:22:59.252405
+ffa92f06-1002-44c7-ba2d-cd095a46d83f,Lady Macbeth of Mtsensk,Dmitri Shostakovich,Katerina Ismailova,soprano,lyric_spinto_soprano,lead,opera,2026-04-26 20:26:11.596639
+ffdfdb44-2bce-4cd9-b244-489bbf855f05,Boris Godunov,Modest Mussorgsky,The Simpleton,tenor,lyric_tenor,small,opera,2026-04-26 19:01:41.337283
