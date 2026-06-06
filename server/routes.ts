@@ -25,7 +25,7 @@ import { promisify } from "util";
 import multer from "multer";
 import express from "express";
 import { uploadToSupabaseStorage } from "./lib/file-upload";
-import { notifyNewRegistration } from "./lib/email";
+import { notifyNewRegistration, getEmailConfigStatus, sendTestEmail } from "./lib/email";
 import { eq, desc } from "drizzle-orm";
 
 const scryptAsync = promisify(scrypt);
@@ -1162,6 +1162,15 @@ export async function registerRoutes(
 
   app.get("/api/admin/auth/check", (req: Request, res: Response) => {
     res.json({ authenticated: !!req.session.adminAuthenticated });
+  });
+
+  app.get("/api/admin/email/status", requireAdminAuth, (_req: Request, res: Response) => {
+    res.json(getEmailConfigStatus());
+  });
+
+  app.post("/api/admin/email/test", requireAdminAuth, async (_req: Request, res: Response) => {
+    const result = await sendTestEmail();
+    res.status(result.ok ? 200 : 502).json(result);
   });
 
   app.post("/api/admin/seed-demo", requireAdminAuth, async (_req: Request, res: Response) => {

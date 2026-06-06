@@ -99,19 +99,81 @@ RESEND_FROM_EMAIL=onboarding@resend.dev
 ADMIN_NOTIFICATION_EMAIL=gfarhan18@gmail.com
 ```
 
-If `RESEND_API_KEY` is unset, the app starts normally and logs once:
+If `RESEND_API_KEY` is unset, the app starts normally and logs:
 
-`[email] Notifications disabled — set RESEND_API_KEY (and related vars) to enable.`
+`[email] Not ready (startup) — RESEND_API_KEY is missing or empty`
 
 ---
 
-## 6. Test
+## 6. Test and read logs
+
+### A. Check Railway startup logs
+
+After deploy, open **Railway → your service → Deployments → Logs** and look for one of:
+
+```
+[email] Ready (startup) — from=onboarding@resend.dev to=gfarhan18@gmail.com key=re_xxxx…
+```
+
+or:
+
+```
+[email] Not ready (startup) — RESEND_API_KEY is missing or empty
+```
+
+If you see **Not ready**, fix the missing variables on **production Railway** (the URL in `vercel.json`) and redeploy.
+
+### B. Send a test email (admin API)
+
+1. Log in to the **Admin dashboard** on your site (uses `ADMIN_PASSWORD`).
+2. In the browser devtools console (while on the site), run:
+
+```javascript
+// 1) Check config (no secrets exposed)
+await fetch("/api/admin/email/status", { credentials: "include" }).then(r => r.json())
+
+// 2) Send test email
+await fetch("/api/admin/email/test", { method: "POST", credentials: "include" }).then(r => r.json())
+```
+
+Expected status response:
+
+```json
+{ "enabled": true, "ready": true, "issues": [], "fromEmail": "onboarding@resend.dev", "adminNotificationEmail": "gfarhan18@gmail.com", "apiKeySet": true, "apiKeyHint": "re_xxxx…" }
+```
+
+Expected test response on success:
+
+```json
+{ "ok": true, "message": "Email sent successfully", "resendId": "…" }
+```
+
+If `ready` is `false`, the `issues` array tells you exactly what is missing on Railway.
+
+### C. Test via registration
 
 1. Register a new singer or organization with a **real email** (not `@example.com`).
-2. Check Railway logs for:
-   - `[email] New registration notification sent for singer #…`
-   - or an error line if something failed
-3. Check **gfarhan18@gmail.com** (and spam folder).
+2. In Railway logs, search for `[email]`. You should see:
+
+```
+[email] Registration hook fired — type=singer id=123 email=someone@gmail.com
+[email] registration notification for someone@gmail.com — sending from=… to=…
+[email] registration notification for someone@gmail.com succeeded — resendId=…
+```
+
+3. Check **gfarhan18@gmail.com** (and spam).
+4. Check the **Resend dashboard → Emails** — an entry appears only after `succeeded` with a `resendId`.
+
+### D. Direct curl against Railway (bypass Vercel)
+
+Replace with your production Railway URL:
+
+```bash
+curl -s "https://graham-singersearch-production.up.railway.app/api/admin/email/status" \
+  -H "Cookie: connect.sid=YOUR_SESSION_COOKIE"
+```
+
+For a full test without admin session, use Railway logs after registration — the startup line alone confirms whether env vars are loaded.
 
 ---
 
@@ -134,7 +196,8 @@ If `RESEND_API_KEY` is unset, the app starts normally and logs once:
 | "We don't allow free public domains" when adding domain | You tried to add Gmail/Outlook/etc. Use a domain **you own**, or skip Domains and use `onboarding@resend.dev` for testing |
 | No email, log says disabled | Set `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, and `ADMIN_NOTIFICATION_EMAIL` on Railway |
 | Resend 403 / domain not allowed | With test sender, `ADMIN_NOTIFICATION_EMAIL` must match your **Resend account email**; or verify your own domain |
-| Registration works, no email | Check Railway logs for `[email]` lines; API key and from-address must be valid |
+| Registration works, no email | Check Railway startup for `[email] Not ready`; use `/api/admin/email/status` and `/api/admin/email/test` |
+| Nothing in Resend dashboard | Resend API was never called — config not ready on the Railway service handling `/api/*` |
 | Demo users don't email | Expected — `@example.com` addresses are skipped |
 
 ---

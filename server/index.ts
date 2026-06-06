@@ -8,6 +8,7 @@ import { pool } from "./storage";
 import { seedDatabase } from "./seed-data";
 import { seedRepertoire } from "./seed-repertoire";
 import { geocodeCityState } from "./lib/geocode";
+import { logEmailConfigStatus } from "./lib/email";
 
 const app = express();
 app.set("trust proxy", 1);
@@ -213,6 +214,8 @@ app.use((req, res, next) => {
   }
 
   await registerRoutes(httpServer, app);
+
+  logEmailConfigStatus("startup");
 
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

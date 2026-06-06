@@ -4,7 +4,15 @@ export type EmailConfig = {
   adminNotificationEmail: string;
 };
 
-let loggedDisabled = false;
+export type EmailConfigStatus = {
+  enabled: boolean;
+  ready: boolean;
+  issues: string[];
+  fromEmail: string | null;
+  adminNotificationEmail: string | null;
+  apiKeySet: boolean;
+  apiKeyHint: string | null;
+};
 
 export function isExampleEmail(email: string): boolean {
   const domain = email.trim().toLowerCase().split("@")[1];
@@ -16,35 +24,63 @@ export function isEmailNotificationsEnabled(): boolean {
   return Boolean(process.env.RESEND_API_KEY?.trim());
 }
 
-export function getEmailConfig(): EmailConfig | null {
-  if (!isEmailNotificationsEnabled()) {
-    if (!loggedDisabled) {
-      console.warn(
-        "[email] Notifications disabled — set RESEND_API_KEY (and related vars) to enable.",
-      );
-      loggedDisabled = true;
-    }
-    return null;
-  }
-
-  const apiKey = process.env.RESEND_API_KEY!.trim();
-  const fromEmail = process.env.RESEND_FROM_EMAIL?.trim();
+export function getEmailConfigStatus(): EmailConfigStatus {
+  const apiKey = process.env.RESEND_API_KEY?.trim() ?? "";
+  const fromEmail = process.env.RESEND_FROM_EMAIL?.trim() ?? "";
   const adminNotificationEmail =
-    process.env.ADMIN_NOTIFICATION_EMAIL?.trim();
+    process.env.ADMIN_NOTIFICATION_EMAIL?.trim() ?? "";
+  const issues: string[] = [];
 
-  if (!fromEmail) {
-    console.warn(
-      "[email] RESEND_FROM_EMAIL is required when RESEND_API_KEY is set.",
-    );
-    return null;
+  if (process.env.EMAIL_NOTIFICATIONS_ENABLED === "false") {
+    issues.push("EMAIL_NOTIFICATIONS_ENABLED is set to false");
   }
 
-  if (!adminNotificationEmail) {
-    console.warn(
-      "[email] ADMIN_NOTIFICATION_EMAIL is required when RESEND_API_KEY is set.",
-    );
-    return null;
+  if (!apiKey) {
+    issues.push("RESEND_API_KEY is missing or empty");
   }
 
-  return { apiKey, fromEmail, adminNotificationEmail };
+  if (apiKey && !fromEmail) {
+    issues.push("RESEND_FROM_EMAIL is missing or empty");
+  }
+
+  if (apiKey && !adminNotificationEmail) {
+    issues.push("ADMIN_NOTIFICATION_EMAIL is missing or empty");
+  }
+
+  const enabled = isEmailNotificationsEnabled();
+  const ready = enabled && issues.length === 0;
+
+  return {
+    enabled,
+    ready,
+    issues,
+    fromEmail: fromEmail || null,
+    adminNotificationEmail: adminNotificationEmail || null,
+    apiKeySet: Boolean(apiKey),
+    apiKeyHint: apiKey ? `${apiKey.slice(0, 8)}…` : null,
+  };
+}
+
+export function getEmailConfig(): EmailConfig | null {
+  const status = getEmailConfigStatus();
+  if (!status.ready) return null;
+  return {
+    apiKey: process.env.RESEND_API_KEY!.trim(),
+    fromEmail: status.fromEmail!,
+    adminNotificationEmail: status.adminNotificationEmail!,
+  };
+}
+
+export function logEmailConfigStatus(source = "startup"): void {
+  const status = getEmailConfigStatus();
+  if (status.ready) {
+    console.log(
+      `[email] Ready (${source}) — from=${status.fromEmail} to=${status.adminNotificationEmail} key=${status.apiKeyHint}`,
+    );
+    return;
+  }
+
+  console.warn(
+    `[email] Not ready (${source}) — ${status.issues.join("; ") || "unknown issue"}`,
+  );
 }
