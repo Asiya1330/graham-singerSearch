@@ -260,6 +260,21 @@ CREATE TABLE IF NOT EXISTS admin_gifts (
 CREATE INDEX IF NOT EXISTS admin_gifts_recipient_idx ON admin_gifts (recipient_type, recipient_id);
 
 -- ---------------------------------------------------------------------
+-- password_reset_tokens
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+  id          serial PRIMARY KEY,
+  token_hash  text NOT NULL,
+  user_type   text NOT NULL,
+  user_id     integer NOT NULL,
+  expires_at  timestamp NOT NULL,
+  used_at     timestamp,
+  created_at  timestamp DEFAULT now()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS password_reset_tokens_token_hash_idx ON password_reset_tokens (token_hash);
+CREATE INDEX IF NOT EXISTS password_reset_tokens_user_idx ON password_reset_tokens (user_type, user_id);
+
+-- ---------------------------------------------------------------------
 -- sessions (used by express-session / connect-pg-simple)
 -- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS sessions (

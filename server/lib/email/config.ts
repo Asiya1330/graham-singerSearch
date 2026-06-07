@@ -71,6 +71,15 @@ export function getEmailConfig(): EmailConfig | null {
   };
 }
 
+export function getSiteUrl(): string {
+  const url = process.env.SITE_URL?.trim();
+  if (url) return url.replace(/\/$/, "");
+  if (process.env.NODE_ENV === "production") {
+    return "https://singersearch.net";
+  }
+  return `http://localhost:${process.env.PORT || "5000"}`;
+}
+
 export function logEmailConfigStatus(source = "startup"): void {
   const status = getEmailConfigStatus();
   if (status.ready) {

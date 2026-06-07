@@ -14,9 +14,11 @@ import {
   type AdminGift,
   repertoireSuggestions,
   type RepertoireSuggestion, type InsertRepertoireSuggestion,
+  passwordResetTokens,
+  type PasswordResetToken,
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { eq, and, gte, lte, ilike, or, sql, desc, count, inArray } from "drizzle-orm";
+import { eq, and, gte, lte, ilike, or, sql, desc, count, inArray, isNull } from "drizzle-orm";
 import { Pool } from "pg";
 import { getSupabaseDatabaseUrl } from "./lib/env";
 
@@ -132,6 +134,17 @@ export interface IStorage {
 
   createRepertoireSuggestion(data: InsertRepertoireSuggestion & { singer_id: number }): Promise<RepertoireSuggestion>;
   listRepertoireSuggestions(): Promise<(RepertoireSuggestion & { singer_first_name: string | null; singer_last_name: string | null })[]>;
+
+  createPasswordResetToken(data: {
+    tokenHash: string;
+    userType: "singer" | "organization";
+    userId: number;
+    expiresAt: Date;
+  }): Promise<PasswordResetToken>;
+  findValidPasswordResetToken(tokenHash: string): Promise<PasswordResetToken | undefined>;
+  markPasswordResetTokenUsed(id: number): Promise<void>;
+  invalidatePasswordResetTokensForUser(userType: "singer" | "organization", userId: number): Promise<void>;
+  countRecentPasswordResetRequests(userType: "singer" | "organization", userId: number, since: Date): Promise<number>;
 }
 
 export const pool = new Pool({
@@ -988,6 +1001,68 @@ export class DatabaseStorage implements IStorage {
       ORDER BY rs.created_at DESC
     `);
     return result.rows as any;
+  }
+
+  async createPasswordResetToken(data: {
+    tokenHash: string;
+    userType: "singer" | "organization";
+    userId: number;
+    expiresAt: Date;
+  }): Promise<PasswordResetToken> {
+    const [created] = await db.insert(passwordResetTokens).values({
+      token_hash: data.tokenHash,
+      user_type: data.userType,
+      user_id: data.userId,
+      expires_at: data.expiresAt,
+    }).returning();
+    return created;
+  }
+
+  async findValidPasswordResetToken(tokenHash: string): Promise<PasswordResetToken | undefined> {
+    const [token] = await db.select().from(passwordResetTokens).where(
+      and(
+        eq(passwordResetTokens.token_hash, tokenHash),
+        isNull(passwordResetTokens.used_at),
+        gte(passwordResetTokens.expires_at, new Date()),
+      ),
+    );
+    return token;
+  }
+
+  async markPasswordResetTokenUsed(id: number): Promise<void> {
+    await db.update(passwordResetTokens)
+      .set({ used_at: new Date() })
+      .where(eq(passwordResetTokens.id, id));
+  }
+
+  async invalidatePasswordResetTokensForUser(
+    userType: "singer" | "organization",
+    userId: number,
+  ): Promise<void> {
+    await db.update(passwordResetTokens)
+      .set({ used_at: new Date() })
+      .where(
+        and(
+          eq(passwordResetTokens.user_type, userType),
+          eq(passwordResetTokens.user_id, userId),
+          isNull(passwordResetTokens.used_at),
+        ),
+      );
+  }
+
+  async countRecentPasswordResetRequests(
+    userType: "singer" | "organization",
+    userId: number,
+    since: Date,
+  ): Promise<number> {
+    const [result] = await db.select({ count: count() }).from(passwordResetTokens).where(
+      and(
+        eq(passwordResetTokens.user_type, userType),
+        eq(passwordResetTokens.user_id, userId),
+        gte(passwordResetTokens.created_at, since),
+      ),
+    );
+    return Number(result?.count ?? 0);
   }
 }
 
