@@ -90,6 +90,18 @@ app.use((req, res, next) => {
       search_filters jsonb,
       created_at timestamp default now()
     );
+
+    CREATE TABLE IF NOT EXISTS password_reset_tokens (
+      id serial PRIMARY KEY,
+      token_hash text NOT NULL,
+      user_type text NOT NULL,
+      user_id integer NOT NULL,
+      expires_at timestamp NOT NULL,
+      used_at timestamp,
+      created_at timestamp DEFAULT now()
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS password_reset_tokens_token_hash_idx ON password_reset_tokens (token_hash);
+    CREATE INDEX IF NOT EXISTS password_reset_tokens_user_idx ON password_reset_tokens (user_type, user_id);
   `);
 
   const { rows: untagged } = await pool.query(

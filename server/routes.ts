@@ -20,12 +20,19 @@ import {
 } from "@shared/schema";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
-import { scrypt, randomBytes, timingSafeEqual } from "crypto";
+import { scrypt, randomBytes, timingSafeEqual, createHmac } from "crypto";
 import { promisify } from "util";
 import multer from "multer";
 import express from "express";
 import { uploadToSupabaseStorage } from "./lib/file-upload";
-import { notifyNewRegistration, getEmailConfigStatus, sendTestEmail } from "./lib/email";
+import {
+  notifyNewRegistration,
+  notifyRegistrationConfirmation,
+  notifySingerApproved,
+  notifyPasswordReset,
+  getEmailConfigStatus,
+  sendTestEmail,
+} from "./lib/email";
 import { eq, desc, and } from "drizzle-orm";
 
 const scryptAsync = promisify(scrypt);
@@ -51,6 +58,14 @@ async function comparePasswords(supplied: string, stored: string): Promise<boole
   const suppliedHash = (await scryptAsync(supplied, salt, 64)) as Buffer;
   return timingSafeEqual(storedHash, suppliedHash);
 }
+
+function hashResetToken(token: string): string {
+  const secret = process.env.SESSION_SECRET || "singer-search-secret-key";
+  return createHmac("sha256", secret).update(token).digest("hex");
+}
+
+const PASSWORD_RESET_GENERIC_MESSAGE =
+  "If an account exists for that email, password reset instructions have been sent.";
 
 function requireAdminAuth(req: Request, res: Response, next: NextFunction) {
   if (!req.session.adminAuthenticated) {
@@ -182,17 +197,23 @@ export async function registerRoutes(
       }
 
       const updated = await storage.getSinger(singer.id);
+      const displayName = `${updated!.first_name} ${updated!.last_name}`.trim();
       void notifyNewRegistration({
         userType: "singer",
         userId: updated!.id,
         email: updated!.email,
-        displayName: `${updated!.first_name} ${updated!.last_name}`.trim(),
+        displayName,
         city: updated!.city,
         state: updated!.state,
         detailLabel: "Voice type",
         detailValue: updated!.primary_voice_type,
         isFoundingMember: isFounding,
         registeredAt: updated!.created_at ?? new Date(),
+      });
+      void notifyRegistrationConfirmation({
+        userType: "singer",
+        email: updated!.email,
+        displayName,
       });
 
       const { password: _, ...safe } = updated!;
@@ -247,6 +268,11 @@ export async function registerRoutes(
         isFoundingMember: isFounding,
         registeredAt: org.created_at ?? new Date(),
       });
+      void notifyRegistrationConfirmation({
+        userType: "organization",
+        email: org.email,
+        displayName: org.organization_name,
+      });
 
       const { password: _, ...safe } = org;
       res.status(201).json(safe);
@@ -292,6 +318,126 @@ export async function registerRoutes(
       res.json(safe);
     } catch (error: any) {
       res.status(500).json({ message: error.message || "Login failed" });
+    }
+  });
+
+  app.post("/api/auth/forgot-password", async (req: Request, res: Response) => {
+    try {
+      const { email, userType } = req.body;
+      if (!email || !userType) {
+        return res.status(400).json({ message: "Email and userType are required" });
+      }
+      if (userType !== "singer" && userType !== "organization") {
+        return res.status(400).json({ message: "Invalid userType" });
+      }
+
+      const normalizedEmail = String(email).trim();
+      let user: { id: number; email: string; displayName: string } | undefined;
+
+      if (userType === "singer") {
+        const singer = await storage.getSingerByEmail(normalizedEmail);
+        if (singer) {
+          user = {
+            id: singer.id,
+            email: singer.email,
+            displayName: `${singer.first_name} ${singer.last_name}`.trim(),
+          };
+        }
+      } else {
+        const org = await storage.getOrganizationByEmail(normalizedEmail);
+        if (org) {
+          user = {
+            id: org.id,
+            email: org.email,
+            displayName: org.organization_name,
+          };
+        }
+      }
+
+      if (user && !normalizedEmail.toLowerCase().endsWith("@example.com")) {
+        const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+        const recentRequests = await storage.countRecentPasswordResetRequests(
+          userType,
+          user.id,
+          oneHourAgo,
+        );
+        if (recentRequests < 3) {
+          await storage.invalidatePasswordResetTokensForUser(userType, user.id);
+          const rawToken = randomBytes(32).toString("hex");
+          const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+          await storage.createPasswordResetToken({
+            tokenHash: hashResetToken(rawToken),
+            userType,
+            userId: user.id,
+            expiresAt,
+          });
+          void notifyPasswordReset({
+            userType,
+            email: user.email,
+            displayName: user.displayName,
+            resetToken: rawToken,
+          });
+        }
+      }
+
+      res.json({ message: PASSWORD_RESET_GENERIC_MESSAGE });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Failed to process request" });
+    }
+  });
+
+  app.get("/api/auth/reset-password/validate", async (req: Request, res: Response) => {
+    try {
+      const token = String(req.query.token || "");
+      const userType = String(req.query.userType || req.query.type || "");
+      if (!token || (userType !== "singer" && userType !== "organization")) {
+        return res.json({ valid: false });
+      }
+
+      const record = await storage.findValidPasswordResetToken(hashResetToken(token));
+      if (!record || record.user_type !== userType) {
+        return res.json({ valid: false });
+      }
+
+      res.json({ valid: true });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Validation failed" });
+    }
+  });
+
+  app.post("/api/auth/reset-password", async (req: Request, res: Response) => {
+    try {
+      const { token, password, userType } = req.body;
+      if (!token || !password || !userType) {
+        return res.status(400).json({ message: "Token, password, and userType are required" });
+      }
+      if (userType !== "singer" && userType !== "organization") {
+        return res.status(400).json({ message: "Invalid userType" });
+      }
+      if (String(password).length < 8) {
+        return res.status(400).json({ message: "Password must be at least 8 characters" });
+      }
+
+      const record = await storage.findValidPasswordResetToken(hashResetToken(String(token)));
+      if (!record || record.user_type !== userType) {
+        return res.status(400).json({ message: "Invalid or expired reset link" });
+      }
+
+      const hashedPassword = await hashPassword(String(password));
+      if (userType === "singer") {
+        const updated = await storage.updateSinger(record.user_id, { password: hashedPassword });
+        if (!updated) return res.status(404).json({ message: "Account not found" });
+      } else {
+        const updated = await storage.updateOrganization(record.user_id, { password: hashedPassword });
+        if (!updated) return res.status(404).json({ message: "Account not found" });
+      }
+
+      await storage.markPasswordResetTokenUsed(record.id);
+      await storage.invalidatePasswordResetTokensForUser(userType, record.user_id);
+
+      res.json({ message: "Password updated successfully" });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Failed to reset password" });
     }
   });
 
@@ -1271,6 +1417,10 @@ export async function registerRoutes(
       const singerId = parseInt(req.params.id as string);
       const singer = await storage.updateSinger(singerId, { admin_approved: true, admin_rejected: false });
       if (!singer) return res.status(404).json({ message: "Singer not found" });
+      void notifySingerApproved({
+        email: singer.email,
+        displayName: `${singer.first_name} ${singer.last_name}`.trim(),
+      });
       res.json({ message: "Singer approved", id: singer.id, admin_approved: singer.admin_approved, admin_rejected: singer.admin_rejected });
     } catch (error: any) {
       res.status(500).json({ message: error.message || "Failed to approve singer" });

@@ -53,7 +53,7 @@ import { PricingPage } from "./PricingPage";
 import { AboutPage } from "./AboutPage";
 import { TermsPage } from "./TermsPage";
 import { PrivacyPage } from "./PrivacyPage";
-import { SingerLogin, OrganizationLogin, SingerRegistration, OrgRegistration } from "./AuthPages";
+import { SingerLogin, OrganizationLogin, SingerRegistration, OrgRegistration, ResetPasswordPage } from "./AuthPages";
 import { BLANK_FILTERS, AlertBanner, AppFooter } from "./AppShared";
 // Assets
 import heroVideo from "./assets/hero-opera.mp4";
@@ -171,7 +171,8 @@ export default function App() {
       const path = window.location.pathname;
       if (path === "/terms") setView("terms");
       else if (path === "/privacy") setView("privacy");
-      else if (path === "/") setView(v => (v === "terms" || v === "privacy") ? "landing" : v);
+      else if (path === "/reset-password") setView("resetPassword");
+      else if (path === "/") setView(v => (["terms", "privacy", "resetPassword"].includes(v)) ? "landing" : v);
     };
     syncFromUrl();
     window.addEventListener("popstate", syncFromUrl);
@@ -179,7 +180,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const onLegalPage = ["/terms", "/privacy"].includes(window.location.pathname);
+    const onLegalPage = ["/terms", "/privacy", "/reset-password"].includes(window.location.pathname);
     fetch("/api/auth/me", { credentials: "include" })
       .then(res => res.ok ? res.json() : null)
       .then(data => {
@@ -404,6 +405,8 @@ export default function App() {
         return <><TermsPage /><AppFooter /></>;
       case "privacy":
         return <><PrivacyPage /><AppFooter /></>;
+      case "resetPassword":
+        return <ResetPasswordPage showAlert={showAlert} />;
       case "singerLogin":
         return <SingerLogin showAlert={showAlert} setShowWelcome={setShowWelcome} />;
       case "organizationLogin":

@@ -13,6 +13,29 @@ export function SingerLogin({ showAlert, setShowWelcome }) {
     const [showForgot, setShowForgot] = useState(false);
     const [forgotEmail, setForgotEmail] = useState("");
     const [forgotSubmitted, setForgotSubmitted] = useState(false);
+    const [forgotLoading, setForgotLoading] = useState(false);
+
+    const handleForgotSubmit = async () => {
+      if (!forgotEmail) return;
+      setForgotLoading(true);
+      try {
+        const res = await fetch("/api/auth/forgot-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: forgotEmail, userType: "singer" }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          showAlert(data.message || "Request failed", "error");
+          return;
+        }
+        setForgotSubmitted(true);
+      } catch {
+        showAlert("Network error. Please try again.", "error");
+      } finally {
+        setForgotLoading(false);
+      }
+    };
 
     const handleLogin = async (e) => {
       e.preventDefault();
@@ -120,9 +143,8 @@ export function SingerLogin({ showAlert, setShowWelcome }) {
                 {forgotSubmitted ? (
                   <div className="bg-blue-50 border border-blue-200 rounded-md p-3" data-testid="forgot-password-confirmation">
                     <p className="text-sm text-blue-800">
-                      Password reset is coming soon. Please contact support at{" "}
-                      <a href="mailto:support@singersearch.net" className="font-semibold underline">support@singersearch.net</a>{" "}
-                      for assistance.
+                      If an account exists for that email, we sent password reset instructions.
+                      Check your inbox and spam folder.
                     </p>
                   </div>
                 ) : (
@@ -138,12 +160,12 @@ export function SingerLogin({ showAlert, setShowWelcome }) {
                     <div className="flex gap-2">
                       <button
                         type="button"
-                        onClick={() => setForgotSubmitted(true)}
-                        disabled={!forgotEmail}
+                        onClick={handleForgotSubmit}
+                        disabled={!forgotEmail || forgotLoading}
                         className="flex-1 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
                         data-testid="button-submit-forgot"
                       >
-                        Submit
+                        {forgotLoading ? "Sending..." : "Submit"}
                       </button>
                       <button
                         type="button"
@@ -178,6 +200,32 @@ export function OrganizationLogin({ showAlert, setShowWelcome }) {
     const [email, setEmail] = useState("sarah.mitchell@metopera.org");
     const [password, setPassword] = useState("password123");
     const [loading, setLoading] = useState(false);
+    const [showForgot, setShowForgot] = useState(false);
+    const [forgotEmail, setForgotEmail] = useState("");
+    const [forgotSubmitted, setForgotSubmitted] = useState(false);
+    const [forgotLoading, setForgotLoading] = useState(false);
+
+    const handleForgotSubmit = async () => {
+      if (!forgotEmail) return;
+      setForgotLoading(true);
+      try {
+        const res = await fetch("/api/auth/forgot-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: forgotEmail, userType: "organization" }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          showAlert(data.message || "Request failed", "error");
+          return;
+        }
+        setForgotSubmitted(true);
+      } catch {
+        showAlert("Network error. Please try again.", "error");
+      } finally {
+        setForgotLoading(false);
+      }
+    };
 
     const handleLogin = async (e) => {
       e.preventDefault();
@@ -256,6 +304,16 @@ export function OrganizationLogin({ showAlert, setShowWelcome }) {
                     className="appearance-none block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   />
                 </div>
+                <div className="mt-2 text-right">
+                  <button
+                    type="button"
+                    onClick={() => { setShowForgot(true); setForgotSubmitted(false); setForgotEmail(email || ""); }}
+                    className="text-xs font-medium text-blue-600 hover:text-blue-500"
+                    data-testid="link-forgot-password-org"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
               </div>
 
               <div>
@@ -268,6 +326,49 @@ export function OrganizationLogin({ showAlert, setShowWelcome }) {
                 </button>
               </div>
             </form>
+
+            {showForgot && (
+              <div className="mt-6 border-t border-slate-200 pt-6">
+                <h3 className="text-sm font-semibold text-slate-800 mb-2">Reset your password</h3>
+                {forgotSubmitted ? (
+                  <div className="bg-blue-50 border border-blue-200 rounded-md p-3" data-testid="forgot-password-confirmation-org">
+                    <p className="text-sm text-blue-800">
+                      If an account exists for that email, we sent password reset instructions.
+                      Check your inbox and spam folder.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <input
+                      type="email"
+                      placeholder="your@email.com"
+                      value={forgotEmail}
+                      onChange={(e) => setForgotEmail(e.target.value)}
+                      className="appearance-none block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      data-testid="input-forgot-email-org"
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={handleForgotSubmit}
+                        disabled={!forgotEmail || forgotLoading}
+                        className="flex-1 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+                        data-testid="button-submit-forgot-org"
+                      >
+                        {forgotLoading ? "Sending..." : "Submit"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowForgot(false)}
+                        className="py-2 px-4 border border-slate-300 rounded-md text-sm font-medium text-slate-700 bg-white hover:bg-slate-50"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="mt-6 text-center">
               <p className="text-sm text-slate-600">
@@ -283,6 +384,142 @@ export function OrganizationLogin({ showAlert, setShowWelcome }) {
     );
 
 }
+
+export function ResetPasswordPage({ showAlert }) {
+  const { setView } = useAppContext();
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get("token") || "";
+  const userType = params.get("type") === "organization" ? "organization" : "singer";
+  const [validating, setValidating] = useState(true);
+  const [tokenValid, setTokenValid] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    if (!token) {
+      setValidating(false);
+      setTokenValid(false);
+      return;
+    }
+    fetch(`/api/auth/reset-password/validate?token=${encodeURIComponent(token)}&userType=${userType}`)
+      .then(res => res.json())
+      .then(data => setTokenValid(Boolean(data.valid)))
+      .catch(() => setTokenValid(false))
+      .finally(() => setValidating(false));
+  }, [token, userType]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (password.length < 8) {
+      showAlert("Password must be at least 8 characters", "error");
+      return;
+    }
+    if (password !== confirmPassword) {
+      showAlert("Passwords do not match", "error");
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, password, userType }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showAlert(data.message || "Reset failed", "error");
+        return;
+      }
+      setSuccess(true);
+    } catch {
+      showAlert("Network error. Please try again.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loginView = userType === "organization" ? "organizationLogin" : "singerLogin";
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 className="text-center text-3xl font-extrabold text-slate-900">Reset your password</h2>
+      </div>
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          {validating ? (
+            <p className="text-sm text-slate-600 text-center">Checking your reset link...</p>
+          ) : success ? (
+            <div className="space-y-4 text-center">
+              <p className="text-sm text-green-800 bg-green-50 border border-green-200 rounded-md p-3" data-testid="reset-password-success">
+                Your password has been updated. You can sign in with your new password.
+              </p>
+              <button
+                onClick={() => { window.history.replaceState({}, "", "/"); setView(loginView); }}
+                className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+                data-testid="button-go-to-login"
+              >
+                Go to sign in
+              </button>
+            </div>
+          ) : !tokenValid ? (
+            <div className="space-y-4 text-center">
+              <p className="text-sm text-red-800 bg-red-50 border border-red-200 rounded-md p-3" data-testid="reset-password-invalid">
+                This reset link is invalid or has expired. Request a new one from the sign-in page.
+              </p>
+              <button
+                onClick={() => { window.history.replaceState({}, "", "/"); setView(loginView); }}
+                className="w-full py-2 px-4 border border-slate-300 rounded-md text-sm font-medium text-slate-700 bg-white hover:bg-slate-50"
+              >
+                Back to sign in
+              </button>
+            </div>
+          ) : (
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              <div>
+                <label htmlFor="new-password" className="block text-sm font-medium text-slate-700">New password</label>
+                <input
+                  id="new-password"
+                  type="password"
+                  required
+                  minLength={8}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="mt-1 appearance-none block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  data-testid="input-new-password"
+                />
+              </div>
+              <div>
+                <label htmlFor="confirm-password" className="block text-sm font-medium text-slate-700">Confirm password</label>
+                <input
+                  id="confirm-password"
+                  type="password"
+                  required
+                  minLength={8}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="mt-1 appearance-none block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  data-testid="input-confirm-password"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+                data-testid="button-reset-password"
+              >
+                {loading ? "Updating..." : "Update password"}
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function SingerRegistration({ showAlert, setShowWelcome }) {
   const { setCurrentUser, setView } = useAppContext();
 
