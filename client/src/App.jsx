@@ -172,7 +172,9 @@ export default function App() {
       if (path === "/terms") setView("terms");
       else if (path === "/privacy") setView("privacy");
       else if (path === "/reset-password") setView("resetPassword");
-      else if (path === "/") setView(v => (["terms", "privacy", "resetPassword"].includes(v)) ? "landing" : v);
+      else if (path === "/login/singer") setView("singerLogin");
+      else if (path === "/login/organization") setView("organizationLogin");
+      else if (path === "/") setView(v => (["terms", "privacy", "resetPassword", "singerLogin", "organizationLogin"].includes(v)) ? "landing" : v);
     };
     syncFromUrl();
     window.addEventListener("popstate", syncFromUrl);
@@ -180,17 +182,17 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const onLegalPage = ["/terms", "/privacy", "/reset-password"].includes(window.location.pathname);
+    const onPublicPage = ["/terms", "/privacy", "/reset-password", "/login/singer", "/login/organization"].includes(window.location.pathname);
     fetch("/api/auth/me", { credentials: "include" })
       .then(res => res.ok ? res.json() : null)
       .then(data => {
         if (data) {
           if (data.userType === "singer") {
             setCurrentUser({ type: "singer", data });
-            if (!onLegalPage) setView("singerDashboard");
+            if (!onPublicPage) setView("singerDashboard");
           } else if (data.userType === "organization") {
             setCurrentUser({ type: "organization", data });
-            if (!onLegalPage) setView("orgDashboard");
+            if (!onPublicPage) setView("orgDashboard");
           }
         }
       })

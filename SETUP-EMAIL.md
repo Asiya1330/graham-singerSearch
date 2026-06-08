@@ -197,6 +197,53 @@ With `onboarding@resend.dev`, Resend only **delivers** to the email you used to 
 3. Set `SITE_URL` to your Vercel URL so reset links work.
 4. Confirm sends in Railway logs (`resendId=…`) and Resend Dashboard → Emails.
 
+## Re-testing with the same email address
+
+Because registration requires a **unique email**, you must remove the test account before registering again with `gfarhan18@gmail.com`.
+
+### Option A — Admin dashboard (easiest)
+
+1. Log in as **Admin**
+2. Find the test singer → **Delete**
+3. Find the test organization → **Delete** (Admin → Organizations)
+4. Register again to trigger registration emails
+
+### Option B — Supabase SQL
+
+Run in **Supabase → SQL Editor** (replace the email):
+
+```sql
+-- Delete test singer and related data
+DELETE FROM password_reset_tokens
+WHERE user_type = 'singer'
+  AND user_id IN (SELECT id FROM singers WHERE email = 'gfarhan18@gmail.com');
+
+DELETE FROM singer_roles WHERE singer_id IN (SELECT id FROM singers WHERE email = 'gfarhan18@gmail.com');
+DELETE FROM singer_works WHERE singer_id IN (SELECT id FROM singers WHERE email = 'gfarhan18@gmail.com');
+DELETE FROM availabilities WHERE singer_id IN (SELECT id FROM singers WHERE email = 'gfarhan18@gmail.com');
+DELETE FROM singers WHERE email = 'gfarhan18@gmail.com';
+
+-- Delete test organization
+DELETE FROM password_reset_tokens
+WHERE user_type = 'organization'
+  AND user_id IN (SELECT id FROM organizations WHERE email = 'gfarhan18@gmail.com');
+
+DELETE FROM organizations WHERE email = 'gfarhan18@gmail.com';
+```
+
+### Re-test without deleting
+
+| Email type | How to re-trigger |
+|------------|-------------------|
+| Password reset | Use **Forgot password** again (max 3 requests/hour per account) |
+| Singer approved | Admin → **Reject**, then **Approve** again |
+| Admin test email | `POST /api/admin/email/test` anytime |
+| Registration emails | Must delete account first (same email) |
+
+You do **not** need to clear Resend, sessions, or Railway env vars between tests.
+
+---
+
 ## Full test checklist
 
 1. `GET /api/admin/email/status` → `ready: true`
@@ -243,3 +290,10 @@ server/lib/email/
 ```
 
 Hooks live in `server/routes.ts` on registration, admin approve, and `/api/auth/forgot-password`.
+
+Email links use `SITE_URL` paths:
+
+- `/login/singer` — singer sign-in
+- `/login/organization` — organization sign-in
+- `/reset-password?token=...&type=singer|organization` — password reset
+- Logo image: `{SITE_URL}/singer-search-logo.png` (from `client/public/`)

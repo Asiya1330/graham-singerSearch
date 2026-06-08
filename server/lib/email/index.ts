@@ -13,6 +13,7 @@ import {
 import { buildRegistrationConfirmationEmail } from "./templates/registration-confirmation";
 import { buildSingerApprovedEmail } from "./templates/singer-approved";
 import { buildPasswordResetEmail } from "./templates/password-reset";
+import { wrapEmailHtml, emailButton } from "./templates/base-layout";
 
 export type { NewRegistrationDetails, EmailConfigStatus };
 export { getEmailConfigStatus, getSiteUrl, logEmailConfigStatus };
@@ -193,13 +194,27 @@ export async function notifyPasswordReset(details: {
 }
 
 export async function sendTestEmail(): Promise<EmailSendResult> {
-  const status = getEmailConfigStatus();
   const timestamp = new Date().toISOString();
+  const siteUrl = getSiteUrl();
+
+  const html = wrapEmailHtml({
+    preheader: "Singer Search test email — Resend is configured correctly.",
+    title: "Test email",
+    bodyHtml: `
+      <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#475569;">
+        This is a test email from Singer Search sent at <strong>${timestamp}</strong>.
+      </p>
+      <p style="margin:0;font-size:15px;line-height:1.6;color:#475569;">
+        If you received this message with the logo and footer intact, Resend is configured correctly.
+      </p>
+      ${emailButton(siteUrl, "Visit Singer Search")}
+    `,
+  });
 
   return sendAdminEmail(
     "Singer Search — test email",
-    `<p>This is a test email from Singer Search sent at <strong>${timestamp}</strong>.</p><p>If you received this, Resend is configured correctly on Railway.</p>`,
-    `This is a test email from Singer Search sent at ${timestamp}. If you received this, Resend is configured correctly on Railway.`,
+    html,
+    `This is a test email from Singer Search sent at ${timestamp}. If you received this, Resend is configured correctly. ${siteUrl}`,
     "test email",
   );
 }
