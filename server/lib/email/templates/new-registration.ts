@@ -1,3 +1,6 @@
+import { emailButton, emailDetailTable, escapeHtml, wrapEmailHtml } from "./base-layout";
+import { getEmailUrls } from "../config";
+
 export type NewRegistrationDetails = {
   userType: "singer" | "organization";
   userId: number;
@@ -32,33 +35,40 @@ export function buildNewRegistrationEmail(details: NewRegistrationDetails) {
   const foundingStatus = details.isFoundingMember
     ? "Yes (Founding Member)"
     : "No";
+  const urls = getEmailUrls();
 
-  const detailRow =
-    details.detailLabel && details.detailValue
-      ? `<tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;color:#64748b;">${details.detailLabel}</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">${details.detailValue}</td></tr>`
-      : "";
+  const rows = [
+    { label: "User type", value: userTypeLabel },
+    { label: "Name", value: details.displayName },
+    { label: "Email", value: details.email },
+    ...(details.detailLabel && details.detailValue
+      ? [{ label: details.detailLabel, value: details.detailValue }]
+      : []),
+    { label: "Location", value: location },
+    { label: "Founding member", value: foundingStatus },
+    { label: "User ID", value: String(details.userId) },
+    { label: "Registered at", value: formatTimestamp(details.registeredAt) },
+  ];
+
+  const bodyHtml = `
+    <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#475569;">
+      A new ${escapeHtml(userTypeLabel.toLowerCase())} registration was submitted on Singer Search.
+      Review the details below in the admin dashboard.
+    </p>
+    ${emailDetailTable(rows)}
+    ${emailButton(urls.home, "Open admin dashboard")}
+  `;
+
+  const html = wrapEmailHtml({
+    preheader: `New ${userTypeLabel} registration from ${details.displayName}.`,
+    title: `New ${userTypeLabel} registration`,
+    bodyHtml,
+  });
 
   const detailText =
     details.detailLabel && details.detailValue
       ? `${details.detailLabel}: ${details.detailValue}\n`
       : "";
-
-  const html = `
-    <div style="font-family:Arial,sans-serif;max-width:560px;color:#0f172a;">
-      <h2 style="margin:0 0 16px;">New ${userTypeLabel} Registration</h2>
-      <p style="color:#475569;margin:0 0 20px;">A new user signed up on Singer Search.</p>
-      <table style="width:100%;border-collapse:collapse;font-size:14px;">
-        <tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;color:#64748b;">User type</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">${userTypeLabel}</td></tr>
-        <tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;color:#64748b;">Name</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">${details.displayName}</td></tr>
-        <tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;color:#64748b;">Email</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">${details.email}</td></tr>
-        ${detailRow}
-        <tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;color:#64748b;">Location</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">${location}</td></tr>
-        <tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;color:#64748b;">Founding member</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">${foundingStatus}</td></tr>
-        <tr><td style="padding:8px 12px;color:#64748b;">User ID</td><td style="padding:8px 12px;">${details.userId}</td></tr>
-        <tr><td style="padding:8px 12px;color:#64748b;">Registered at</td><td style="padding:8px 12px;">${formatTimestamp(details.registeredAt)}</td></tr>
-      </table>
-    </div>
-  `.trim();
 
   const text = [
     `New ${userTypeLabel} Registration`,
@@ -70,6 +80,8 @@ export function buildNewRegistrationEmail(details: NewRegistrationDetails) {
     `Founding member: ${foundingStatus}`,
     `User ID: ${details.userId}`,
     `Registered at: ${formatTimestamp(details.registeredAt)}`,
+    "",
+    urls.home,
   ]
     .filter(Boolean)
     .join("\n");
