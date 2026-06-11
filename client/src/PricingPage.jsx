@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { CheckCircle, Zap } from "lucide-react";
 import { useAppContext } from "./AppContext";
+import { navigateToView } from "./lib/nav";
 
 export function PricingPage({ showAlert }) {
   const { currentUser, setCurrentUser, setView } = useAppContext();
@@ -119,7 +120,7 @@ export function PricingPage({ showAlert }) {
               <button 
                 onClick={async () => {
                     if (!currentUser) {
-                        setView(isSinger ? "singerLogin" : "organizationLogin");
+                        navigateToView(setView, isSinger ? "singerLogin" : "organizationLogin");
                         return;
                     }
 
