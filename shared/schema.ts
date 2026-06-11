@@ -348,6 +348,21 @@ export const insertRepertoireSuggestionSchema = createInsertSchema(repertoireSug
 export type InsertRepertoireSuggestion = z.infer<typeof insertRepertoireSuggestionSchema>;
 export type RepertoireSuggestion = typeof repertoireSuggestions.$inferSelect;
 
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: serial("id").primaryKey(),
+  token_hash: text("token_hash").notNull(),
+  user_type: text("user_type").notNull(),
+  user_id: integer("user_id").notNull(),
+  expires_at: timestamp("expires_at", { mode: "date" }).notNull(),
+  used_at: timestamp("used_at", { mode: "date" }),
+  created_at: timestamp("created_at", { mode: "date" }).defaultNow(),
+}, (table) => ({
+  tokenHashIdx: uniqueIndex("password_reset_tokens_token_hash_idx").on(table.token_hash),
+  userIdx: index("password_reset_tokens_user_idx").on(table.user_type, table.user_id),
+}));
+
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+
 export const sessions = pgTable("sessions", {
   sid: varchar("sid").primaryKey(),
   sess: json("sess").notNull(),

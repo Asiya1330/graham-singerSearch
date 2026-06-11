@@ -1,8 +1,15 @@
 # Email notifications (Resend)
 
-Singer Search sends you an admin email when a real user registers as a **Singer** or **Organization**. Email runs on the **Railway API** only (not Vercel).
+Singer Search sends transactional email via Resend on the **Railway API** only (not Vercel).
 
-Registration always succeeds even if email fails — failures are logged on the server.
+| Email | Recipient | Trigger |
+|-------|-----------|---------|
+| Admin new registration | `ADMIN_NOTIFICATION_EMAIL` | Singer or org registers |
+| Registration confirmation | User's email | Singer or org registers |
+| Singer approved | Singer's email | Admin approves singer profile |
+| Password reset | User's email | Forgot password (singer or org) |
+
+Registration and password reset always succeed even if email fails — failures are logged on the server.
 
 Demo/seed users with `@example.com` addresses never trigger notifications.
 
@@ -49,19 +56,28 @@ If Resend was created with a different email, either:
 - change `ADMIN_NOTIFICATION_EMAIL` to match your Resend account email, **or**
 - add your own domain (below) so you can send to any address.
 
-### Production: use a domain you own
+### Production: verified domain (singersearch.com)
 
-When you have a domain (e.g. from Namecheap, Google Domains, Cloudflare):
+Once the client has verified `singersearch.com` in Resend, you can email **any recipient** (Gmail, Outlook, etc.) — not just the Resend signup inbox.
 
-1. Resend → **Domains** → **Add Domain** — enter **your** domain (e.g. `singersearch.net`), **not** `gmail.com`.
-2. Add the DNS records Resend shows (SPF, DKIM) at your DNS provider.
-3. Wait until status is **Verified**.
-4. Update Railway:
-   ```env
-   RESEND_FROM_EMAIL=Singer Search <notifications@yourdomain.com>
-   ```
+Update **Railway** (and local `.env` for testing):
 
-After that, you can send to `gfarhan18@gmail.com` (or any address) without the sandbox restriction.
+```env
+RESEND_API_KEY=re_client_production_key
+RESEND_FROM_EMAIL=Singer Search <notifications@singersearch.com>
+ADMIN_NOTIFICATION_EMAIL=admin@singersearch.com
+SITE_URL=https://singersearch.com
+SUPPORT_EMAIL=support@singersearch.com
+EMAIL_NOTIFICATIONS_ENABLED=true
+```
+
+Notes:
+- `RESEND_FROM_EMAIL` must use an address on the **verified** domain (check Resend → Domains for the exact subdomain, e.g. `notifications@` or `hello@`).
+- `SITE_URL` must match where users open the site (custom domain or Vercel URL).
+- `ADMIN_NOTIFICATION_EMAIL` can be any inbox you want for admin alerts.
+- Logo in emails loads from `{SITE_URL}/singer-search-logo.png` — ensure that URL works after Vercel deploy.
+
+Redeploy Railway after saving variables. No code deploy is required beyond env updates (defaults in code fall back to `singersearch.com` if `SITE_URL` is unset).
 
 ---
 
@@ -73,6 +89,7 @@ In [Railway](https://railway.app) → your API service → **Variables**, add:
 RESEND_API_KEY=re_your_api_key_here
 RESEND_FROM_EMAIL=onboarding@resend.dev
 ADMIN_NOTIFICATION_EMAIL=gfarhan18@gmail.com
+SITE_URL=https://graham-singer-search.vercel.app
 ```
 
 Optional:
@@ -80,6 +97,8 @@ Optional:
 ```env
 EMAIL_NOTIFICATIONS_ENABLED=true
 ```
+
+`SITE_URL` is your public Vercel URL (or custom domain later). It is used in registration confirmation emails and password-reset links.
 
 Set `EMAIL_NOTIFICATIONS_ENABLED=false` to disable without removing the API key.
 
@@ -97,6 +116,7 @@ Add the same variables to your local `.env` (copy from `.env.example`):
 RESEND_API_KEY=re_your_api_key_here
 RESEND_FROM_EMAIL=onboarding@resend.dev
 ADMIN_NOTIFICATION_EMAIL=gfarhan18@gmail.com
+SITE_URL=http://localhost:5000
 ```
 
 If `RESEND_API_KEY` is unset, the app starts normally and logs:
@@ -177,14 +197,76 @@ For a full test without admin session, use Railway logs after registration — t
 
 ---
 
-## What each email includes
+## Sandbox testing (no custom domain)
+
+With `onboarding@resend.dev`, Resend only **delivers** to the email you used to sign up for Resend. To test all flows:
+
+1. Set `ADMIN_NOTIFICATION_EMAIL` to your Resend account email (e.g. `gfarhan18@gmail.com`).
+2. Register test singer/org accounts using **that same email**.
+3. Set `SITE_URL` to your Vercel URL so reset links work.
+4. Confirm sends in Railway logs (`resendId=…`) and Resend Dashboard → Emails.
+
+## Re-testing with the same email address
+
+Because registration requires a **unique email**, you must remove the test account before registering again with `gfarhan18@gmail.com`.
+
+### Option A — Admin dashboard (easiest)
+
+1. Log in as **Admin**
+2. Find the test singer → **Delete**
+3. Find the test organization → **Delete** (Admin → Organizations)
+4. Register again to trigger registration emails
+
+### Option B — Supabase SQL
+
+Run in **Supabase → SQL Editor** (replace the email):
+
+```sql
+-- Delete test singer and related data
+DELETE FROM password_reset_tokens
+WHERE user_type = 'singer'
+  AND user_id IN (SELECT id FROM singers WHERE email = 'gfarhan18@gmail.com');
+
+DELETE FROM singer_roles WHERE singer_id IN (SELECT id FROM singers WHERE email = 'gfarhan18@gmail.com');
+DELETE FROM singer_works WHERE singer_id IN (SELECT id FROM singers WHERE email = 'gfarhan18@gmail.com');
+DELETE FROM availabilities WHERE singer_id IN (SELECT id FROM singers WHERE email = 'gfarhan18@gmail.com');
+DELETE FROM singers WHERE email = 'gfarhan18@gmail.com';
+
+-- Delete test organization
+DELETE FROM password_reset_tokens
+WHERE user_type = 'organization'
+  AND user_id IN (SELECT id FROM organizations WHERE email = 'gfarhan18@gmail.com');
+
+DELETE FROM organizations WHERE email = 'gfarhan18@gmail.com';
+```
+
+### Re-test without deleting
+
+| Email type | How to re-trigger |
+|------------|-------------------|
+| Password reset | Use **Forgot password** again (max 3 requests/hour per account) |
+| Singer approved | Admin → **Reject**, then **Approve** again |
+| Admin test email | `POST /api/admin/email/test` anytime |
+| Registration emails | Must delete account first (same email) |
+
+You do **not** need to clear Resend, sessions, or Railway env vars between tests.
+
+---
+
+## Full test checklist
+
+1. `GET /api/admin/email/status` → `ready: true`
+2. `POST /api/admin/email/test` → email in inbox
+3. Register singer → user confirmation + admin alert
+4. Register org → user confirmation + admin alert
+5. Admin approve singer → approval email
+6. Forgot password (singer + org) → reset link → new password → login
+
+## What the admin registration email includes
 
 - User type (Singer / Organization)
-- Name
-- Email
-- Voice type or organization type
-- City / state
-- Founding member status
+- Name, email, voice type or org type
+- City / state, founding member status
 - User ID and registration timestamp (UTC)
 
 ---
@@ -206,10 +288,21 @@ For a full test without admin session, use Railway logs after registration — t
 
 ```
 server/lib/email/
-  index.ts                    # notifyNewRegistration()
-  config.ts                   # env helpers
-  client.ts                   # Resend client
-  templates/new-registration.ts
+  index.ts                              # send helpers + notify*()
+  config.ts                             # env helpers + getSiteUrl()
+  client.ts                             # Resend client
+  templates/base-layout.ts
+  templates/new-registration.ts         # admin alert
+  templates/registration-confirmation.ts
+  templates/singer-approved.ts
+  templates/password-reset.ts
 ```
 
-Hooks live in `server/routes.ts` on `POST /api/auth/register/singer` and `POST /api/auth/register/organization`.
+Hooks live in `server/routes.ts` on registration, admin approve, and `/api/auth/forgot-password`.
+
+Email links use `SITE_URL` paths:
+
+- `/login/singer` — singer sign-in
+- `/login/organization` — organization sign-in
+- `/reset-password?token=...&type=singer|organization` — password reset
+- Logo image: `{SITE_URL}/singer-search-logo.png` (from `client/public/`)
