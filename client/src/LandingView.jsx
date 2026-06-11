@@ -8,6 +8,7 @@ import logo3 from "./assets/logos/logo_3.png";
 import logo4 from "./assets/logos/logo_4.png";
 import { useAppContext } from "./AppContext";
 import { FeaturedSingers } from "./pages/home";
+import { APP_ROUTES, navClick, navigateToView } from "./lib/nav";
 
 export function LandingView({ setAdminMode }) {
   const { setView } = useAppContext();
@@ -29,7 +30,7 @@ export function LandingView({ setAdminMode }) {
       })();
     }, []);
 
-    const handleHeroSearch = () => setView("organizationLogin");
+    const handleHeroSearch = () => navigateToView(setView, "organizationLogin");
 
     // Hidden admin keyboard trigger: typing "admin" within 2s navigates to admin login.
     React.useEffect(() => {
@@ -72,7 +73,7 @@ export function LandingView({ setAdminMode }) {
         <header className="fixed top-0 left-0 right-0 z-50 bg-[#121212]/95 backdrop-blur-sm border-b border-white/5 h-11 flex items-center">
           <div className="max-w-7xl mx-auto px-6 w-full flex items-center justify-between">
             <div className="flex items-center gap-8">
-              <button onClick={() => setView("landing")} className="flex-shrink-0">
+              <button onClick={() => navigateToView(setView, "landing")} className="flex-shrink-0">
                 <img src={singerSearchLogo} alt="SingerSearch" className="h-8 object-contain brightness-0 invert" />
               </button>
               <nav className="hidden md:flex items-center gap-6">
@@ -81,18 +82,22 @@ export function LandingView({ setAdminMode }) {
               </nav>
             </div>
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => setView("singerLogin")}
+              <a
+                href={APP_ROUTES.singerLogin}
+                onClick={navClick(setView, "singerLogin")}
                 className="border border-white/20 hover:border-white/40 text-white/60 hover:text-white text-xs font-medium px-4 py-1.5 rounded transition-colors"
+                data-testid="link-nav-singer-login"
               >
                 Singer Login
-              </button>
-              <button
-                onClick={() => setView("organizationLogin")}
+              </a>
+              <a
+                href={APP_ROUTES.organizationLogin}
+                onClick={navClick(setView, "organizationLogin")}
                 className="bg-[#3B82F6] hover:bg-blue-500 text-white text-xs font-bold px-4 py-1.5 rounded transition-colors"
+                data-testid="link-nav-org-login"
               >
                 Organization Login
-              </button>
+              </a>
             </div>
           </div>
         </header>
@@ -208,9 +213,13 @@ export function LandingView({ setAdminMode }) {
 
               <p className="text-white/25 text-xs font-mono">
                 Singer?{" "}
-                <button onClick={() => setView("singerLogin")} className="text-[#3B82F6] hover:text-blue-400 transition-colors">
+                <a
+                  href={APP_ROUTES.singerRegister}
+                  onClick={navClick(setView, "singerRegister")}
+                  className="text-[#3B82F6] hover:text-blue-400 transition-colors"
+                >
                   Create your profile →
-                </button>
+                </a>
                 {"  ·  "}
                 Search is free. Confidence data requires a Pro subscription.
               </p>
@@ -305,18 +314,20 @@ export function LandingView({ setAdminMode }) {
               <p className="text-white/35 text-sm font-mono">Search is free. Confidence and speed are worth paying for.</p>
             </div>
             <div className="flex gap-3">
-              <button
-                onClick={() => setView("organizationLogin")}
+              <a
+                href={APP_ROUTES.organizationLogin}
+                onClick={navClick(setView, "organizationLogin")}
                 className="bg-[#3B82F6] hover:bg-blue-500 text-white font-bold px-7 py-2.5 rounded text-sm transition-colors flex items-center gap-2"
               >
                 <Search className="w-4 h-4" /> Search Database
-              </button>
-              <button
-                onClick={() => setView("singerLogin")}
+              </a>
+              <a
+                href={APP_ROUTES.singerLogin}
+                onClick={navClick(setView, "singerLogin")}
                 className="border border-white/15 text-white/50 hover:text-white hover:border-white/30 font-medium px-7 py-2.5 rounded text-sm transition-colors"
               >
                 Singer Portal
-              </button>
+              </a>
             </div>
           </div>
         </div>

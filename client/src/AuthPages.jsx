@@ -3,6 +3,7 @@ import { Search, Users } from "lucide-react";
 import { useAppContext } from "./AppContext";
 import { US_STATES } from "./AppShared";
 import { useCityStateAutofill } from "./hooks/useCityStateAutofill";
+import { navigateToView } from "./lib/nav";
 
 export function SingerLogin({ showAlert, setShowWelcome }) {
   const { setCurrentUser, setView } = useAppContext();
@@ -71,7 +72,7 @@ export function SingerLogin({ showAlert, setShowWelcome }) {
           <h2 className="mt-6 text-center text-3xl font-extrabold text-slate-900">Sign in to your account</h2>
           <p className="mt-2 text-center text-sm text-slate-600">
             Or{" "}
-            <button onClick={() => setView("landing")} className="font-medium text-blue-600 hover:text-blue-500">
+            <button onClick={() => navigateToView(setView, "landing")} className="font-medium text-blue-600 hover:text-blue-500">
               return home
             </button>
           </p>
@@ -183,7 +184,7 @@ export function SingerLogin({ showAlert, setShowWelcome }) {
             <div className="mt-6 text-center">
               <p className="text-sm text-slate-600">
                 Need an account?{" "}
-                <button onClick={() => setView("singerRegister")} className="font-medium text-blue-600 hover:text-blue-500">
+                <button onClick={() => navigateToView(setView, "singerRegister")} className="font-medium text-blue-600 hover:text-blue-500">
                   Register
                 </button>
               </p>
@@ -261,7 +262,7 @@ export function OrganizationLogin({ showAlert, setShowWelcome }) {
           <h2 className="mt-6 text-center text-3xl font-extrabold text-slate-900">Organization Login</h2>
           <p className="mt-2 text-center text-sm text-slate-600">
             Or{" "}
-            <button onClick={() => setView("landing")} className="font-medium text-blue-600 hover:text-blue-500">
+            <button onClick={() => navigateToView(setView, "landing")} className="font-medium text-blue-600 hover:text-blue-500">
               return home
             </button>
           </p>
@@ -373,7 +374,7 @@ export function OrganizationLogin({ showAlert, setShowWelcome }) {
             <div className="mt-6 text-center">
               <p className="text-sm text-slate-600">
                 Need an account?{" "}
-                <button onClick={() => setView("orgRegister")} className="font-medium text-blue-600 hover:text-blue-500">
+                <button onClick={() => navigateToView(setView, "orgRegister")} className="font-medium text-blue-600 hover:text-blue-500">
                   Register
                 </button>
               </p>
@@ -457,7 +458,7 @@ export function ResetPasswordPage({ showAlert }) {
                 Your password has been updated. You can sign in with your new password.
               </p>
               <button
-                onClick={() => { window.history.replaceState({}, "", "/"); setView(loginView); }}
+                onClick={() => navigateToView(setView, loginView, { replace: true })}
                 className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
                 data-testid="button-go-to-login"
               >
@@ -470,7 +471,7 @@ export function ResetPasswordPage({ showAlert }) {
                 This reset link is invalid or has expired. Request a new one from the sign-in page.
               </p>
               <button
-                onClick={() => { window.history.replaceState({}, "", "/"); setView(loginView); }}
+                onClick={() => navigateToView(setView, loginView, { replace: true })}
                 className="w-full py-2 px-4 border border-slate-300 rounded-md text-sm font-medium text-slate-700 bg-white hover:bg-slate-50"
               >
                 Back to sign in
@@ -567,7 +568,7 @@ export function SingerRegistration({ showAlert, setShowWelcome }) {
           <h2 className="mt-6 text-center text-3xl font-extrabold text-slate-900">Create Singer Account</h2>
           <p className="mt-2 text-center text-sm text-slate-600">
             Already have an account?{" "}
-            <button onClick={() => setView("singerLogin")} className="font-medium text-blue-600 hover:text-blue-500">Sign in</button>
+            <button onClick={() => navigateToView(setView, "singerLogin")} className="font-medium text-blue-600 hover:text-blue-500">Sign in</button>
           </p>
         </div>
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -686,7 +687,7 @@ export function OrgRegistration({ showAlert, setShowWelcome }) {
           <h2 className="mt-6 text-center text-3xl font-extrabold text-slate-900">Register Organization</h2>
           <p className="mt-2 text-center text-sm text-slate-600">
             Already have an account?{" "}
-            <button onClick={() => setView("organizationLogin")} className="font-medium text-blue-600 hover:text-blue-500">Sign in</button>
+            <button onClick={() => navigateToView(setView, "organizationLogin")} className="font-medium text-blue-600 hover:text-blue-500">Sign in</button>
           </p>
         </div>
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
