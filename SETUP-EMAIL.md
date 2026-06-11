@@ -56,19 +56,28 @@ If Resend was created with a different email, either:
 - change `ADMIN_NOTIFICATION_EMAIL` to match your Resend account email, **or**
 - add your own domain (below) so you can send to any address.
 
-### Production: use a domain you own
+### Production: verified domain (singersearch.com)
 
-When you have a domain (e.g. from Namecheap, Google Domains, Cloudflare):
+Once the client has verified `singersearch.com` in Resend, you can email **any recipient** (Gmail, Outlook, etc.) — not just the Resend signup inbox.
 
-1. Resend → **Domains** → **Add Domain** — enter **your** domain (e.g. `singersearch.net`), **not** `gmail.com`.
-2. Add the DNS records Resend shows (SPF, DKIM) at your DNS provider.
-3. Wait until status is **Verified**.
-4. Update Railway:
-   ```env
-   RESEND_FROM_EMAIL=Singer Search <notifications@yourdomain.com>
-   ```
+Update **Railway** (and local `.env` for testing):
 
-After that, you can send to `gfarhan18@gmail.com` (or any address) without the sandbox restriction.
+```env
+RESEND_API_KEY=re_client_production_key
+RESEND_FROM_EMAIL=Singer Search <notifications@singersearch.com>
+ADMIN_NOTIFICATION_EMAIL=admin@singersearch.com
+SITE_URL=https://singersearch.com
+SUPPORT_EMAIL=support@singersearch.com
+EMAIL_NOTIFICATIONS_ENABLED=true
+```
+
+Notes:
+- `RESEND_FROM_EMAIL` must use an address on the **verified** domain (check Resend → Domains for the exact subdomain, e.g. `notifications@` or `hello@`).
+- `SITE_URL` must match where users open the site (custom domain or Vercel URL).
+- `ADMIN_NOTIFICATION_EMAIL` can be any inbox you want for admin alerts.
+- Logo in emails loads from `{SITE_URL}/singer-search-logo.png` — ensure that URL works after Vercel deploy.
+
+Redeploy Railway after saving variables. No code deploy is required beyond env updates (defaults in code fall back to `singersearch.com` if `SITE_URL` is unset).
 
 ---
 
