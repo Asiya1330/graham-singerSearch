@@ -55,6 +55,7 @@ import { TermsPage } from "./TermsPage";
 import { PrivacyPage } from "./PrivacyPage";
 import { SingerLogin, OrganizationLogin, SingerRegistration, OrgRegistration, ResetPasswordPage } from "./AuthPages";
 import { BLANK_FILTERS, AlertBanner, AppFooter } from "./AppShared";
+import { navigateToView, viewFromPath, PUBLIC_PATHS } from "./lib/nav";
 // Assets
 import heroVideo from "./assets/hero-opera.mp4";
 import singerBanner from "@assets/singer-banner_1771276151336.gif";
@@ -169,12 +170,16 @@ export default function App() {
   useEffect(() => {
     const syncFromUrl = () => {
       const path = window.location.pathname;
-      if (path === "/terms") setView("terms");
-      else if (path === "/privacy") setView("privacy");
-      else if (path === "/reset-password") setView("resetPassword");
-      else if (path === "/login/singer") setView("singerLogin");
-      else if (path === "/login/organization") setView("organizationLogin");
-      else if (path === "/") setView(v => (["terms", "privacy", "resetPassword", "singerLogin", "organizationLogin"].includes(v)) ? "landing" : v);
+      const matchedView = viewFromPath(path);
+      if (matchedView) {
+        setView(matchedView);
+      } else if (path === "/") {
+        setView((v) =>
+          ["terms", "privacy", "resetPassword", "singerLogin", "organizationLogin", "singerRegister", "orgRegister"].includes(v)
+            ? "landing"
+            : v,
+        );
+      }
     };
     syncFromUrl();
     window.addEventListener("popstate", syncFromUrl);
@@ -182,7 +187,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const onPublicPage = ["/terms", "/privacy", "/reset-password", "/login/singer", "/login/organization"].includes(window.location.pathname);
+    const onPublicPage = PUBLIC_PATHS.includes(window.location.pathname);
     fetch("/api/auth/me", { credentials: "include" })
       .then(res => res.ok ? res.json() : null)
       .then(data => {
@@ -305,7 +310,7 @@ export default function App() {
   const revealContact = async (singerId, type = "standard", cost = 1) => {
     if (!currentUser || currentUser.type !== "organization") {
       showAlert("Please log in as an organization to view contact information.", "error");
-      setView("orgLogin");
+      navigateToView(setView, "organizationLogin");
       return;
     }
     try {
