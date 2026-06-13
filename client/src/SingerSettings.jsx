@@ -414,7 +414,7 @@ export function SingerSettings() {
                     <span className={`px-3 py-1 rounded-full text-sm font-semibold ${planColor}`} data-testid="text-subscription-tier">
                       {planLabel}
                     </span>
-                    {isPro && <span className="text-sm text-slate-600">$4.99/month</span>}
+                    {isPro && <span className="text-sm text-slate-600">$9.99/month</span>}
                   </div>
                   {isFounding && (
                     <div className="bg-amber-50 border border-amber-200 rounded-lg p-3" data-testid="text-founding-info">
@@ -425,7 +425,7 @@ export function SingerSettings() {
                   {isPro && !isFounding && (
                     <div className="space-y-3">
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-3" data-testid="text-pro-info">
-                        <p className="text-sm text-blue-900 font-medium">You are on the Pro plan — $4.99/month</p>
+                        <p className="text-sm text-blue-900 font-medium">You are on the Pro plan — $9.99/month</p>
                         <p className="text-xs text-blue-700 mt-1">To manage your subscription contact <a href="mailto:support@singersearch.net" className="underline font-medium">support@singersearch.net</a></p>
                       </div>
                       <button
@@ -456,7 +456,7 @@ export function SingerSettings() {
                         className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
                         data-testid="button-upgrade-pro"
                       >
-                        Upgrade to Pro — $4.99/month
+                        Upgrade to Pro — $9.99/month
                       </button>
                       {profileMsg?.text?.startsWith("Online payments") && (
                         <p className="text-sm text-blue-700 bg-blue-50 border border-blue-200 rounded p-2" data-testid="text-upgrade-message">
