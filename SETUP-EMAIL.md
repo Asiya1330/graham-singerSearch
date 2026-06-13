@@ -40,7 +40,7 @@ Store it as `RESEND_API_KEY` on Railway (see step 4).
 | Role | Where it goes | Value |
 |------|----------------|-------|
 | **Sender (From)** | Railway env `RESEND_FROM_EMAIL` | `onboarding@resend.dev` (test only) |
-| **Recipient (To)** | Railway env `ADMIN_NOTIFICATION_EMAIL` | `gfarhan18@gmail.com` |
+| **Recipient (To)** | Railway env `ADMIN_NOTIFICATION_EMAIL` | `admin@your-domain.com` |
 
 Your Gmail address is only the **inbox that receives** notifications. It is **not** added in Resend → Domains.
 
@@ -48,7 +48,7 @@ Your Gmail address is only the **inbox that receives** notifications. It is **no
 
 Resend’s test sender is a **sandbox**. It can only deliver to the **email you used to sign up for Resend**.
 
-1. Sign up / log in to Resend with **gfarhan18@gmail.com** (same as `ADMIN_NOTIFICATION_EMAIL`).
+1. Sign up / log in to Resend with **admin@your-domain.com** (same as `ADMIN_NOTIFICATION_EMAIL`).
 2. Set Railway variables (step 4) and redeploy.
 3. Register a test user on the site — notifications should arrive at that Gmail inbox.
 
@@ -88,7 +88,7 @@ In [Railway](https://railway.app) → your API service → **Variables**, add:
 ```env
 RESEND_API_KEY=re_your_api_key_here
 RESEND_FROM_EMAIL=onboarding@resend.dev
-ADMIN_NOTIFICATION_EMAIL=gfarhan18@gmail.com
+ADMIN_NOTIFICATION_EMAIL=admin@your-domain.com
 SITE_URL=https://graham-singer-search.vercel.app
 ```
 
@@ -115,7 +115,7 @@ Add the same variables to your local `.env` (copy from `.env.example`):
 ```bash
 RESEND_API_KEY=re_your_api_key_here
 RESEND_FROM_EMAIL=onboarding@resend.dev
-ADMIN_NOTIFICATION_EMAIL=gfarhan18@gmail.com
+ADMIN_NOTIFICATION_EMAIL=admin@your-domain.com
 SITE_URL=http://localhost:5000
 ```
 
@@ -132,7 +132,7 @@ If `RESEND_API_KEY` is unset, the app starts normally and logs:
 After deploy, open **Railway → your service → Deployments → Logs** and look for one of:
 
 ```
-[email] Ready (startup) — from=onboarding@resend.dev to=gfarhan18@gmail.com key=re_xxxx…
+[email] Ready (startup) — from=onboarding@resend.dev to=admin@your-domain.com key=re_xxxx…
 ```
 
 or:
@@ -159,7 +159,7 @@ await fetch("/api/admin/email/test", { method: "POST", credentials: "include" })
 Expected status response:
 
 ```json
-{ "enabled": true, "ready": true, "issues": [], "fromEmail": "onboarding@resend.dev", "adminNotificationEmail": "gfarhan18@gmail.com", "apiKeySet": true, "apiKeyHint": "re_xxxx…" }
+{ "enabled": true, "ready": true, "issues": [], "fromEmail": "onboarding@resend.dev", "adminNotificationEmail": "admin@your-domain.com", "apiKeySet": true, "apiKeyHint": "re_xxxx…" }
 ```
 
 Expected test response on success:
@@ -181,7 +181,7 @@ If `ready` is `false`, the `issues` array tells you exactly what is missing on R
 [email] registration notification for someone@gmail.com succeeded — resendId=…
 ```
 
-3. Check **gfarhan18@gmail.com** (and spam).
+3. Check **admin@your-domain.com** (and spam).
 4. Check the **Resend dashboard → Emails** — an entry appears only after `succeeded` with a `resendId`.
 
 ### D. Direct curl against Railway (bypass Vercel)
@@ -189,7 +189,7 @@ If `ready` is `false`, the `issues` array tells you exactly what is missing on R
 Replace with your production Railway URL:
 
 ```bash
-curl -s "https://graham-singersearch-production.up.railway.app/api/admin/email/status" \
+curl -s "https://your-railway-service.up.railway.app/api/admin/email/status" \
   -H "Cookie: connect.sid=YOUR_SESSION_COOKIE"
 ```
 
@@ -201,14 +201,14 @@ For a full test without admin session, use Railway logs after registration — t
 
 With `onboarding@resend.dev`, Resend only **delivers** to the email you used to sign up for Resend. To test all flows:
 
-1. Set `ADMIN_NOTIFICATION_EMAIL` to your Resend account email (e.g. `gfarhan18@gmail.com`).
+1. Set `ADMIN_NOTIFICATION_EMAIL` to your Resend account email (e.g. `admin@your-domain.com`).
 2. Register test singer/org accounts using **that same email**.
 3. Set `SITE_URL` to your Vercel URL so reset links work.
 4. Confirm sends in Railway logs (`resendId=…`) and Resend Dashboard → Emails.
 
 ## Re-testing with the same email address
 
-Because registration requires a **unique email**, you must remove the test account before registering again with `gfarhan18@gmail.com`.
+Because registration requires a **unique email**, you must remove the test account before registering again with `admin@your-domain.com`.
 
 ### Option A — Admin dashboard (easiest)
 
@@ -225,19 +225,19 @@ Run in **Supabase → SQL Editor** (replace the email):
 -- Delete test singer and related data
 DELETE FROM password_reset_tokens
 WHERE user_type = 'singer'
-  AND user_id IN (SELECT id FROM singers WHERE email = 'gfarhan18@gmail.com');
+  AND user_id IN (SELECT id FROM singers WHERE email = 'admin@your-domain.com');
 
-DELETE FROM singer_roles WHERE singer_id IN (SELECT id FROM singers WHERE email = 'gfarhan18@gmail.com');
-DELETE FROM singer_works WHERE singer_id IN (SELECT id FROM singers WHERE email = 'gfarhan18@gmail.com');
-DELETE FROM availabilities WHERE singer_id IN (SELECT id FROM singers WHERE email = 'gfarhan18@gmail.com');
-DELETE FROM singers WHERE email = 'gfarhan18@gmail.com';
+DELETE FROM singer_roles WHERE singer_id IN (SELECT id FROM singers WHERE email = 'admin@your-domain.com');
+DELETE FROM singer_works WHERE singer_id IN (SELECT id FROM singers WHERE email = 'admin@your-domain.com');
+DELETE FROM availabilities WHERE singer_id IN (SELECT id FROM singers WHERE email = 'admin@your-domain.com');
+DELETE FROM singers WHERE email = 'admin@your-domain.com';
 
 -- Delete test organization
 DELETE FROM password_reset_tokens
 WHERE user_type = 'organization'
-  AND user_id IN (SELECT id FROM organizations WHERE email = 'gfarhan18@gmail.com');
+  AND user_id IN (SELECT id FROM organizations WHERE email = 'admin@your-domain.com');
 
-DELETE FROM organizations WHERE email = 'gfarhan18@gmail.com';
+DELETE FROM organizations WHERE email = 'admin@your-domain.com';
 ```
 
 ### Re-test without deleting
