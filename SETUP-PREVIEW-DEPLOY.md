@@ -31,9 +31,9 @@ Static client builds (`outputDirectory`) do **not** run `/api` serverless files.
 
 | Name | Production value | Preview value |
 |------|------------------|---------------|
-| `RAILWAY_API_URL` | `https://graham-singersearch-production.up.railway.app` | Your Railway **preview** public URL (no trailing slash) |
+| `RAILWAY_API_URL` | `https://your-service-production.up.railway.app` | Your Railway **preview** public URL (no trailing slash) |
 
-Do **not** add a trailing slash. Example preview URL shape: `https://graham-singersearch-preview.up.railway.app`
+Do **not** add a trailing slash. Example preview URL shape: `https://your-service-preview.up.railway.app`
 
 Apply each value to the correct scope only (Production vs Preview).
 

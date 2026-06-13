@@ -25,6 +25,7 @@ import { promisify } from "util";
 import multer from "multer";
 import express from "express";
 import { uploadToSupabaseStorage } from "./lib/file-upload";
+import { getSessionSecret } from "./lib/env";
 import {
   notifyNewRegistration,
   notifyRegistrationConfirmation,
@@ -60,7 +61,7 @@ async function comparePasswords(supplied: string, stored: string): Promise<boole
 }
 
 function hashResetToken(token: string): string {
-  const secret = process.env.SESSION_SECRET || "singer-search-secret-key";
+  const secret = getSessionSecret();
   return createHmac("sha256", secret).update(token).digest("hex");
 }
 
@@ -132,7 +133,7 @@ export async function registerRoutes(
   app.use(
     session({
       store: new PgStore({ pool, tableName: "sessions" }),
-      secret: process.env.SESSION_SECRET || "singer-search-secret-key",
+      secret: getSessionSecret(),
       resave: false,
       saveUninitialized: false,
       proxy: true,
