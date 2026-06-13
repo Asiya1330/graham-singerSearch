@@ -8,8 +8,12 @@ import { navigateToView } from "./lib/nav";
 export function SingerLogin({ showAlert, setShowWelcome }) {
   const { setCurrentUser, setView } = useAppContext();
 
-    const [email, setEmail] = useState(import.meta.env.VITE_DEMO_SINGER_EMAIL || "");
-    const [password, setPassword] = useState(import.meta.env.VITE_DEMO_SINGER_PASSWORD || "");
+    const [email, setEmail] = useState(
+      import.meta.env.DEV ? (import.meta.env.VITE_DEMO_SINGER_EMAIL || "") : ""
+    );
+    const [password, setPassword] = useState(
+      import.meta.env.DEV ? (import.meta.env.VITE_DEMO_SINGER_PASSWORD || "") : ""
+    );
     const [loading, setLoading] = useState(false);
     const [showForgot, setShowForgot] = useState(false);
     const [forgotEmail, setForgotEmail] = useState("");

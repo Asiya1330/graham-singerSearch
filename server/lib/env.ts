@@ -37,6 +37,16 @@ export function getSupabaseDatabaseUrl(): string {
   return url;
 }
 
+export function getSessionSecret(): string {
+  const secret = process.env.SESSION_SECRET?.trim();
+  if (!secret) {
+    throw new Error(
+      "SESSION_SECRET is required. Set a long random string in Railway / .env",
+    );
+  }
+  return secret;
+}
+
 export function getStorageBucket(): string {
   return process.env.SUPABASE_STORAGE_BUCKET || "singer-uploads";
 }
