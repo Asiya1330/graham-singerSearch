@@ -2,7 +2,7 @@
 
 ## 1. Supabase project
 
-Your project URL: **https://tncpvoajbkwdmsodsmom.supabase.co**
+Copy **Project URL** from [Supabase Dashboard](https://supabase.com/dashboard) → your project → **API** into `SUPABASE_URL` in your local `.env`.
 
 In [Supabase Dashboard](https://supabase.com/dashboard) → your project:
 
