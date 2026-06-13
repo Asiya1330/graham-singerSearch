@@ -1097,7 +1097,6 @@ export async function registerRoutes(
             `SELECT DISTINCT part_name FROM repertoire_reference WHERE work_title ILIKE $1`,
             [`%${filters.workTitle}%`]
           );
-          console.log(`[search] workTitle="${filters.workTitle}" → ${repoResult.rows.length} part_names in repertoire_reference:`, repoResult.rows.map((r: any) => r.part_name));
           if (repoResult.rows.length > 0) {
             filters.roleNames = repoResult.rows.map((r: any) => (r.part_name as string).toLowerCase());
           }
@@ -1118,7 +1117,6 @@ export async function registerRoutes(
       await storage.createSearchLog(req.session.userId!, filters);
 
       let results = await storage.searchSingers(filters);
-      console.log(`[search] searchSingers returned ${results.length} singers`);
       const cityFallback = false;
       const searchedCity = resolvedCity || null;
 

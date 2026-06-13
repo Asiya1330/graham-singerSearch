@@ -89,10 +89,10 @@ export function PricingPage({ showAlert }) {
               <div className="mb-6">
                 <h3 className="text-2xl font-bold text-slate-900">{isSinger ? "Singer Pro" : "Organization Pro"}</h3>
                 <p className="text-slate-500 mt-2 h-12">
-                  {isSinger ? "Get seen first when it matters." : "Built for real hiring needs."}
+                  {isSinger ? "Be first in line when companies need someone now." : "Built for real hiring needs."}
                 </p>
                 <div className="mt-6 flex items-baseline text-slate-900">
-                  <span className="text-5xl font-extrabold tracking-tight">{isSinger ? "$4.99" : "$79"}</span>
+                  <span className="text-5xl font-extrabold tracking-tight">{isSinger ? "$9.99" : "$79"}</span>
                   <span className="ml-1 text-xl font-semibold text-slate-500">/month</span>
                 </div>
               </div>
@@ -100,11 +100,11 @@ export function PricingPage({ showAlert }) {
               <ul className="space-y-4 mb-8 flex-1">
                 {isSinger ? (
                   <>
-                    <li className="flex items-start"><Zap className="w-5 h-5 text-blue-600 mr-2 flex-shrink-0" /> <span className="font-medium text-slate-900">Priority search placement</span></li>
-                    <li className="flex items-start"><Zap className="w-5 h-5 text-blue-600 mr-2 flex-shrink-0" /> <span className="font-medium text-slate-900">Urgent cover visibility</span></li>
-                    <li className="flex items-start"><CheckCircle className="w-5 h-5 text-blue-600 mr-2 flex-shrink-0" /> Advanced availability filters</li>
-                    <li className="flex items-start"><CheckCircle className="w-5 h-5 text-blue-600 mr-2 flex-shrink-0" /> Profile analytics</li>
-                    <li className="flex items-start"><CheckCircle className="w-5 h-5 text-blue-600 mr-2 flex-shrink-0" /> Featured profile styling</li>
+                    <li className="flex items-start"><Zap className="w-5 h-5 text-blue-600 mr-2 flex-shrink-0" /> <span className="font-medium text-slate-900">First in line for urgent cover calls</span></li>
+                    <li className="flex items-start"><Zap className="w-5 h-5 text-blue-600 mr-2 flex-shrink-0" /> <span className="font-medium text-slate-900">Priority placement in casting searches</span></li>
+                    <li className="flex items-start"><CheckCircle className="w-5 h-5 text-blue-600 mr-2 flex-shrink-0" /> Detailed availability so the right gigs find you</li>
+                    <li className="flex items-start"><CheckCircle className="w-5 h-5 text-blue-600 mr-2 flex-shrink-0" /> See which organizations view your profile</li>
+                    <li className="flex items-start"><CheckCircle className="w-5 h-5 text-blue-600 mr-2 flex-shrink-0" /> A featured profile that stands out</li>
                   </>
                 ) : (
                   <>
