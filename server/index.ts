@@ -7,8 +7,6 @@ import { createServer } from "http";
 import { pool } from "./storage";
 import { seedRepertoire } from "./seed-repertoire";
 import { geocodeCityState } from "./lib/geocode";
-import { logEmailConfigStatus } from "./lib/email";
-
 const app = express();
 app.set("trust proxy", 1);
 const httpServer = createServer(app);
@@ -43,23 +41,10 @@ export function log(message: string, source = "express") {
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
-
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
-  };
-
   res.on("finish", () => {
     const duration = Date.now() - start;
     if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
-
-      log(logLine);
+      log(`${req.method} ${path} ${res.statusCode} in ${duration}ms`);
     }
   });
 
@@ -202,8 +187,6 @@ app.use((req, res, next) => {
   }
 
   await registerRoutes(httpServer, app);
-
-  logEmailConfigStatus("startup");
 
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

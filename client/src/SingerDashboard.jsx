@@ -773,7 +773,7 @@ export function SingerDashboard({ setSearchResults, showAlert }) {
                           </div>
                           <h2 className="text-2xl font-bold mb-2">Don't miss your next role.</h2>
                           <p className="text-indigo-200 text-lg max-w-2xl">
-                              You are currently on the Free plan. Upgrade to Pro for <span className="text-white font-bold">$4.99/month</span> to appear in "Urgent Ready" searches and see who is viewing your profile.
+                              You are currently on the Free plan. Upgrade to Pro for <span className="text-white font-bold">$9.99/month</span> to appear in "Urgent Ready" searches and see who is viewing your profile.
                           </p>
                       </div>
                       <div className="flex-shrink-0">

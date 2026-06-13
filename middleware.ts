@@ -18,7 +18,11 @@ const HOP_BY_HOP = new Set([
 function getRailwayBase(): string | null {
   const raw = process.env.RAILWAY_API_URL?.trim();
   if (!raw) return null;
-  return raw.replace(/\/$/, "");
+  let base = raw.replace(/\/$/, "");
+  if (!/^https?:\/\//i.test(base)) {
+    base = `https://${base}`;
+  }
+  return base;
 }
 
 function forwardRequestHeaders(request: Request): Headers {
