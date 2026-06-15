@@ -28,3 +28,5 @@ attached_assets/Pasted-*
 # Local reports (not for repo)
 CLEANUP-REPORT.md
 CLIENT-UPDATE.md
+temp_auto_push.bat
+temp_interactive_push.bat
