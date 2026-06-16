@@ -35,6 +35,7 @@ import {
   sendTestEmail,
 } from "./lib/email";
 import { eq, desc, and } from "drizzle-orm";
+import { sendApiError, sendRouteError } from "./lib/api-response";
 
 const scryptAsync = promisify(scrypt);
 
@@ -70,28 +71,28 @@ const PASSWORD_RESET_GENERIC_MESSAGE =
 
 function requireAdminAuth(req: Request, res: Response, next: NextFunction) {
   if (!req.session.adminAuthenticated) {
-    return res.status(401).json({ message: "Admin authentication required" });
+    return sendApiError(res, "ADMIN_AUTH_REQUIRED");
   }
   next();
 }
 
 function requireAuth(req: Request, res: Response, next: NextFunction) {
   if (!req.session.userId) {
-    return res.status(401).json({ message: "Not authenticated" });
+    return sendApiError(res, "NOT_AUTHENTICATED");
   }
   next();
 }
 
 function requireSinger(req: Request, res: Response, next: NextFunction) {
   if (req.session.userType !== "singer") {
-    return res.status(403).json({ message: "Singer access required" });
+    return sendApiError(res, "SINGER_ACCESS_REQUIRED");
   }
   next();
 }
 
 function requireOrg(req: Request, res: Response, next: NextFunction) {
   if (req.session.userType !== "organization") {
-    return res.status(403).json({ message: "Organization access required" });
+    return sendApiError(res, "ORG_ACCESS_REQUIRED");
   }
   next();
 }
@@ -152,12 +153,12 @@ export async function registerRoutes(
     try {
       const { email, password, ...rest } = req.body;
       if (!email || !password) {
-        return res.status(400).json({ message: "Email and password are required" });
+        return sendApiError(res, "EMAIL_PASSWORD_REQUIRED");
       }
 
       const existing = await storage.getSingerByEmail(email);
       if (existing) {
-        return res.status(409).json({ message: "Email already registered" });
+        return sendApiError(res, "EMAIL_ALREADY_REGISTERED");
       }
 
       const singerCount = await storage.getSingerCount();
@@ -220,7 +221,7 @@ export async function registerRoutes(
       const { password: _, ...safe } = updated!;
       res.status(201).json(safe);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Registration failed" });
+      sendRouteError(res, error, "REGISTRATION_FAILED");
     }
   });
 
@@ -228,12 +229,12 @@ export async function registerRoutes(
     try {
       const { email, password, ...rest } = req.body;
       if (!email || !password) {
-        return res.status(400).json({ message: "Email and password are required" });
+        return sendApiError(res, "EMAIL_PASSWORD_REQUIRED");
       }
 
       const existing = await storage.getOrganizationByEmail(email);
       if (existing) {
-        return res.status(409).json({ message: "Email already registered" });
+        return sendApiError(res, "EMAIL_ALREADY_REGISTERED");
       }
 
       const orgCount = await storage.getOrganizationCount();
@@ -278,7 +279,7 @@ export async function registerRoutes(
       const { password: _, ...safe } = org;
       res.status(201).json(safe);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Registration failed" });
+      sendRouteError(res, error, "REGISTRATION_FAILED");
     }
   });
 
@@ -286,7 +287,7 @@ export async function registerRoutes(
     try {
       const { email, password, userType } = req.body;
       if (!email || !password || !userType) {
-        return res.status(400).json({ message: "Email, password, and userType are required" });
+        return sendApiError(res, "EMAIL_USER_TYPE_REQUIRED", "Email, password, and account type are required.");
       }
 
       let user: any;
@@ -295,16 +296,16 @@ export async function registerRoutes(
       } else if (userType === "organization") {
         user = await storage.getOrganizationByEmail(email);
       } else {
-        return res.status(400).json({ message: "Invalid userType" });
+        return sendApiError(res, "INVALID_USER_TYPE");
       }
 
       if (!user) {
-        return res.status(401).json({ message: "Invalid credentials" });
+        return sendApiError(res, "USER_NOT_FOUND");
       }
 
       const valid = await comparePasswords(password, user.password);
       if (!valid) {
-        return res.status(401).json({ message: "Invalid credentials" });
+        return sendApiError(res, "INVALID_PASSWORD");
       }
 
       req.session.userId = user.id;
@@ -318,7 +319,7 @@ export async function registerRoutes(
       const { password: _, ...safe } = user;
       res.json(safe);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Login failed" });
+      sendRouteError(res, error, "LOGIN_FAILED");
     }
   });
 
@@ -329,7 +330,7 @@ export async function registerRoutes(
         return res.status(400).json({ message: "Email and userType are required" });
       }
       if (userType !== "singer" && userType !== "organization") {
-        return res.status(400).json({ message: "Invalid userType" });
+        return sendApiError(res, "INVALID_USER_TYPE");
       }
 
       const normalizedEmail = String(email).trim();
@@ -383,7 +384,7 @@ export async function registerRoutes(
 
       res.json({ message: PASSWORD_RESET_GENERIC_MESSAGE });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to process request" });
+      sendRouteError(res, error, "FORGOT_PASSWORD_FAILED");
     }
   });
 
@@ -402,7 +403,7 @@ export async function registerRoutes(
 
       res.json({ valid: true });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Validation failed" });
+      sendRouteError(res, error, "VALIDATION_FAILED");
     }
   });
 
@@ -413,24 +414,24 @@ export async function registerRoutes(
         return res.status(400).json({ message: "Token, password, and userType are required" });
       }
       if (userType !== "singer" && userType !== "organization") {
-        return res.status(400).json({ message: "Invalid userType" });
+        return sendApiError(res, "INVALID_USER_TYPE");
       }
       if (String(password).length < 8) {
-        return res.status(400).json({ message: "Password must be at least 8 characters" });
+        return sendApiError(res, "PASSWORD_TOO_SHORT");
       }
 
       const record = await storage.findValidPasswordResetToken(hashResetToken(String(token)));
       if (!record || record.user_type !== userType) {
-        return res.status(400).json({ message: "Invalid or expired reset link" });
+        return sendApiError(res, "RESET_LINK_INVALID");
       }
 
       const hashedPassword = await hashPassword(String(password));
       if (userType === "singer") {
         const updated = await storage.updateSinger(record.user_id, { password: hashedPassword });
-        if (!updated) return res.status(404).json({ message: "Account not found" });
+        if (!updated) return sendApiError(res, "ACCOUNT_NOT_FOUND");
       } else {
         const updated = await storage.updateOrganization(record.user_id, { password: hashedPassword });
-        if (!updated) return res.status(404).json({ message: "Account not found" });
+        if (!updated) return sendApiError(res, "ACCOUNT_NOT_FOUND");
       }
 
       await storage.markPasswordResetTokenUsed(record.id);
@@ -438,14 +439,14 @@ export async function registerRoutes(
 
       res.json({ message: "Password updated successfully" });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to reset password" });
+      sendRouteError(res, error, "PASSWORD_RESET_FAILED");
     }
   });
 
   app.post("/api/auth/logout", (req: Request, res: Response) => {
     req.session.destroy((err) => {
       if (err) {
-        return res.status(500).json({ message: "Logout failed" });
+        return sendApiError(res, "LOGOUT_FAILED");
       }
       res.json({ message: "Logged out" });
     });
@@ -454,12 +455,12 @@ export async function registerRoutes(
   app.get("/api/auth/me", async (req: Request, res: Response) => {
     try {
       if (!req.session.userId) {
-        return res.status(401).json({ message: "Not authenticated" });
+        return sendApiError(res, "NOT_AUTHENTICATED");
       }
 
       if (req.session.userType === "singer") {
         let singer = await storage.getSinger(req.session.userId);
-        if (!singer) return res.status(404).json({ message: "Singer not found" });
+        if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
 
         if (singer.subscription_tier === 'founding' && singer.founding_expires_at && new Date(singer.founding_expires_at) < new Date()) {
           singer = (await storage.updateSinger(singer.id, { subscription_tier: 'standard', founding_expires_at: null }))!;
@@ -481,7 +482,7 @@ export async function registerRoutes(
 
       if (req.session.userType === "organization") {
         let org = await storage.getOrganization(req.session.userId);
-        if (!org) return res.status(404).json({ message: "Organization not found" });
+        if (!org) return sendApiError(res, "ORG_NOT_FOUND");
 
         if (org.subscription_tier === 'pro' && org.pro_expires_at && new Date(org.pro_expires_at) < new Date()) {
           org = (await storage.updateOrganization(org.id, { subscription_tier: 'free', pro_expires_at: null, founding_org: false, is_gifted: false }))!;
@@ -491,9 +492,9 @@ export async function registerRoutes(
         return res.json({ ...safe, userType: "organization" });
       }
 
-      res.status(400).json({ message: "Invalid session" });
+      sendApiError(res, "INVALID_SESSION");
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to get user" });
+      sendRouteError(res, error, "PROFILE_LOAD_FAILED");
     }
   });
 
@@ -502,7 +503,7 @@ export async function registerRoutes(
   app.get("/api/singer/profile", requireAuth, requireSinger, async (req: Request, res: Response) => {
     try {
       const singer = await storage.getSinger(req.session.userId!);
-      if (!singer) return res.status(404).json({ message: "Singer not found" });
+      if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
 
       const [roles, works, availabilities] = await Promise.all([
         storage.getSingerRoles(singer.id),
@@ -513,7 +514,7 @@ export async function registerRoutes(
       const { password: _, ...safe } = singer;
       res.json({ ...safe, roles, works, availabilities });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to get profile" });
+      sendRouteError(res, error, "PROFILE_LOAD_FAILED");
     }
   });
 
@@ -545,7 +546,7 @@ export async function registerRoutes(
         (updates.state ?? existing.state) !== existing.state
       );
       let singer = await storage.updateSinger(req.session.userId!, { ...updates, last_updated: new Date() });
-      if (!singer) return res.status(404).json({ message: "Singer not found" });
+      if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
 
       if (cityChanged) {
         if (!singer.city || !singer.state) {
@@ -571,7 +572,7 @@ export async function registerRoutes(
       const { password: _, ...safe } = singer;
       res.json(safe);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to update profile" });
+      sendRouteError(res, error, "PROFILE_UPDATE_FAILED");
     }
   });
 
@@ -581,11 +582,11 @@ export async function registerRoutes(
         is_emergency_ready: false,
         emergency_status_requested: false,
       });
-      if (!singer) return res.status(404).json({ message: "Singer not found" });
+      if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
       const { password: _, ...safe } = singer;
       res.json(safe);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to opt out" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -597,11 +598,11 @@ export async function registerRoutes(
         founding_artist: false,
         is_gifted: false,
       });
-      if (!singer) return res.status(404).json({ message: "Singer not found" });
+      if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
       const { password: _, ...safe } = singer;
       res.json(safe);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to downgrade" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -614,22 +615,22 @@ export async function registerRoutes(
         is_gifted: false,
         contact_reveal_limit: 3,
       });
-      if (!org) return res.status(404).json({ message: "Organization not found" });
+      if (!org) return sendApiError(res, "ORG_NOT_FOUND");
       const { password: _, ...safe } = org;
       res.json(safe);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to downgrade" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
   app.put("/api/singer/approval-seen", requireAuth, requireSinger, async (req: Request, res: Response) => {
     try {
       const singer = await storage.updateSinger(req.session.userId!, { approval_seen: true });
-      if (!singer) return res.status(404).json({ message: "Singer not found" });
+      if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
       const { password: _, ...safe } = singer;
       res.json(safe);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to update approval" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -674,7 +675,7 @@ export async function registerRoutes(
       const role = await storage.createSingerRole(parsed);
       res.status(201).json(role);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to add role" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -688,7 +689,7 @@ export async function registerRoutes(
       await storage.deleteSingerRole(roleId);
       res.json({ message: "Role deleted" });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to delete role" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -713,7 +714,7 @@ export async function registerRoutes(
 
       res.json(created);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to replace roles" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -768,7 +769,7 @@ export async function registerRoutes(
       const work = await storage.createSingerWork(parsed);
       res.status(201).json(work);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to add work" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -838,7 +839,7 @@ export async function registerRoutes(
       );
       res.json(updated.rows[0]);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to update work" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -852,7 +853,7 @@ export async function registerRoutes(
       await storage.deleteSingerWork(workId);
       res.json({ message: "Work deleted" });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to delete work" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -877,7 +878,7 @@ export async function registerRoutes(
 
       res.json(created);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to replace works" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -887,7 +888,7 @@ export async function registerRoutes(
       const avail = await storage.createAvailability(parsed);
       res.status(201).json(avail);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to add availability" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -901,7 +902,7 @@ export async function registerRoutes(
       await storage.deleteAvailability(availId);
       res.json({ message: "Availability deleted" });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to delete availability" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -915,12 +916,12 @@ export async function registerRoutes(
         emergency_travel_modes: modes,
         emergency_notes: notes,
       });
-      if (!singer) return res.status(404).json({ message: "Singer not found" });
+      if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
 
       const { password: _, ...safe } = singer;
       res.json(safe);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to update emergency settings" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1175,7 +1176,7 @@ export async function registerRoutes(
         noResultsDiagnostic,
       });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Search failed" });
+      sendRouteError(res, error, "SEARCH_FAILED");
     }
   });
 
@@ -1185,7 +1186,7 @@ export async function registerRoutes(
       const orgId = req.session.userId!;
 
       const org = await storage.getOrganization(orgId);
-      if (!org) return res.status(404).json({ message: "Organization not found" });
+      if (!org) return sendApiError(res, "ORG_NOT_FOUND");
 
       const credits = isEmergency ? 2 : 1;
       const used = org.contact_reveals_used_this_month ?? 0;
@@ -1193,7 +1194,7 @@ export async function registerRoutes(
       const isPro = org.subscription_tier === 'pro';
 
       if (!isPro && used + credits > limit) {
-        return res.status(403).json({ message: "Upgrade required" });
+        return sendApiError(res, "UPGRADE_REQUIRED");
       }
 
       await storage.createContactReveal({
@@ -1220,17 +1221,17 @@ export async function registerRoutes(
           website_url: singer.website_url,
         });
       } else {
-        res.status(404).json({ message: "Singer not found" });
+        sendApiError(res, "SINGER_NOT_FOUND");
       }
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Contact reveal failed" });
+      sendRouteError(res, error, "CONTACT_REVEAL_FAILED");
     }
   });
 
   app.get("/api/org/profile", requireAuth, requireOrg, async (req: Request, res: Response) => {
     try {
       const org = await storage.getOrganization(req.session.userId!);
-      if (!org) return res.status(404).json({ message: "Organization not found" });
+      if (!org) return sendApiError(res, "ORG_NOT_FOUND");
 
       const revealsResult = await pool.query(
         `SELECT cr.id, cr.singer_id, cr.revealed_at, cr.is_emergency, cr.credits_used,
@@ -1245,7 +1246,7 @@ export async function registerRoutes(
       const { password: _, ...safe } = org;
       res.json({ ...safe, reveals: revealsResult.rows });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to get org profile" });
+      sendRouteError(res, error, "PROFILE_LOAD_FAILED");
     }
   });
 
@@ -1259,12 +1260,12 @@ export async function registerRoutes(
         ...updates
       } = req.body;
       const org = await storage.updateOrganization(req.session.userId!, updates);
-      if (!org) return res.status(404).json({ message: "Organization not found" });
+      if (!org) return sendApiError(res, "ORG_NOT_FOUND");
 
       const { password: _, ...safe } = org;
       res.json(safe);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to update org profile" });
+      sendRouteError(res, error, "PROFILE_UPDATE_FAILED");
     }
   });
 
@@ -1277,12 +1278,12 @@ export async function registerRoutes(
         subscription_tier: tier,
         contact_reveal_limit: revealLimit,
       });
-      if (!org) return res.status(404).json({ message: "Organization not found" });
+      if (!org) return sendApiError(res, "ORG_NOT_FOUND");
 
       const { password: _, ...safe } = org;
       res.json(safe);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to update subscription" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1291,13 +1292,13 @@ export async function registerRoutes(
     const { password } = req.body;
     const adminPassword = process.env.ADMIN_PASSWORD;
     if (!adminPassword) {
-      return res.status(500).json({ message: "Admin password not configured. Set the ADMIN_PASSWORD environment variable." });
+      return sendApiError(res, "ADMIN_PASSWORD_NOT_CONFIGURED");
     }
     if (password === adminPassword) {
       req.session.adminAuthenticated = true;
       return res.json({ success: true });
     }
-    return res.status(401).json({ message: "Incorrect password. Please try again." });
+    return sendApiError(res, "ADMIN_INVALID_PASSWORD");
   });
 
   app.post("/api/admin/auth/logout", (req: Request, res: Response) => {
@@ -1361,7 +1362,7 @@ export async function registerRoutes(
     } catch (error: any) {
       try { await client.query("ROLLBACK"); } catch {}
       console.error("[seed-demo] error:", error);
-      res.status(500).json({ message: error.message || "Failed to seed demo data" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     } finally {
       client.release();
     }
@@ -1372,7 +1373,7 @@ export async function registerRoutes(
       const stats = await storage.getAdminStats();
       res.json(stats);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to get stats" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1407,7 +1408,7 @@ export async function registerRoutes(
       }).from(singers).orderBy(singers.created_at);
       res.json(result);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to get singers" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1415,14 +1416,14 @@ export async function registerRoutes(
     try {
       const singerId = parseInt(req.params.id as string);
       const singer = await storage.updateSinger(singerId, { admin_approved: true, admin_rejected: false });
-      if (!singer) return res.status(404).json({ message: "Singer not found" });
+      if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
       void notifySingerApproved({
         email: singer.email,
         displayName: `${singer.first_name} ${singer.last_name}`.trim(),
       });
       res.json({ message: "Singer approved", id: singer.id, admin_approved: singer.admin_approved, admin_rejected: singer.admin_rejected });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to approve singer" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1430,10 +1431,10 @@ export async function registerRoutes(
     try {
       const singerId = parseInt(req.params.id as string);
       const singer = await storage.updateSinger(singerId, { admin_approved: false, admin_rejected: true });
-      if (!singer) return res.status(404).json({ message: "Singer not found" });
+      if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
       res.json({ message: "Singer rejected", id: singer.id, admin_approved: singer.admin_approved, admin_rejected: singer.admin_rejected });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to reject singer" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1441,10 +1442,10 @@ export async function registerRoutes(
     try {
       const singerId = parseInt(req.params.id as string);
       const singer = await storage.updateSinger(singerId, { subscription_status: "inactive" });
-      if (!singer) return res.status(404).json({ message: "Singer not found" });
+      if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
       res.json({ message: "Singer deactivated", id: singer.id });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to deactivate singer" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1452,10 +1453,10 @@ export async function registerRoutes(
     try {
       const singerId = parseInt(req.params.id as string);
       const singer = await storage.updateSinger(singerId, { subscription_status: "active" });
-      if (!singer) return res.status(404).json({ message: "Singer not found" });
+      if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
       res.json({ message: "Singer activated", id: singer.id });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to activate singer" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1470,7 +1471,7 @@ export async function registerRoutes(
       await storage.deleteSinger(singerId);
       res.json({ message: "Singer deleted" });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to delete singer" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1484,7 +1485,7 @@ export async function registerRoutes(
         (updates.state ?? before.state) !== before.state
       );
       let singer = await storage.updateSinger(singerId, updates);
-      if (!singer) return res.status(404).json({ message: "Singer not found" });
+      if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
       if (cityChanged) {
         if (!singer.city || !singer.state) {
           singer = (await storage.updateSinger(singer.id, { latitude: null, longitude: null })) || singer;
@@ -1508,7 +1509,7 @@ export async function registerRoutes(
       const { password: _, ...safe } = singer;
       res.json(safe);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to edit singer" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1516,7 +1517,7 @@ export async function registerRoutes(
     try {
       const singerId = parseInt(req.params.id as string);
       const singer = await storage.getSinger(singerId);
-      if (!singer) return res.status(404).json({ message: "Singer not found" });
+      if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
       const [roles, works, avails, giftHistory] = await Promise.all([
         storage.getSingerRoles(singerId),
         storage.getSingerWorks(singerId),
@@ -1526,7 +1527,7 @@ export async function registerRoutes(
       const { password: _, ...safe } = singer;
       res.json({ ...safe, roles, works, availabilities: avails, gift_history: giftHistory });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to get singer" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1545,7 +1546,7 @@ export async function registerRoutes(
         isAvailable: remaining > 0,
       });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to get founding status" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1577,7 +1578,7 @@ export async function registerRoutes(
       if (!computed) return res.status(400).json({ message: "Invalid duration or custom date" });
 
       const singer = await storage.getSinger(singerId);
-      if (!singer) return res.status(404).json({ message: "Singer not found" });
+      if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
 
       const existing = singer.pro_expires_at ? new Date(singer.pro_expires_at) : null;
       const finalExpiry = existing && existing > computed.expiresAt ? existing : computed.expiresAt;
@@ -1597,7 +1598,7 @@ export async function registerRoutes(
       const { password: _, ...safe } = updated!;
       res.json({ singer: safe, gift });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to gift Pro" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1609,7 +1610,7 @@ export async function registerRoutes(
       if (!computed) return res.status(400).json({ message: "Invalid duration or custom date" });
 
       const org = await storage.getOrganization(orgId);
-      if (!org) return res.status(404).json({ message: "Organization not found" });
+      if (!org) return sendApiError(res, "ORG_NOT_FOUND");
 
       const existing = org.pro_expires_at ? new Date(org.pro_expires_at) : null;
       const finalExpiry = existing && existing > computed.expiresAt ? existing : computed.expiresAt;
@@ -1628,7 +1629,7 @@ export async function registerRoutes(
       const { password: _, ...safe } = updated!;
       res.json({ org: safe, gift });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to gift Pro" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1637,13 +1638,13 @@ export async function registerRoutes(
       if (!req.file) return res.status(400).json({ message: "No file uploaded" });
       const resumeUrl = await uploadToSupabaseStorage("resumes", req.file);
       const singer = await storage.updateSinger(req.session.userId!, { resume_url: resumeUrl });
-      if (!singer) return res.status(404).json({ message: "Singer not found" });
+      if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
       res.json({ resume_url: resumeUrl, message: "Resume uploaded successfully" });
     } catch (error: any) {
       if (error.message === "Only PDF files are allowed") {
         return res.status(400).json({ message: "Only PDF files are allowed" });
       }
-      res.status(500).json({ message: error.message || "Failed to upload resume" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1680,7 +1681,7 @@ export async function registerRoutes(
       const updated = await storage.updateSingerRole(roleId, { ...req.body, ...(composer ? { composer } : {}) });
       res.json(updated);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to update role" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1689,11 +1690,11 @@ export async function registerRoutes(
       if (!req.file) return res.status(400).json({ message: "No file uploaded" });
       const url = await uploadToSupabaseStorage("headshots", req.file);
       const singer = await storage.updateSinger(req.session.userId!, { headshot_url: url });
-      if (!singer) return res.status(404).json({ message: "Singer not found" });
+      if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
       const { password: _, ...safe } = singer;
       res.json({ headshot_url: url, ...safe });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Headshot upload failed" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1707,14 +1708,14 @@ export async function registerRoutes(
         return res.status(400).json({ message: "New password must be at least 8 characters" });
       }
       const singer = await storage.getSinger(req.session.userId!);
-      if (!singer) return res.status(404).json({ message: "Singer not found" });
+      if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
       const valid = await comparePasswords(currentPassword, singer.password);
-      if (!valid) return res.status(401).json({ message: "Current password is incorrect" });
+      if (!valid) return sendApiError(res, "CURRENT_PASSWORD_INCORRECT");
       const hashed = await hashPassword(newPassword);
       await storage.updateSinger(req.session.userId!, { password: hashed });
       res.json({ message: "Password updated successfully" });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to update password" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1728,14 +1729,14 @@ export async function registerRoutes(
         return res.status(400).json({ message: "New password must be at least 8 characters" });
       }
       const org = await storage.getOrganization(req.session.userId!);
-      if (!org) return res.status(404).json({ message: "Organization not found" });
+      if (!org) return sendApiError(res, "ORG_NOT_FOUND");
       const valid = await comparePasswords(currentPassword, org.password);
-      if (!valid) return res.status(401).json({ message: "Current password is incorrect" });
+      if (!valid) return sendApiError(res, "CURRENT_PASSWORD_INCORRECT");
       const hashed = await hashPassword(newPassword);
       await storage.updateOrganization(req.session.userId!, { password: hashed });
       res.json({ message: "Password updated successfully" });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to update password" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1748,12 +1749,12 @@ export async function registerRoutes(
       }
       const singer = await storage.getSinger(singerId);
       if (!singer || !singer.admin_approved) {
-        return res.status(404).json({ message: "Singer not found" });
+        return sendApiError(res, "SINGER_NOT_FOUND");
       }
       const result = await storage.toggleShortlist(req.session.userId!, singerId);
       res.json(result);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to toggle shortlist" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1776,7 +1777,7 @@ export async function registerRoutes(
       });
       res.json(safe);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to load shortlist" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1787,7 +1788,7 @@ export async function registerRoutes(
       const safeSingers = singers.map(({ password, ...s }: any) => s);
       res.json(safeSingers);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to get revealed singers" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1852,7 +1853,7 @@ export async function registerRoutes(
 
       res.json({ message: "Feedback submitted successfully" });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to submit feedback" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1862,7 +1863,7 @@ export async function registerRoutes(
       const count = await storage.countSearchAppearances(req.session.userId!, 30);
       res.json({ count, days: 30 });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to compute search appearances" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1870,10 +1871,10 @@ export async function registerRoutes(
   app.post("/api/singer/request-emergency", requireAuth, requireSinger, async (req: Request, res: Response) => {
     try {
       const singer = await storage.updateSinger(req.session.userId!, { emergency_status_requested: true });
-      if (!singer) return res.status(404).json({ message: "Singer not found" });
+      if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
       res.json({ message: "Emergency status request submitted. An admin will review your request." });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to submit request" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1890,7 +1891,7 @@ export async function registerRoutes(
       });
       res.json(created);
     } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to submit suggestion" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1900,7 +1901,7 @@ export async function registerRoutes(
       const rows = await storage.listRepertoireSuggestions();
       res.json(rows);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to load suggestions" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1923,7 +1924,7 @@ export async function registerRoutes(
       `);
       res.json(result.rows);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to get organizations" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1931,7 +1932,7 @@ export async function registerRoutes(
     try {
       const orgId = parseInt(req.params.id as string);
       const org = await storage.getOrganization(orgId);
-      if (!org) return res.status(404).json({ message: "Organization not found" });
+      if (!org) return sendApiError(res, "ORG_NOT_FOUND");
       const { password: _, ...safeOrg } = org;
 
       const revealHistory = await pool.query(`
@@ -1972,7 +1973,7 @@ export async function registerRoutes(
         gift_history: giftHistory,
       });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to get organization" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1981,11 +1982,11 @@ export async function registerRoutes(
       const orgId = parseInt(req.params.id as string);
       const { password, id, created_at, contact_reveals_used_this_month, login_count, pro_expires_at, founding_org, is_gifted, ...updates } = req.body;
       const org = await storage.updateOrganization(orgId, updates);
-      if (!org) return res.status(404).json({ message: "Organization not found" });
+      if (!org) return sendApiError(res, "ORG_NOT_FOUND");
       const { password: _, ...safe } = org;
       res.json(safe);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to edit organization" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -1997,11 +1998,11 @@ export async function registerRoutes(
         return res.status(400).json({ message: "Tier must be 'free' or 'pro'" });
       }
       const org = await storage.updateOrganization(orgId, { subscription_tier: tier });
-      if (!org) return res.status(404).json({ message: "Organization not found" });
+      if (!org) return sendApiError(res, "ORG_NOT_FOUND");
       const { password: _, ...safe } = org;
       res.json(safe);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to update subscription" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -2018,7 +2019,7 @@ export async function registerRoutes(
         return res.status(400).json({ message: `Reason must be one of: ${VALID_REASONS.join(", ")}` });
       }
       const org = await storage.getOrganization(orgId);
-      if (!org) return res.status(404).json({ message: "Organization not found" });
+      if (!org) return sendApiError(res, "ORG_NOT_FOUND");
 
       const used = org.contact_reveals_used_this_month ?? 0;
       const limit = org.contact_reveal_limit ?? 0;
@@ -2044,7 +2045,7 @@ export async function registerRoutes(
       const { password: _, ...safe } = updated!;
       res.json({ ...safe, previous_balance: previousBalance, new_balance: newBalance });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to adjust credits" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -2056,7 +2057,7 @@ export async function registerRoutes(
         .orderBy(desc(creditAdjustments.created_at));
       res.json(rows);
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to get credit adjustments" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -2071,7 +2072,7 @@ export async function registerRoutes(
       await pool.query(`DELETE FROM organizations WHERE id = $1`, [orgId]);
       res.json({ message: "Organization deleted" });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to delete organization" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -2085,7 +2086,7 @@ export async function registerRoutes(
         reveals_this_month: monthRes.rows[0].c,
       });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to get extended stats" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 
@@ -2105,10 +2106,10 @@ export async function registerRoutes(
       }
       // When clearing flagged_for_review, that's an explicit admin action
       const singer = await storage.updateSinger(singerId, updateData);
-      if (!singer) return res.status(404).json({ message: "Singer not found" });
+      if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
       res.json({ message: "Badge updated", id: singer.id, [field]: (singer as any)[field] });
     } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to update badge" });
+      sendRouteError(res, error, "OPERATION_FAILED");
     }
   });
 

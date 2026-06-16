@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import singerSearchLogo from "@assets/Singer_Search_Logo_May_2026_1777734809747.png";
 import { useAppContext } from "./AppContext";
 import { US_STATES } from "./AppShared";
 import { useCityStateAutofill } from "./hooks/useCityStateAutofill";
+import { getErrorMessageFromBody } from "./lib/api";
 
 export function SingerSettings() {
   const { currentUser, setCurrentUser, setView } = useAppContext();
@@ -66,7 +67,7 @@ export function SingerSettings() {
           body: JSON.stringify(mgmt),
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || data.message || "Save failed");
+        if (!res.ok) throw new Error(getErrorMessageFromBody(data, "PROFILE_UPDATE_FAILED"));
         setCurrentUser(prev => prev?.data
           ? { ...prev, data: { ...prev.data, ...mgmt } }
           : { ...prev, ...mgmt });
@@ -111,7 +112,7 @@ export function SingerSettings() {
           body: JSON.stringify(payload),
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.message || data.error || "Save failed");
+        if (!res.ok) throw new Error(getErrorMessageFromBody(data, "PROFILE_UPDATE_FAILED"));
         setCurrentUser(prev => prev?.data
           ? { ...prev, data: { ...prev.data, ...payload } }
           : { ...prev, ...payload });
@@ -142,7 +143,7 @@ export function SingerSettings() {
           body: JSON.stringify({ currentPassword: pw.current, newPassword: pw.next }),
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Password change failed");
+        if (!res.ok) throw new Error(getErrorMessageFromBody(data, "OPERATION_FAILED"));
         setPwMsg({ type: "success", text: "Password changed successfully." });
         setPw({ current: "", next: "", confirm: "" });
       } catch (e) {

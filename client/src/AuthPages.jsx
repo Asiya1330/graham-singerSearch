@@ -4,6 +4,7 @@ import { useAppContext } from "./AppContext";
 import { US_STATES } from "./AppShared";
 import { useCityStateAutofill } from "./hooks/useCityStateAutofill";
 import { navigateToView } from "./lib/nav";
+import { apiFetch, API_ERRORS } from "./lib/api";
 
 export function SingerLogin({ showAlert, setShowWelcome }) {
   const { setCurrentUser, setView } = useAppContext();
@@ -24,19 +25,14 @@ export function SingerLogin({ showAlert, setShowWelcome }) {
       if (!forgotEmail) return;
       setForgotLoading(true);
       try {
-        const res = await fetch("/api/auth/forgot-password", {
+        await apiFetch("/api/auth/forgot-password", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: forgotEmail, userType: "singer" }),
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          showAlert(data.message || "Request failed", "error");
-          return;
-        }
+        }, "FORGOT_PASSWORD_FAILED");
         setForgotSubmitted(true);
-      } catch {
-        showAlert("Network error. Please try again.", "error");
+      } catch (err) {
+        showAlert(err.message || API_ERRORS.FORGOT_PASSWORD_FAILED.message, "error");
       } finally {
         setForgotLoading(false);
       }
@@ -46,22 +42,18 @@ export function SingerLogin({ showAlert, setShowWelcome }) {
       e.preventDefault();
       setLoading(true);
       try {
-        const res = await fetch("/api/auth/login", {
+        await apiFetch("/api/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          credentials: "include",
           body: JSON.stringify({ email, password, userType: "singer" }),
-        });
-        const data = await res.json();
-        if (!res.ok) { showAlert(data.message || "Login failed", "error"); return; }
-        
-        const profileRes = await fetch("/api/auth/me", { credentials: "include" });
-        const profile = await profileRes.json();
+        }, "LOGIN_FAILED");
+
+        const { data: profile } = await apiFetch("/api/auth/me", {}, "PROFILE_LOAD_FAILED");
         setCurrentUser({ type: "singer", data: profile });
         setView("singerDashboard");
         setShowWelcome(true);
       } catch (err) {
-        showAlert("Login failed", "error");
+        showAlert(err.message || API_ERRORS.LOGIN_FAILED.message, "error");
       } finally {
         setLoading(false);
       }
@@ -214,19 +206,14 @@ export function OrganizationLogin({ showAlert, setShowWelcome }) {
       if (!forgotEmail) return;
       setForgotLoading(true);
       try {
-        const res = await fetch("/api/auth/forgot-password", {
+        await apiFetch("/api/auth/forgot-password", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: forgotEmail, userType: "organization" }),
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          showAlert(data.message || "Request failed", "error");
-          return;
-        }
+        }, "FORGOT_PASSWORD_FAILED");
         setForgotSubmitted(true);
-      } catch {
-        showAlert("Network error. Please try again.", "error");
+      } catch (err) {
+        showAlert(err.message || API_ERRORS.FORGOT_PASSWORD_FAILED.message, "error");
       } finally {
         setForgotLoading(false);
       }
@@ -236,22 +223,18 @@ export function OrganizationLogin({ showAlert, setShowWelcome }) {
       e.preventDefault();
       setLoading(true);
       try {
-        const res = await fetch("/api/auth/login", {
+        await apiFetch("/api/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          credentials: "include",
           body: JSON.stringify({ email, password, userType: "organization" }),
-        });
-        const data = await res.json();
-        if (!res.ok) { showAlert(data.message || "Login failed", "error"); return; }
-        
-        const profileRes = await fetch("/api/auth/me", { credentials: "include" });
-        const profile = await profileRes.json();
+        }, "LOGIN_FAILED");
+
+        const { data: profile } = await apiFetch("/api/auth/me", {}, "PROFILE_LOAD_FAILED");
         setCurrentUser({ type: "organization", data: profile });
         setView("orgDashboard");
         setShowWelcome(true);
       } catch (err) {
-        showAlert("Login failed", "error");
+        showAlert(err.message || API_ERRORS.LOGIN_FAILED.message, "error");
       } finally {
         setLoading(false);
       }
@@ -427,19 +410,14 @@ export function ResetPasswordPage({ showAlert }) {
     }
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/reset-password", {
+      await apiFetch("/api/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, password, userType }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        showAlert(data.message || "Reset failed", "error");
-        return;
-      }
+      }, "PASSWORD_RESET_FAILED");
       setSuccess(true);
-    } catch {
-      showAlert("Network error. Please try again.", "error");
+    } catch (err) {
+      showAlert(err.message || API_ERRORS.PASSWORD_RESET_FAILED.message, "error");
     } finally {
       setLoading(false);
     }
@@ -541,23 +519,19 @@ export function SingerRegistration({ showAlert, setShowWelcome }) {
       e.preventDefault();
       setLoading(true);
       try {
-        const res = await fetch("/api/auth/register/singer", {
+        await apiFetch("/api/auth/register/singer", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          credentials: "include",
           body: JSON.stringify(form),
-        });
-        const data = await res.json();
-        if (!res.ok) { showAlert(data.message || "Registration failed", "error"); return; }
+        }, "REGISTRATION_FAILED");
 
-        const profileRes = await fetch("/api/auth/me", { credentials: "include" });
-        const profile = await profileRes.json();
+        const { data: profile } = await apiFetch("/api/auth/me", {}, "PROFILE_LOAD_FAILED");
         setCurrentUser({ type: "singer", data: profile });
         setView("singerDashboard");
         setShowWelcome(true);
         showAlert("Account created successfully!", "success");
       } catch (err) {
-        showAlert("Registration failed", "error");
+        showAlert(err.message || API_ERRORS.REGISTRATION_FAILED.message, "error");
       } finally {
         setLoading(false);
       }
@@ -660,23 +634,19 @@ export function OrgRegistration({ showAlert, setShowWelcome }) {
       e.preventDefault();
       setLoading(true);
       try {
-        const res = await fetch("/api/auth/register/organization", {
+        await apiFetch("/api/auth/register/organization", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          credentials: "include",
           body: JSON.stringify(form),
-        });
-        const data = await res.json();
-        if (!res.ok) { showAlert(data.message || "Registration failed", "error"); return; }
+        }, "REGISTRATION_FAILED");
 
-        const profileRes = await fetch("/api/auth/me", { credentials: "include" });
-        const profile = await profileRes.json();
+        const { data: profile } = await apiFetch("/api/auth/me", {}, "PROFILE_LOAD_FAILED");
         setCurrentUser({ type: "organization", data: profile });
         setView("orgDashboard");
         setShowWelcome(true);
         showAlert("Organization account created!", "success");
       } catch (err) {
-        showAlert("Registration failed", "error");
+        showAlert(err.message || API_ERRORS.REGISTRATION_FAILED.message, "error");
       } finally {
         setLoading(false);
       }

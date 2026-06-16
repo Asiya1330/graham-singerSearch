@@ -7,6 +7,7 @@ import { createServer } from "http";
 import { pool } from "./storage";
 import { seedRepertoire } from "./seed-repertoire";
 import { geocodeCityState } from "./lib/geocode";
+import { HttpApiError, sendApiError } from "./lib/api-response";
 const app = express();
 app.set("trust proxy", 1);
 const httpServer = createServer(app);
@@ -189,16 +190,25 @@ app.use((req, res, next) => {
   await registerRoutes(httpServer, app);
 
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
     console.error("Internal Server Error:", err);
 
     if (res.headersSent) {
       return next(err);
     }
 
-    return res.status(status).json({ message });
+    if (err instanceof HttpApiError) {
+      return sendApiError(res, err.code, err.message);
+    }
+
+    const status = err.status || err.statusCode || 500;
+    if (status >= 400 && status < 500) {
+      return res.status(status).json({
+        code: "VALIDATION_FAILED",
+        message: err.message || "Please check your input and try again.",
+      });
+    }
+
+    return sendApiError(res, "INTERNAL_ERROR");
   });
 
   // importantly only setup vite in development and after
