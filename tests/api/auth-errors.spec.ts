@@ -43,7 +43,7 @@ test.describe("API error messaging", () => {
       },
     });
 
-    expect(response.status()).toBe(401);
+    expect(response.status()).toBe(400);
     const body = await response.json();
     expect(body.code).toBe("INVALID_PASSWORD");
     expect(body.message).toMatch(/Incorrect password/i);

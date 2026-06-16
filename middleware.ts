@@ -1,6 +1,6 @@
 import { API_ERRORS } from "./shared/api-errors";
 
-const HOP_BY_HOP = new Set([
+const STRIP_REQUEST_HEADERS = new Set([
   "connection",
   "keep-alive",
   "proxy-authenticate",
@@ -25,10 +25,27 @@ function getRailwayBase(): string | null {
 function forwardRequestHeaders(request: Request): Headers {
   const headers = new Headers();
   request.headers.forEach((value, key) => {
-    if (HOP_BY_HOP.has(key.toLowerCase())) return;
+    if (STRIP_REQUEST_HEADERS.has(key.toLowerCase())) return;
     headers.set(key, value);
   });
   return headers;
+}
+
+function jsonResponse(body: unknown, status: number): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
+function serviceUnavailable(status = 503): Response {
+  return jsonResponse(
+    {
+      code: "SERVICE_UNAVAILABLE",
+      message: API_ERRORS.SERVICE_UNAVAILABLE.message,
+    },
+    status,
+  );
 }
 
 export const config = {
@@ -38,43 +55,50 @@ export const config = {
 export default async function middleware(request: Request): Promise<Response> {
   const railwayBase = getRailwayBase();
   if (!railwayBase) {
-    const body = {
-      code: "SERVICE_UNAVAILABLE",
-      message: API_ERRORS.SERVICE_UNAVAILABLE.message,
-    };
-    return new Response(JSON.stringify(body), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return serviceUnavailable(500);
   }
 
   const incoming = new URL(request.url);
   const target = `${railwayBase}${incoming.pathname}${incoming.search}`;
 
   try {
+    const method = request.method.toUpperCase();
+    const hasBody = method !== "GET" && method !== "HEAD";
+    const requestBody = hasBody ? await request.text() : undefined;
+
     const upstream = await fetch(target, {
-      method: request.method,
+      method,
       headers: forwardRequestHeaders(request),
-      body:
-        request.method === "GET" || request.method === "HEAD"
-          ? undefined
-          : request.body,
+      body: requestBody,
     });
 
-    return new Response(upstream.body, {
+    const responseBody = await upstream.text();
+    const responseHeaders = new Headers();
+    responseHeaders.set(
+      "content-type",
+      upstream.headers.get("content-type") || "application/json; charset=utf-8",
+    );
+
+    const setCookies =
+      typeof upstream.headers.getSetCookie === "function"
+        ? upstream.headers.getSetCookie()
+        : [];
+    if (setCookies.length > 0) {
+      for (const cookie of setCookies) {
+        responseHeaders.append("set-cookie", cookie);
+      }
+    } else {
+      const cookie = upstream.headers.get("set-cookie");
+      if (cookie) responseHeaders.append("set-cookie", cookie);
+    }
+
+    return new Response(responseBody, {
       status: upstream.status,
       statusText: upstream.statusText,
-      headers: upstream.headers,
+      headers: responseHeaders,
     });
   } catch (err) {
     console.error("[api-proxy] upstream request failed:", err);
-    const body = {
-      code: "SERVICE_UNAVAILABLE",
-      message: API_ERRORS.SERVICE_UNAVAILABLE.message,
-    };
-    return new Response(JSON.stringify(body), {
-      status: 503,
-      headers: { "Content-Type": "application/json" },
-    });
+    return serviceUnavailable(503);
   }
 }
