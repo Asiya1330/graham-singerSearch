@@ -59,6 +59,7 @@ import { BLANK_FILTERS, AlertBanner, AppFooter } from "./AppShared";
 import { navigateToView, viewFromPath, pathFromView, requiredAccessForView } from "./lib/nav";
 import { apiFetch, getErrorMessageFromBody, API_ERRORS } from "./lib/api";
 import { ApiErrorText } from "./components/ApiErrorText";
+import { syncStripeSubscription } from "./lib/stripe";
 // Assets
 import heroVideo from "./assets/hero-opera.mp4";
 import singerBanner from "@assets/singer-banner_1771276151336.gif";
@@ -178,6 +179,42 @@ export default function App() {
   // Hydrate auth + admin session once on load. The URL is the source of truth
   // for which view renders; the route guards below redirect when access is
   // denied (including after a hard reload of a protected URL).
+  // Handle Stripe checkout redirect query params
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const checkout = params.get("checkout");
+    const viewParam = params.get("view");
+    if (checkout === "success") {
+      showAlert("Subscription started! Syncing your account…", "success");
+      syncStripeSubscription()
+        .then((data) => {
+          if (data?.userType === "singer") setCurrentUser({ type: "singer", data });
+          else if (data?.userType === "organization") setCurrentUser({ type: "organization", data });
+          showAlert("Pro subscription active!", "success");
+        })
+        .catch(() => {
+          fetch("/api/auth/me", { credentials: "include" })
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+              if (data?.userType === "singer") setCurrentUser({ type: "singer", data });
+              else if (data?.userType === "organization") setCurrentUser({ type: "organization", data });
+            })
+            .catch(() => {});
+        });
+    } else if (checkout === "cancel") {
+      showAlert("Checkout canceled.", "error");
+    }
+    if (viewParam) {
+      setView(viewParam);
+    }
+    if (checkout || viewParam) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("checkout");
+      url.searchParams.delete("view");
+      window.history.replaceState({}, "", `${url.pathname}${url.search}`);
+    }
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     (async () => {

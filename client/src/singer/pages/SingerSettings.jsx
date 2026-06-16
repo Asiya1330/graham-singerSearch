@@ -4,6 +4,7 @@ import { SingerNav } from "../../AppNav";
 import { US_STATES } from "../../AppShared";
 import { useCityStateAutofill } from "../../hooks/useCityStateAutofill";
 import { getErrorMessageFromBody } from "../../lib/api";
+import { startStripeCheckout, openStripeBillingPortal, stripeStatusLabel } from "../../lib/stripe";
 
 export function SingerSettings() {
   const { currentUser, setCurrentUser, setView } = useAppContext();
@@ -415,8 +416,13 @@ export function SingerSettings() {
               const tier = user.subscription_tier;
               const isFounding = tier === "founding" && user.founding_expires_at;
               const isPro = tier === "pro";
+              const hasStripeSub = Boolean(user.stripe_subscription_id);
+              const stripeStatus = stripeStatusLabel(user.stripe_subscription_status);
               const foundingDate = isFounding
                 ? new Date(user.founding_expires_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+                : null;
+              const trialEndDate = user.pro_expires_at && user.stripe_subscription_status === "trialing"
+                ? new Date(user.pro_expires_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
                 : null;
               const planLabel = isPro ? "Pro" : isFounding ? "Founding Artist" : "Free";
               const planColor = isPro
@@ -424,13 +430,44 @@ export function SingerSettings() {
                 : isFounding
                   ? "bg-amber-100 text-amber-800"
                   : "bg-slate-100 text-slate-600";
+
+              const handleDowngrade = async () => {
+                if (hasStripeSub) {
+                  try {
+                    await openStripeBillingPortal();
+                  } catch (e) {
+                    setProfileMsg({ type: "error", text: e.message || "Failed to open billing portal." });
+                  }
+                  return;
+                }
+                if (!window.confirm("Downgrade to the Free tier? You will lose Pro features at the end of the current period.")) return;
+                try {
+                  const res = await fetch("/api/singer/downgrade", { method: "POST", credentials: "include" });
+                  const data = await res.json().catch(() => ({}));
+                  if (res.status === 409 && data.usePortal) {
+                    await openStripeBillingPortal();
+                    return;
+                  }
+                  if (!res.ok) { setProfileMsg({ type: "error", text: data.message || "Failed to downgrade. Please try again." }); return; }
+                  setProfileMsg({ type: "success", text: "Your account has been moved to the Free tier." });
+                  window.location.reload();
+                } catch (e) {
+                  setProfileMsg({ type: "error", text: "Network error. Please try again." });
+                }
+              };
+
               return (
                 <>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-wrap">
                     <span className={`px-3 py-1 rounded-full text-sm font-semibold ${planColor}`} data-testid="text-subscription-tier">
                       {planLabel}
                     </span>
                     {isPro && <span className="text-sm text-slate-600">$9.99/month</span>}
+                    {stripeStatus && (
+                      <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full" data-testid="text-stripe-status">
+                        {stripeStatus}
+                      </span>
+                    )}
                   </div>
                   {isFounding && (
                     <div className="bg-amber-50 border border-amber-200 rounded-lg p-3" data-testid="text-founding-info">
@@ -438,47 +475,66 @@ export function SingerSettings() {
                       <p className="text-xs text-amber-700 mt-1">Enjoy full Pro features at no charge as one of our earliest members.</p>
                     </div>
                   )}
+                  {user.stripe_subscription_status === "past_due" && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3" data-testid="text-past-due-warning">
+                      <p className="text-sm text-red-900 font-medium">Your payment is past due.</p>
+                      <p className="text-xs text-red-700 mt-1">Update your payment method in billing settings to keep Pro access.</p>
+                    </div>
+                  )}
                   {isPro && !isFounding && (
                     <div className="space-y-3">
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-3" data-testid="text-pro-info">
-                        <p className="text-sm text-blue-900 font-medium">You are on the Pro plan — $9.99/month</p>
-                        <p className="text-xs text-blue-700 mt-1">To manage your subscription contact <a href="mailto:support@singersearch.net" className="underline font-medium">support@singersearch.net</a></p>
+                        <p className="text-sm text-blue-900 font-medium">
+                          {user.stripe_subscription_status === "trialing"
+                            ? `Free trial active — billing starts ${trialEndDate || "after trial"}`
+                            : "You are on the Pro plan — $9.99/month"}
+                        </p>
+                        {hasStripeSub ? (
+                          <p className="text-xs text-blue-700 mt-1">Manage your subscription, payment method, and invoices in the billing portal.</p>
+                        ) : (
+                          <p className="text-xs text-blue-700 mt-1">To manage your subscription contact <a href="mailto:support@singersearch.net" className="underline font-medium">support@singersearch.net</a></p>
+                        )}
                       </div>
+                      {hasStripeSub && (
+                        <button
+                          onClick={async () => {
+                            try {
+                              await openStripeBillingPortal();
+                            } catch (e) {
+                              setProfileMsg({ type: "error", text: e.message || "Failed to open billing portal." });
+                            }
+                          }}
+                          className="text-sm font-medium text-blue-700 hover:text-blue-900 border border-blue-200 hover:bg-blue-50 px-4 py-2 rounded-lg transition-colors"
+                          data-testid="button-manage-billing-singer"
+                        >
+                          Manage billing
+                        </button>
+                      )}
                       <button
-                        onClick={async () => {
-                          if (!window.confirm("Downgrade to the Free tier? You will lose Pro features (priority short-notice access, profile view analytics, Castability Score) at the end of the current period.")) return;
-                          try {
-                            const res = await fetch("/api/singer/downgrade", { method: "POST", credentials: "include" });
-                            if (!res.ok) { setProfileMsg({ type: "error", text: "Failed to downgrade. Please try again." }); return; }
-                            setProfileMsg({ type: "success", text: "Your account has been moved to the Free tier." });
-                            const me = await fetch("/api/auth/me", { credentials: "include" });
-                            if (me.ok) { const data = await me.json(); window.location.reload(); }
-                          } catch (e) {
-                            setProfileMsg({ type: "error", text: "Network error. Please try again." });
-                          }
-                        }}
+                        onClick={handleDowngrade}
                         className="text-sm font-medium text-slate-600 hover:text-red-700 border border-slate-300 hover:border-red-300 hover:bg-red-50 px-4 py-2 rounded-lg transition-colors"
                         data-testid="button-downgrade-singer"
                       >
-                        Downgrade to Free
+                        {hasStripeSub ? "Cancel subscription" : "Downgrade to Free"}
                       </button>
                     </div>
                   )}
                   {!isPro && !isFounding && (
                     <div className="space-y-3">
-                      <p className="text-sm text-slate-600">Upgrade to Pro for expedited Short-Notice Engagement access, profile view analytics, and the Castability Score.</p>
+                      <p className="text-sm text-slate-600">Upgrade to Pro for expedited Short-Notice Engagement access, profile view analytics, and the Castability Score. Start with a 7-day free trial.</p>
                       <button
-                        onClick={() => setProfileMsg({ type: "success", text: "Online payments coming soon. To upgrade contact us at support@singersearch.net" })}
+                        onClick={async () => {
+                          try {
+                            await startStripeCheckout();
+                          } catch (e) {
+                            setProfileMsg({ type: "error", text: e.message || "Failed to start checkout." });
+                          }
+                        }}
                         className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
                         data-testid="button-upgrade-pro"
                       >
-                        Upgrade to Pro — $9.99/month
+                        Start free trial — $9.99/month
                       </button>
-                      {profileMsg?.text?.startsWith("Online payments") && (
-                        <p className="text-sm text-blue-700 bg-blue-50 border border-blue-200 rounded p-2" data-testid="text-upgrade-message">
-                          Online payments coming soon. To upgrade contact us at <a href="mailto:support@singersearch.net" className="underline font-semibold">support@singersearch.net</a>
-                        </p>
-                      )}
                     </div>
                   )}
                 </>

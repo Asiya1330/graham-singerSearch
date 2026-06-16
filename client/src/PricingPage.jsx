@@ -2,12 +2,16 @@ import React, { useState, useEffect } from "react";
 import { CheckCircle, Zap } from "lucide-react";
 import { useAppContext } from "./AppContext";
 import { navigateToView } from "./lib/nav";
+import { startStripeCheckout, openStripeBillingPortal } from "./lib/stripe";
 
 export function PricingPage({ showAlert }) {
   const { currentUser, setCurrentUser, setView } = useAppContext();
 
     const [pricingType, setPricingType] = useState(currentUser?.type || "singer");
+    const [checkoutLoading, setCheckoutLoading] = useState(false);
     const isSinger = pricingType === "singer";
+    const isPro = currentUser?.data?.subscription_tier === "pro";
+    const hasStripeSub = Boolean(currentUser?.data?.stripe_subscription_id);
     
     return (
       <div className="min-h-screen bg-slate-50 py-12">
@@ -95,6 +99,7 @@ export function PricingPage({ showAlert }) {
                   <span className="text-5xl font-extrabold tracking-tight">{isSinger ? "$9.99" : "$79"}</span>
                   <span className="ml-1 text-xl font-semibold text-slate-500">/month</span>
                 </div>
+                <p className="mt-2 text-sm font-medium text-emerald-700">7-day free trial · card required</p>
               </div>
 
               <ul className="space-y-4 mb-8 flex-1">
@@ -124,40 +129,34 @@ export function PricingPage({ showAlert }) {
                         return;
                     }
 
-                    const confirmed = window.confirm(`Confirm subscription to ${isSinger ? "Singer Pro" : "Organization Pro"}?`);
-                    if(confirmed) {
+                    if (hasStripeSub) {
                         try {
-                            if(isSinger) {
-                                await fetch("/api/singer/profile", {
-                                    method: "PUT",
-                                    headers: { "Content-Type": "application/json" },
-                                    credentials: "include",
-                                    body: JSON.stringify({ subscription_tier: "pro" }),
-                                });
-                            } else {
-                                await fetch("/api/org/subscription", {
-                                    method: "PUT",
-                                    headers: { "Content-Type": "application/json" },
-                                    credentials: "include",
-                                    body: JSON.stringify({ tier: "pro" }),
-                                });
-                            }
-                            const profileRes = await fetch("/api/auth/me", { credentials: "include" });
-                            const profile = await profileRes.json();
-                            setCurrentUser({ type: currentUser.type, data: profile });
-                            showAlert("Upgrade successful! Pro features unlocked.", "success");
-                            if(isSinger) setView("singerDashboard");
-                            else setView("orgDashboard");
+                            await openStripeBillingPortal();
                         } catch (err) {
-                            showAlert("Upgrade failed", "error");
+                            showAlert(err.message || "Failed to open billing portal", "error");
                         }
+                        return;
+                    }
+
+                    setCheckoutLoading(true);
+                    try {
+                        await startStripeCheckout();
+                    } catch (err) {
+                        showAlert(err.message || "Upgrade failed", "error");
+                        setCheckoutLoading(false);
                     }
                 }}
-                disabled={currentUser?.data?.subscription_tier === 'pro'}
+                disabled={(isPro && !hasStripeSub) || checkoutLoading}
                 className="w-full py-3 px-4 bg-blue-600 border border-transparent rounded-xl shadow-lg text-white font-bold hover:bg-blue-700 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
-                {currentUser 
-                    ? (currentUser.data.subscription_tier === 'pro' ? "Plan Active" : `Upgrade to ${isSinger ? "Singer" : "Org"} Pro`)
+                {checkoutLoading
+                    ? "Redirecting…"
+                    : currentUser
+                    ? (hasStripeSub
+                        ? "Manage billing"
+                        : isPro
+                          ? "Plan Active"
+                          : `Start free trial — ${isSinger ? "Singer" : "Org"} Pro`)
                     : "Sign in to Upgrade"
                 }
               </button>
