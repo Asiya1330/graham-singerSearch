@@ -54,11 +54,22 @@ async function hashPassword(password: string): Promise<string> {
 }
 
 async function comparePasswords(supplied: string, stored: string): Promise<boolean> {
+  if (!supplied || !stored || !stored.includes(".")) return false;
   const [saltHex, hashHex] = stored.split(".");
-  const salt = Buffer.from(saltHex, "hex");
-  const storedHash = Buffer.from(hashHex, "hex");
-  const suppliedHash = (await scryptAsync(supplied, salt, 64)) as Buffer;
-  return timingSafeEqual(storedHash, suppliedHash);
+  if (!saltHex || !hashHex) return false;
+
+  try {
+    const salt = Buffer.from(saltHex, "hex");
+    const storedHash = Buffer.from(hashHex, "hex");
+    if (!storedHash.length) return false;
+
+    const suppliedHash = (await scryptAsync(supplied, salt, 64)) as Buffer;
+    if (storedHash.length !== suppliedHash.length) return false;
+
+    return timingSafeEqual(storedHash, suppliedHash);
+  } catch {
+    return false;
+  }
 }
 
 function hashResetToken(token: string): string {
