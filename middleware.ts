@@ -1,7 +1,4 @@
-/**
- * Proxies /api/* to Railway using RAILWAY_API_URL (set per Vercel environment).
- * Required for static deployments (outputDirectory) where /api serverless files are not used.
- */
+import { API_ERRORS } from "./shared/api-errors";
 
 const HOP_BY_HOP = new Set([
   "connection",
@@ -41,13 +38,14 @@ export const config = {
 export default async function middleware(request: Request): Promise<Response> {
   const railwayBase = getRailwayBase();
   if (!railwayBase) {
-    return new Response(
-      JSON.stringify({
-        message:
-          "RAILWAY_API_URL is not set on Vercel. Add it under Project Settings → Environment Variables.",
-      }),
-      { status: 500, headers: { "Content-Type": "application/json" } },
-    );
+    const body = {
+      code: "SERVICE_UNAVAILABLE",
+      message: API_ERRORS.SERVICE_UNAVAILABLE.message,
+    };
+    return new Response(JSON.stringify(body), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   const incoming = new URL(request.url);
@@ -69,13 +67,14 @@ export default async function middleware(request: Request): Promise<Response> {
       headers: upstream.headers,
     });
   } catch (err) {
-    console.error("[api-proxy] Railway request failed:", err);
-    return new Response(
-      JSON.stringify({
-        message: "Failed to reach Railway API",
-        target,
-      }),
-      { status: 502, headers: { "Content-Type": "application/json" } },
-    );
+    console.error("[api-proxy] upstream request failed:", err);
+    const body = {
+      code: "SERVICE_UNAVAILABLE",
+      message: API_ERRORS.SERVICE_UNAVAILABLE.message,
+    };
+    return new Response(JSON.stringify(body), {
+      status: 503,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }

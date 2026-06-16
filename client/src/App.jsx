@@ -56,6 +56,8 @@ import { PrivacyPage } from "./PrivacyPage";
 import { SingerLogin, OrganizationLogin, SingerRegistration, OrgRegistration, ResetPasswordPage } from "./AuthPages";
 import { BLANK_FILTERS, AlertBanner, AppFooter } from "./AppShared";
 import { navigateToView, viewFromPath, PUBLIC_PATHS } from "./lib/nav";
+import { apiFetch, getErrorMessageFromBody, API_ERRORS } from "./lib/api";
+import { ApiErrorText } from "./components/ApiErrorText";
 // Assets
 import heroVideo from "./assets/hero-opera.mp4";
 import singerBanner from "@assets/singer-banner_1771276151336.gif";
@@ -78,20 +80,14 @@ function AdminLogin({ onSuccess }) {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/admin/auth/login", {
+      await apiFetch("/api/admin/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({ password }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        onSuccess();
-      } else {
-        setError(data.message || "Login failed");
-      }
-    } catch {
-      setError("Network error. Please try again.");
+      }, "ADMIN_INVALID_PASSWORD");
+      onSuccess();
+    } catch (err) {
+      setError(err.message || API_ERRORS.ADMIN_INVALID_PASSWORD.message);
     } finally {
       setLoading(false);
     }
@@ -123,7 +119,7 @@ function AdminLogin({ onSuccess }) {
             />
           </div>
           {error && (
-            <p className="text-sm text-red-600 font-medium" data-testid="admin-login-error">{error}</p>
+            <ApiErrorText message={error} testId="admin-login-error" />
           )}
           <button
             type="submit"
@@ -228,7 +224,10 @@ export default function App() {
 
       const res = await fetch(`/api/search?${params.toString()}`, { credentials: "include" });
       const data = await res.json();
-      if (!res.ok) { showAlert(data.message || "Search failed", "error"); return; }
+      if (!res.ok) {
+        showAlert(getErrorMessageFromBody(data, "SEARCH_FAILED"), "error");
+        return;
+      }
 
       const results = data.results || [];
       setSearchResults(results);
@@ -247,7 +246,7 @@ export default function App() {
         }
       }
     } catch (err) {
-      showAlert("Search failed", "error");
+      showAlert(err.message || API_ERRORS.SEARCH_FAILED.message, "error");
     } finally {
       setIsSearching(false);
     }
@@ -321,12 +320,14 @@ export default function App() {
         body: JSON.stringify({ singerId, isEmergency: type === "emergency" }),
       });
       const data = await res.json();
-      if (!res.ok) { showAlert(data.message || "Could not reveal contact", "error"); return; }
+      if (!res.ok) {
+        showAlert(getErrorMessageFromBody(data, "CONTACT_REVEAL_FAILED"), "error");
+        return;
+      }
       
       showAlert("Contact information revealed.", "success");
       
-      const profileRes = await fetch("/api/auth/me", { credentials: "include" });
-      const profile = await profileRes.json();
+      const { data: profile } = await apiFetch("/api/auth/me", {}, "PROFILE_LOAD_FAILED");
       setCurrentUser({ type: "organization", data: profile });
       
       setSearchResults(prev => prev.map(s => s.id === singerId ? { ...s, revealed: true, email: data.email, agent_name: data.agent_name, agent_email: data.agent_email, website_url: data.website_url } : s));
@@ -334,7 +335,7 @@ export default function App() {
         setSelectedSinger(prev => ({ ...prev, revealed: true, email: data.email, agent_name: data.agent_name, agent_email: data.agent_email, website_url: data.website_url }));
       }
     } catch (err) {
-      showAlert("Failed to reveal contact", "error");
+      showAlert(err.message || API_ERRORS.CONTACT_REVEAL_FAILED.message, "error");
     }
   };
 
