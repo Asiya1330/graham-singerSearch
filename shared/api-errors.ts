@@ -88,11 +88,11 @@ export const API_ERRORS: Record<ApiErrorCode, ApiErrorDefinition> = {
     message: "No account found with that email. Please register first.",
   },
   INVALID_PASSWORD: {
-    status: 401,
+    status: 400,
     message: "Incorrect password. Please try again.",
   },
   CURRENT_PASSWORD_INCORRECT: {
-    status: 401,
+    status: 400,
     message: "Your current password is incorrect.",
   },
   INVALID_USER_TYPE: {
