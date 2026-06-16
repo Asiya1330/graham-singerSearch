@@ -5,6 +5,7 @@ import { useAppContext } from "./AppContext";
 import { UpgradeModal, US_STATES } from "./AppShared";
 import { useCityStateAutofill } from "./hooks/useCityStateAutofill";
 import RepertoireAutocomplete, { VOICE_TYPE_DB_TO_LABEL } from "./RepertoireAutocomplete";
+import { getErrorMessageFromBody, API_ERRORS } from "./lib/api";
 
 export function EmergencySearch({ showAlert, revealContact, showUpgradeModal, setShowUpgradeModal }) {
   const { currentUser, setView } = useAppContext();
@@ -62,13 +63,16 @@ export function EmergencySearch({ showAlert, revealContact, showUpgradeModal, se
         
         const res = await fetch(`/api/search?${params.toString()}`, { credentials: "include" });
         const data = await res.json();
-        if (!res.ok) { showAlert(data.message || "Search failed", "error"); return; }
+        if (!res.ok) {
+          showAlert(getErrorMessageFromBody(data, "SEARCH_FAILED"), "error");
+          return;
+        }
         
         const list = Array.isArray(data) ? data : (Array.isArray(data?.results) ? data.results : []);
         setResults(list);
         setHasSearched(true);
       } catch (err) {
-        showAlert("Urgent search failed", "error");
+        showAlert(err.message || API_ERRORS.SEARCH_FAILED.message, "error");
       }
     };
 
