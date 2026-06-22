@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Award, BarChart2, Calendar, Camera, CheckCircle, ChevronRight, Edit2, Eye, Info, Shield, TrendingUp, Users, UserX, X, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import RepertoireAutocomplete, { VOICE_TYPE_DB_TO_LABEL, CATEGORY_DB_TO_PERFTYPE } from "./RepertoireAutocomplete";
-import singerSearchLogo from "@assets/Singer_Search_Logo_May_2026_1777734809747.png";
 import { AppFooter } from "./AppShared";
+import { SingerNav } from "./AppNav";
 import { useAppContext } from "./AppContext";
 
 export function SingerDashboard({ setSearchResults, showAlert }) {
-  const { currentUser, setCurrentUser, setView, setSelectedSinger } = useAppContext();
-    const user = currentUser.data;
+  const { currentUser, setCurrentUser, setView } = useAppContext();
+    const user = currentUser?.data || {};
     const userAvails = user.availabilities || [];
     const isPro = user.subscription_tier === 'pro';
     
@@ -87,21 +87,25 @@ export function SingerDashboard({ setSearchResults, showAlert }) {
       const file = e.target.files?.[0];
       if (!file) return;
       if (file.type !== "application/pdf") { showAlert("Only PDF files are allowed", "error"); return; }
-      if (file.size > 5 * 1024 * 1024) { showAlert("File must be under 5MB", "error"); return; }
+      if (file.size > 4 * 1024 * 1024) { showAlert("File must be under 4MB", "error"); return; }
       setResumeUploading(true);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 30000);
       try {
         const formData = new FormData();
         formData.append("resume", file);
-        const res = await fetch("/api/singer/resume", { method: "POST", credentials: "include", body: formData });
-        if (!res.ok) { const data = await res.json(); showAlert(data.message || "Upload failed", "error"); setResumeUploading(false); return; }
+        const res = await fetch("/api/singer/resume", { method: "POST", credentials: "include", body: formData, signal: controller.signal });
+        if (!res.ok) { const data = await res.json().catch(() => ({})); showAlert(data.message || "Upload failed", "error"); return; }
         const profileRes = await fetch("/api/auth/me", { credentials: "include" });
         const profile = await profileRes.json();
         setCurrentUser({ type: "singer", data: profile });
         showAlert("Resume uploaded successfully", "success");
       } catch (err) {
-        showAlert("Failed to upload resume", "error");
+        showAlert(err.name === "AbortError" ? "Upload timed out. Please try again." : "Failed to upload resume", "error");
+      } finally {
+        clearTimeout(timeout);
+        setResumeUploading(false);
       }
-      setResumeUploading(false);
     };
 
     const handlePhotoUpload = async (e) => {
@@ -109,23 +113,27 @@ export function SingerDashboard({ setSearchResults, showAlert }) {
       if (!file) return;
       const allowed = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
       if (!allowed.includes(file.type)) { showAlert("Please upload a JPG, PNG, or WebP image", "error"); return; }
-      if (file.size > 5 * 1024 * 1024) { showAlert("Photo must be under 5MB", "error"); return; }
+      if (file.size > 4 * 1024 * 1024) { showAlert("Photo must be under 4MB", "error"); return; }
       setPhotoPreview(URL.createObjectURL(file));
       setPhotoUploading(true);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 30000);
       try {
         const formData = new FormData();
         formData.append("headshot", file);
-        const res = await fetch("/api/singer/headshot", { method: "POST", credentials: "include", body: formData });
-        const data = await res.json();
-        if (!res.ok) { showAlert(data.message || "Upload failed", "error"); setPhotoUploading(false); return; }
+        const res = await fetch("/api/singer/headshot", { method: "POST", credentials: "include", body: formData, signal: controller.signal });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) { showAlert(data.message || "Upload failed", "error"); return; }
         const profileRes = await fetch("/api/auth/me", { credentials: "include" });
         const profile = await profileRes.json();
         setCurrentUser({ type: "singer", data: profile });
         showAlert("Profile photo updated!", "success");
       } catch (err) {
-        showAlert("Failed to upload photo", "error");
+        showAlert(err.name === "AbortError" ? "Upload timed out. Please try again." : "Failed to upload photo", "error");
+      } finally {
+        clearTimeout(timeout);
+        setPhotoUploading(false);
       }
-      setPhotoUploading(false);
     };
 
     const handleRequestEmergency = async () => {
@@ -139,6 +147,38 @@ export function SingerDashboard({ setSearchResults, showAlert }) {
         showAlert("Urgent availability signal submitted for admin review.", "success");
       } catch (err) {
         showAlert(err.message || "Failed to submit request", "error");
+      }
+    };
+
+    const handleOptOutEmergency = async () => {
+      if (!window.confirm("Opt out of Short-Notice Engagements? Your profile will no longer appear in urgent searches.")) return;
+      try {
+        const res = await fetch("/api/singer/emergency/opt-out", { method: "POST", credentials: "include" });
+        if (!res.ok) { showAlert("Failed to opt out", "error"); return; }
+        const profileRes = await fetch("/api/auth/me", { credentials: "include" });
+        const profile = await profileRes.json();
+        setCurrentUser({ type: "singer", data: profile });
+        showAlert("Opted out of Short-Notice Engagements.", "success");
+      } catch (err) {
+        showAlert("Failed to opt out", "error");
+      }
+    };
+
+    const handleCancelEmergencyRequest = async () => {
+      try {
+        const res = await fetch("/api/singer/profile", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ emergency_status_requested: false }),
+        });
+        if (!res.ok) { showAlert("Failed to cancel request", "error"); return; }
+        const profileRes = await fetch("/api/auth/me", { credentials: "include" });
+        const profile = await profileRes.json();
+        setCurrentUser({ type: "singer", data: profile });
+        showAlert("Urgent request cancelled.", "success");
+      } catch (err) {
+        showAlert("Failed to cancel request", "error");
       }
     };
 
@@ -512,61 +552,7 @@ export function SingerDashboard({ setSearchResults, showAlert }) {
 
     return (
       <div className="min-h-screen bg-slate-50 pb-12">
-        <nav className="bg-[#121212] border-b border-white/10 sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between h-14">
-              <div className="flex">
-                <div className="flex-shrink-0 flex items-center cursor-pointer pr-6" onClick={() => setView("landing")}>
-                  <img src={singerSearchLogo} alt="SingerSearch" className="h-10 object-contain brightness-0 invert" />
-                </div>
-                <div className="hidden sm:flex sm:space-x-6">
-                  <span className="border-[#3B82F6] text-white inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                    Dashboard
-                  </span>
-                  <span
-                    className="text-white/40 hover:text-white/80 inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium cursor-pointer transition-colors"
-                    onClick={() => { setSelectedSinger({ ...user, previewMode: true }); setView("profileView"); }}
-                    data-testid="link-preview-my-profile"
-                  >
-                    Preview My Profile
-                  </span>
-                  <span className="text-white/40 hover:text-white/80 inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium cursor-pointer transition-colors" onClick={() => { setView("singerSettings"); setTimeout(() => { const el = document.getElementById("singer-subscription-section"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100); }} data-testid="link-my-subscription-dashboard">
-                    My Subscription
-                  </span>
-                  <span className="text-white/40 hover:text-white/80 inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium cursor-pointer transition-colors" onClick={() => setView("singerSettings")}>
-                    Account &amp; Profile
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                {!isPro && (
-                    <button 
-                        onClick={() => setView("pricing")}
-                        className="text-xs font-semibold text-white bg-[#3B82F6] hover:bg-blue-500 px-3 py-1.5 rounded transition-colors"
-                    >
-                        Upgrade to Pro
-                    </button>
-                )}
-                <div className="flex items-center">
-                    <span className="text-white/50 text-sm font-medium mr-4">
-                    {user.first_name} {user.last_name}
-                    </span>
-                    <button
-                    onClick={async () => {
-                        await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-                        setCurrentUser(null);
-                        setSearchResults([]);
-                        setView("landing");
-                    }}
-                    className="text-white/30 hover:text-white/60 text-sm transition-colors"
-                    >
-                    Sign out
-                    </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </nav>
+        <SingerNav />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
@@ -663,72 +649,10 @@ export function SingerDashboard({ setSearchResults, showAlert }) {
                     Verified Pro (not yet)
                   </span>
                 )}
-                {user.is_emergency_ready ? (
-                  <div className="inline-flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1 bg-red-100 text-red-800 px-2.5 py-1 rounded-full text-xs font-bold">
-                      <Zap className="w-3.5 h-3.5" /> Available for Short-Notice Engagements
-                    </span>
-                    <button
-                      onClick={async () => {
-                        if (!window.confirm("Opt out of Short-Notice Engagements? Your profile will no longer appear in urgent searches.")) return;
-                        try {
-                          const res = await fetch("/api/singer/emergency/opt-out", {
-                            method: "POST",
-                            credentials: "include",
-                          });
-                          if (!res.ok) { showAlert("Failed to opt out", "error"); return; }
-                          const profileRes = await fetch("/api/auth/me", { credentials: "include" });
-                          const profile = await profileRes.json();
-                          setCurrentUser({ type: "singer", data: profile });
-                          showAlert("Opted out of Short-Notice Engagements.", "success");
-                        } catch (err) {
-                          showAlert("Failed to opt out", "error");
-                        }
-                      }}
-                      className="text-xs font-medium text-slate-600 hover:text-red-700 hover:bg-red-50 border border-slate-200 hover:border-red-200 px-3 py-1 rounded transition-colors"
-                      data-testid="button-optout-emergency"
-                    >
-                      Opt Out
-                    </button>
-                  </div>
-                ) : user.emergency_status_requested ? (
-                  <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5" data-testid="status-emergency-pending">
-                    <span className="inline-flex items-center gap-1 text-amber-800 text-xs font-bold">
-                      <Zap className="w-3.5 h-3.5" /> Emergency Status Request Pending
-                    </span>
-                    <span className="text-[10px] text-amber-700">Awaiting admin review</span>
-                    <button
-                      onClick={async () => {
-                        try {
-                          const res = await fetch("/api/singer/profile", {
-                            method: "PUT",
-                            headers: { "Content-Type": "application/json" },
-                            credentials: "include",
-                            body: JSON.stringify({ emergency_status_requested: false }),
-                          });
-                          if (!res.ok) { showAlert("Failed to cancel request", "error"); return; }
-                          const profileRes = await fetch("/api/auth/me", { credentials: "include" });
-                          const profile = await profileRes.json();
-                          setCurrentUser({ type: "singer", data: profile });
-                          showAlert("Urgent request cancelled.", "success");
-                        } catch (err) {
-                          showAlert("Failed to cancel request", "error");
-                        }
-                      }}
-                      className="text-xs font-medium text-amber-700 hover:text-red-700 hover:bg-red-50 px-2 py-0.5 rounded transition-colors"
-                      data-testid="button-cancel-emergency-request"
-                    >
-                      Cancel Request
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={handleRequestEmergency}
-                    className="inline-flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-1.5 rounded-lg text-xs shadow-sm transition-colors"
-                    data-testid="button-request-emergency"
-                  >
-                    <Zap className="w-3.5 h-3.5" /> Opt In to Short-Notice Engagements
-                  </button>
+                {user.is_emergency_ready && (
+                  <span className="inline-flex items-center gap-1 bg-red-100 text-red-800 px-2.5 py-1 rounded-full text-xs font-bold">
+                    <Zap className="w-3.5 h-3.5" /> Short-Notice Ready
+                  </span>
                 )}
                 {user.is_management_verified ? (
                   <span className="inline-flex items-center gap-1 bg-violet-100 text-violet-800 px-2.5 py-1 rounded-full text-xs font-bold">
@@ -741,7 +665,7 @@ export function SingerDashboard({ setSearchResults, showAlert }) {
                 )}
               </div>
             </div>
-            <div className="mt-3 pt-3 border-t border-slate-100 flex items-center gap-3">
+            <div className="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center gap-x-3 gap-y-2">
               {[
                 { tier: 1, label: "Self-Reported", color: "bg-slate-100 text-slate-500" },
                 { tier: 2, label: "Partially Verified", color: "bg-blue-100 text-blue-700" },
@@ -1041,51 +965,56 @@ export function SingerDashboard({ setSearchResults, showAlert }) {
                 <h3 className="text-lg leading-6 font-medium text-slate-900">Availability</h3>
                 <p className="mt-1 text-sm text-slate-500">Add date windows when you are available for engagements.</p>
               </div>
-              <div className="flex items-center gap-4">
-                <label className={`flex items-center gap-2 cursor-pointer px-4 py-2 rounded-full border transition-all ${isPro ? 'bg-amber-50 border-amber-200 hover:bg-amber-100' : 'bg-slate-50 border-slate-200 opacity-75'}`} title="You may be contacted on short notice for last-minute replacements.">
-                  <input
-                    type="checkbox"
-                    disabled={!isPro}
-                    checked={isPro && user.emergency_opt_in}
-                    onChange={async (e) => {
-                      if (!isPro) return;
-                      const newVal = e.target.checked;
-                      try {
-                        const body = newVal
-                          ? {
-                              opt_in: true,
-                              lead_time: user.emergency_lead_time_hours,
-                              radius: user.emergency_travel_radius_miles,
-                              modes: user.emergency_travel_modes,
-                              notes: user.emergency_notes,
-                            }
-                          : { opt_in: false, lead_time: null, radius: null, modes: null, notes: null };
-                        await fetch("/api/singer/emergency", {
-                          method: "PUT",
-                          headers: { "Content-Type": "application/json" },
-                          credentials: "include",
-                          body: JSON.stringify(body),
-                        });
-                        const profileRes = await fetch("/api/auth/me", { credentials: "include" });
-                        const profile = await profileRes.json();
-                        setCurrentUser({ type: "singer", data: profile });
-                      } catch (err) {
-                        showAlert("Failed to update urgent settings", "error");
-                      }
-                    }}
-                    className="rounded border-amber-300 text-amber-600 focus:ring-amber-500 disabled:cursor-not-allowed"
-                  />
-                  <div>
-                    <span className={`text-sm font-bold flex items-center gap-1 ${isPro ? 'text-amber-800' : 'text-slate-500'}`}>
-                      <Zap className="w-3 h-3" /> Available for Short-Notice Engagements
+              <div className="flex items-center gap-3 flex-wrap">
+                {user.is_emergency_ready ? (
+                  <div className="inline-flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1 bg-red-100 text-red-800 px-3 py-1.5 rounded-full text-xs font-bold">
+                      <Zap className="w-3.5 h-3.5" /> Available for Short-Notice Engagements
                     </span>
-                    {!isPro && <div className="text-[10px] text-blue-600 font-medium cursor-pointer" onClick={() => setView("pricing")}>Upgrade to enable</div>}
+                    <button
+                      onClick={handleOptOutEmergency}
+                      className="text-xs font-medium text-slate-600 hover:text-red-700 hover:bg-red-50 border border-slate-200 hover:border-red-200 px-3 py-1 rounded transition-colors"
+                      data-testid="button-optout-emergency"
+                    >
+                      Opt Out
+                    </button>
                   </div>
-                </label>
+                ) : user.emergency_status_requested ? (
+                  <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5" data-testid="status-emergency-pending">
+                    <span className="inline-flex items-center gap-1 text-amber-800 text-xs font-bold">
+                      <Zap className="w-3.5 h-3.5" /> Short-Notice Request Pending
+                    </span>
+                    <span className="text-[10px] text-amber-700">Awaiting admin review</span>
+                    <button
+                      onClick={handleCancelEmergencyRequest}
+                      className="text-xs font-medium text-amber-700 hover:text-red-700 hover:bg-red-50 px-2 py-0.5 rounded transition-colors"
+                      data-testid="button-cancel-emergency-request"
+                    >
+                      Cancel Request
+                    </button>
+                  </div>
+                ) : isPro ? (
+                  <button
+                    onClick={handleRequestEmergency}
+                    className="inline-flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-1.5 rounded-lg text-xs shadow-sm transition-colors"
+                    data-testid="button-request-emergency"
+                  >
+                    <Zap className="w-3.5 h-3.5" /> Opt In to Short-Notice Engagements
+                  </button>
+                ) : (
+                  <label className="flex items-center gap-2 px-4 py-2 rounded-full border bg-slate-50 border-slate-200 opacity-75" title="You may be contacted on short notice for last-minute replacements.">
+                    <div>
+                      <span className="text-sm font-bold flex items-center gap-1 text-slate-500">
+                        <Zap className="w-3 h-3" /> Available for Short-Notice Engagements
+                      </span>
+                      <div className="text-[10px] text-blue-600 font-medium cursor-pointer" onClick={() => setView("pricing")}>Upgrade to enable</div>
+                    </div>
+                  </label>
+                )}
               </div>
             </div>
 
-            {isPro && user.emergency_opt_in && (
+            {user.is_emergency_ready && (
               <div className="px-6 py-5 border-b border-amber-200 bg-amber-50/40">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -1228,8 +1157,8 @@ export function SingerDashboard({ setSearchResults, showAlert }) {
                   <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
                     <ul className="divide-y divide-slate-200">
                       {userAvails.map((a) => (
-                        <li key={a.id} className="px-4 py-3 flex items-center justify-between hover:bg-slate-50" data-testid={`avail-window-${a.id}`}>
-                          <div className="flex items-center gap-3">
+                        <li key={a.id} className="px-4 py-3 flex items-center justify-between gap-3 hover:bg-slate-50" data-testid={`avail-window-${a.id}`}>
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 min-w-0">
                             <Calendar className="w-4 h-4 text-slate-400" />
                             <span className="text-sm text-slate-900 font-medium">
                               {new Date(a.start_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
@@ -1247,7 +1176,7 @@ export function SingerDashboard({ setSearchResults, showAlert }) {
                           <button
                             data-testid={`button-delete-avail-${a.id}`}
                             onClick={() => handleDeleteAvailability(a.id)}
-                            className="text-slate-400 hover:text-red-500 transition-colors"
+                            className="text-slate-400 hover:text-red-500 transition-colors flex-shrink-0"
                             title="Remove this window"
                           >
                             <X className="w-4 h-4" />
@@ -1268,12 +1197,12 @@ export function SingerDashboard({ setSearchResults, showAlert }) {
 
            {/* Repertoire Entry Section */}
           <div className="bg-white shadow rounded-lg mb-8">
-             <div className="px-6 py-5 border-b border-slate-200 bg-slate-50 flex justify-between items-center rounded-t-lg overflow-hidden">
+             <div className="px-6 py-5 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-t-lg">
                 <div>
                    <h3 className="text-lg leading-6 font-medium text-slate-900">Repertoire & Experience</h3>
                    <p className="mt-1 text-sm text-slate-500">Add roles and works so organizations can find you when they need specific experience.</p>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex gap-3 flex-wrap flex-shrink-0">
                    <button 
                       onClick={() => setIsAddingRole(true)}
                       className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
@@ -1804,13 +1733,13 @@ export function SingerDashboard({ setSearchResults, showAlert }) {
 
                     const renderRole = (role, opts = {}) => (
                         <li key={role.id} className={`px-4 py-3 hover:bg-slate-50 ${opts.muted ? 'opacity-80' : ''}`} data-testid={`role-item-${role.id}`}>
-                            <div className="flex justify-between items-center">
-                                <div className={opts.muted ? 'text-sm' : ''}>
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                                <div className={`min-w-0 break-words ${opts.muted ? 'text-sm' : ''}`}>
                                     <span className={`font-medium ${opts.muted ? 'text-slate-700' : 'text-slate-900'}`}>{role.role_name}</span>
                                     <span className="text-slate-500 mx-1">in</span>
                                     <span className="text-slate-600 italic">{role.work_title}</span>
                                 </div>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 flex-wrap flex-shrink-0">
                                     <span className="text-xs text-slate-500">{role.composer}</span>
                                     {!opts.muted && (role.performance_types || []).map(t => (
                                         <span key={t} className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs capitalize">
@@ -1848,15 +1777,15 @@ export function SingerDashboard({ setSearchResults, showAlert }) {
 
                     const renderWork = (work, opts = {}) => (
                         <li key={work.id} className={`px-4 py-3 hover:bg-slate-50 ${opts.muted ? 'opacity-80' : ''}`} data-testid={`work-item-${work.id}`}>
-                            <div className="flex justify-between items-center">
-                                <div className={opts.muted ? 'text-sm' : ''}>
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                                <div className={`min-w-0 break-words ${opts.muted ? 'text-sm' : ''}`}>
                                     <span className={`font-medium ${opts.muted ? 'text-slate-700' : 'text-slate-900'}`}>{work.work_title}</span>
                                     {work.part_name && <>
                                         <span className="text-slate-500 mx-2">•</span>
                                         <span className="text-slate-600">{work.part_name}</span>
                                     </>}
                                 </div>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 flex-wrap flex-shrink-0">
                                     <span className="text-xs text-slate-500">{work.composer}</span>
                                     {!opts.muted && (
                                         <span className="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-xs capitalize">

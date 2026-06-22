@@ -55,6 +55,7 @@ export function EmergencySearch({ showAlert, revealContact, showUpgradeModal, se
         if (filters.voiceType) params.set("voiceType", filters.voiceType);
         if (filters.roleOrWork) params.set("roleOrWork", filters.roleOrWork);
         if (filters.composer) params.set("composer", filters.composer);
+        if (filters.language && filters.language !== "Any") params.set("language", filters.language);
         if (filters.city) params.set("city", filters.city);
         if (filters.state) params.set("state", filters.state);
         if (filters.radiusMiles) params.set("radius_miles", filters.radiusMiles);

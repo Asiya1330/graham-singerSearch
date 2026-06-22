@@ -52,63 +52,80 @@ app.use((req, res, next) => {
   next();
 });
 
-(async () => {
-  await pool.query(`
-    -- singers schema backfill for migrated databases
-    ALTER TABLE singers ADD COLUMN IF NOT EXISTS latitude double precision;
-    ALTER TABLE singers ADD COLUMN IF NOT EXISTS longitude double precision;
-    ALTER TABLE singers ADD COLUMN IF NOT EXISTS video_link_1 text;
-    ALTER TABLE singers ADD COLUMN IF NOT EXISTS video_link_2 text;
-    ALTER TABLE singers ADD COLUMN IF NOT EXISTS audio_link_1 text;
-    ALTER TABLE singers ADD COLUMN IF NOT EXISTS founding_expires_at timestamp;
-    ALTER TABLE singers ADD COLUMN IF NOT EXISTS performance_types text[];
+// DB migrations are expensive (many round-trips to a remote DB) and don't need
+// to run on every dev boot. They run automatically in production, or in any
+// environment when RUN_DB_MIGRATIONS=1 is set. This work is kicked off in the
+// background AFTER the server starts listening, so it never blocks startup.
+const shouldRunMigrations =
+  process.env.NODE_ENV === "production" ||
+  process.env.RUN_DB_MIGRATIONS === "1";
 
-    -- organizations schema backfill
-    ALTER TABLE organizations ADD COLUMN IF NOT EXISTS founding_expires_at timestamp;
+// Data seeding (e.g. repertoire reference catalog) is a separate, explicitly
+// opt-in operation. It NEVER runs automatically — including in production.
+// Set RUN_DB_SEED=1 only when you intentionally want to populate seed data.
+const shouldRunSeed = process.env.RUN_DB_SEED === "1";
 
-    -- role/work schema backfill
-    ALTER TABLE singer_roles ADD COLUMN IF NOT EXISTS status text DEFAULT 'performed';
-    ALTER TABLE singer_works ADD COLUMN IF NOT EXISTS status text DEFAULT 'performed';
-
-    CREATE TABLE IF NOT EXISTS search_logs (
-      id serial primary key,
-      org_id integer,
-      search_filters jsonb,
-      created_at timestamp default now()
-    );
-
-    CREATE TABLE IF NOT EXISTS password_reset_tokens (
-      id serial PRIMARY KEY,
-      token_hash text NOT NULL,
-      user_type text NOT NULL,
-      user_id integer NOT NULL,
-      expires_at timestamp NOT NULL,
-      used_at timestamp,
-      created_at timestamp DEFAULT now()
-    );
-    CREATE UNIQUE INDEX IF NOT EXISTS password_reset_tokens_token_hash_idx ON password_reset_tokens (token_hash);
-    CREATE INDEX IF NOT EXISTS password_reset_tokens_user_idx ON password_reset_tokens (user_type, user_id);
-  `);
-
-  const { rows: untagged } = await pool.query(
-    "SELECT count(*)::int as cnt FROM singers WHERE performance_types IS NULL"
-  );
-  if (untagged[0].cnt > 0) {
-    log(`Tagging ${untagged[0].cnt} singers with performance_types...`);
+async function runStartupMaintenance() {
+  if (shouldRunMigrations) {
     await pool.query(`
-      UPDATE singers s SET performance_types = (
-        SELECT array_agg(DISTINCT t.cat) FROM (
-          SELECT 'Opera' AS cat FROM singer_roles r WHERE r.singer_id = s.id
-          UNION
-          SELECT 'Orchestra' AS cat FROM singer_works w WHERE w.singer_id = s.id AND lower(coalesce(w.context,'')) = 'orchestra'
-          UNION
-          SELECT 'Chorus' AS cat FROM singer_works w WHERE w.singer_id = s.id AND (lower(coalesce(w.context,'')) LIKE '%chor%' OR lower(coalesce(w.work_title,'')) LIKE '%mass%' OR lower(coalesce(w.work_title,'')) LIKE '%requiem%' OR lower(coalesce(w.work_title,'')) LIKE '%passion%' OR lower(coalesce(w.work_title,'')) LIKE '%messiah%' OR lower(coalesce(w.work_title,'')) LIKE '%carmina%' OR lower(coalesce(w.work_title,'')) LIKE '%oratorio%')
-        ) t
-      )
-      WHERE s.performance_types IS NULL
+      -- singers schema backfill for migrated databases
+      ALTER TABLE singers ADD COLUMN IF NOT EXISTS latitude double precision;
+      ALTER TABLE singers ADD COLUMN IF NOT EXISTS longitude double precision;
+      ALTER TABLE singers ADD COLUMN IF NOT EXISTS video_link_1 text;
+      ALTER TABLE singers ADD COLUMN IF NOT EXISTS video_link_2 text;
+      ALTER TABLE singers ADD COLUMN IF NOT EXISTS audio_link_1 text;
+      ALTER TABLE singers ADD COLUMN IF NOT EXISTS founding_expires_at timestamp;
+      ALTER TABLE singers ADD COLUMN IF NOT EXISTS performance_types text[];
+
+      -- organizations schema backfill
+      ALTER TABLE organizations ADD COLUMN IF NOT EXISTS founding_expires_at timestamp;
+
+      -- role/work schema backfill
+      ALTER TABLE singer_roles ADD COLUMN IF NOT EXISTS status text DEFAULT 'performed';
+      ALTER TABLE singer_works ADD COLUMN IF NOT EXISTS status text DEFAULT 'performed';
+
+      CREATE TABLE IF NOT EXISTS search_logs (
+        id serial primary key,
+        org_id integer,
+        search_filters jsonb,
+        created_at timestamp default now()
+      );
+
+      CREATE TABLE IF NOT EXISTS password_reset_tokens (
+        id serial PRIMARY KEY,
+        token_hash text NOT NULL,
+        user_type text NOT NULL,
+        user_id integer NOT NULL,
+        expires_at timestamp NOT NULL,
+        used_at timestamp,
+        created_at timestamp DEFAULT now()
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS password_reset_tokens_token_hash_idx ON password_reset_tokens (token_hash);
+      CREATE INDEX IF NOT EXISTS password_reset_tokens_user_idx ON password_reset_tokens (user_type, user_id);
     `);
-    await pool.query("UPDATE singers SET performance_types = ARRAY['Other'] WHERE performance_types IS NULL OR array_length(performance_types, 1) IS NULL");
-    log("Performance types tagged successfully.");
+
+    const { rows: untagged } = await pool.query(
+      "SELECT count(*)::int as cnt FROM singers WHERE performance_types IS NULL"
+    );
+    if (untagged[0].cnt > 0) {
+      log(`Tagging ${untagged[0].cnt} singers with performance_types...`);
+      await pool.query(`
+        UPDATE singers s SET performance_types = (
+          SELECT array_agg(DISTINCT t.cat) FROM (
+            SELECT 'Opera' AS cat FROM singer_roles r WHERE r.singer_id = s.id
+            UNION
+            SELECT 'Orchestra' AS cat FROM singer_works w WHERE w.singer_id = s.id AND lower(coalesce(w.context,'')) = 'orchestra'
+            UNION
+            SELECT 'Chorus' AS cat FROM singer_works w WHERE w.singer_id = s.id AND (lower(coalesce(w.context,'')) LIKE '%chor%' OR lower(coalesce(w.work_title,'')) LIKE '%mass%' OR lower(coalesce(w.work_title,'')) LIKE '%requiem%' OR lower(coalesce(w.work_title,'')) LIKE '%passion%' OR lower(coalesce(w.work_title,'')) LIKE '%messiah%' OR lower(coalesce(w.work_title,'')) LIKE '%carmina%' OR lower(coalesce(w.work_title,'')) LIKE '%oratorio%')
+          ) t
+        )
+        WHERE s.performance_types IS NULL
+      `);
+      await pool.query("UPDATE singers SET performance_types = ARRAY['Other'] WHERE performance_types IS NULL OR array_length(performance_types, 1) IS NULL");
+      log("Performance types tagged successfully.");
+    }
+  } else {
+    log("Skipping DB migrations/seed (dev). Set RUN_DB_MIGRATIONS=1 to force.");
   }
 
   if (process.env.RESET_ORG_4_CREDITS === "1") {
@@ -178,15 +195,21 @@ app.use((req, res, next) => {
     }
   }
 
-  try {
-    const insertedRep = await seedRepertoire(pool);
-    if (insertedRep > 0) {
-      log(`Repertoire reference seeded: ${insertedRep} entries.`);
+  if (shouldRunSeed) {
+    try {
+      const insertedRep = await seedRepertoire(pool);
+      if (insertedRep > 0) {
+        log(`Repertoire reference seeded: ${insertedRep} entries.`);
+      }
+    } catch (err) {
+      console.error("[repertoire-seed] failed:", err);
     }
-  } catch (err) {
-    console.error("[repertoire-seed] failed:", err);
+  } else {
+    log("Skipping DB seeding. Set RUN_DB_SEED=1 to explicitly seed data.");
   }
+}
 
+(async () => {
   await registerRoutes(httpServer, app);
 
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
@@ -232,5 +255,11 @@ app.use((req, res, next) => {
   const host = process.env.HOST || "0.0.0.0";
   httpServer.listen(port, host, () => {
     log(`serving on http://localhost:${port}`);
+
+    // Run DB migrations/seed in the background so the server starts immediately
+    // instead of waiting on remote DB round-trips.
+    runStartupMaintenance().catch((err) => {
+      console.error("[startup-maintenance] failed:", err);
+    });
   });
 })();
