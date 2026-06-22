@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { BarChart2, CheckCircle, ClipboardList, Heart, MapPin, Search, Users, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import singerSearchLogo from "@assets/Singer_Search_Logo_May_2026_1777734809747.png";
 import SingerCard from "./SingerCard";
 import { useAppContext } from "./AppContext";
+import { OrgNav } from "./AppNav";
 import { AlertBanner, WelcomePanel, UpgradeModal, SearchForm, AppFooter } from "./AppShared";
 
 export function OrgDashboard({
@@ -13,21 +13,19 @@ export function OrgDashboard({
   cityFallbackBanner, noResultsDiagnostic, submittedFilters,
   shortlistedIds, shortlistSingers, shortlistLoading, loadShortlist, toggleShortlist
 }) {
-  const { currentUser, setCurrentUser, setView, alert } = useAppContext();
+  const { currentUser, setCurrentUser, setView, alert, orgTab, setOrgTab } = useAppContext();
 
-    const user = currentUser.data;
+    const user = currentUser?.data || {};
     const isPro = user.subscription_tier === 'pro';
-    const [orgView, setOrgView] = React.useState('search');
+    // Tab state is lifted to App context so the Org Settings navbar can open the
+    // correct tab and stay consistent with this dashboard's navbar.
+    const orgView = orgTab;
+    const setOrgView = setOrgTab;
     const [revealedSingers, setRevealedSingers] = React.useState([]);
     const [revealedLoading, setRevealedLoading] = React.useState(false);
     const [feedbackForm, setFeedbackForm] = React.useState(null);
     const [feedbackSubmitting, setFeedbackSubmitting] = React.useState(false);
     const [feedbackMsg, setFeedbackMsg] = React.useState(null);
-
-    const handleShortlistTab = () => {
-      setOrgView('shortlist');
-      loadShortlist();
-    };
 
     const loadRevealedSingers = async () => {
       setRevealedLoading(true);
@@ -39,10 +37,13 @@ export function OrgDashboard({
       setRevealedLoading(false);
     };
 
-    const handleContactsTab = () => {
-      setOrgView('contacts');
-      loadRevealedSingers();
-    };
+    // Load the data for the active tab whenever it changes — including when the
+    // tab is opened from the Settings navbar (which sets the tab then navigates).
+    React.useEffect(() => {
+      if (orgView === 'shortlist') loadShortlist();
+      else if (orgView === 'contacts') loadRevealedSingers();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [orgView]);
 
     const handleFeedbackSubmit = async () => {
       if (!feedbackForm) return;
@@ -77,81 +78,7 @@ export function OrgDashboard({
 
     return (
       <div className="min-h-screen bg-slate-50 pb-12">
-        <nav className="bg-[#121212] border-b border-white/10 sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between h-14">
-              <div className="flex">
-                <div className="flex-shrink-0 flex items-center pr-6">
-                  <img src={singerSearchLogo} alt="SingerSearch" className="h-10 object-contain brightness-0 invert" />
-                </div>
-                <div className="hidden sm:flex sm:space-x-2">
-                  <span
-                    className={`${orgView === 'search' ? 'border-[#3B82F6] text-white' : 'border-transparent text-white/40 hover:text-white/80'} inline-flex items-center px-3 pt-1 border-b-2 text-sm font-medium cursor-pointer transition-colors`}
-                    onClick={() => setOrgView('search')}
-                  >
-                    Search
-                  </span>
-                  <span
-                    className={`${orgView === 'contacts' ? 'border-[#3B82F6] text-white' : 'border-transparent text-white/40 hover:text-white/80'} inline-flex items-center px-3 pt-1 border-b-2 text-sm font-medium cursor-pointer gap-1.5 transition-colors`}
-                    onClick={handleContactsTab}
-                    data-testid="nav-contacts"
-                  >
-                    <ClipboardList className="w-4 h-4" /> Contacts
-                  </span>
-                  <span
-                    className={`${orgView === 'shortlist' ? 'border-[#3B82F6] text-white' : 'border-transparent text-white/40 hover:text-white/80'} inline-flex items-center px-3 pt-1 border-b-2 text-sm font-medium cursor-pointer gap-1.5 transition-colors`}
-                    onClick={handleShortlistTab}
-                    data-testid="nav-shortlist"
-                  >
-                    <Heart className={`w-4 h-4 ${shortlistedIds.size > 0 ? 'fill-current' : ''}`} /> My Shortlist
-                    {shortlistedIds.size > 0 && (
-                      <span className="ml-0.5 text-[10px] font-bold bg-white/10 px-1.5 py-0.5 rounded-full" data-testid="badge-shortlist-count">
-                        {shortlistedIds.size}
-                      </span>
-                    )}
-                  </span>
-                  <button 
-                    onClick={() => isPro ? setView("emergencySearch") : setShowUpgradeModal(true)}
-                    className="text-white/40 hover:text-red-400 px-3 py-2 text-sm font-medium transition-colors flex items-center gap-1.5"
-                  >
-                    <Zap className="w-4 h-4" />
-                    Urgent
-                  </button>
-                  <span className="text-white/40 hover:text-white/80 inline-flex items-center px-3 pt-1 border-b-2 border-transparent text-sm font-medium cursor-pointer transition-colors" onClick={() => setView("orgSettings")}>
-                    Settings
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                {!isPro && (
-                    <button 
-                        onClick={() => setView("pricing")}
-                        className="text-xs font-semibold text-white bg-[#3B82F6] hover:bg-blue-500 px-3 py-1.5 rounded transition-colors"
-                    >
-                        Upgrade to Pro
-                    </button>
-                )}
-                <div className="flex items-center">
-                    <span className="text-white/50 text-sm font-medium mr-4 flex items-center gap-2">
-                        {user.organization_name}
-                        {user.verified && <CheckCircle className="w-4 h-4 text-blue-400" title="Verified Organization" />}
-                    </span>
-                    <button
-                      onClick={async () => {
-                        await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-                        setCurrentUser(null);
-                        setSearchResults([]);
-                        setView("landing");
-                      }}
-                      className="text-white/30 hover:text-white/60 text-sm transition-colors"
-                    >
-                      Sign out
-                    </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </nav>
+        <OrgNav />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <AnimatePresence>
@@ -193,7 +120,7 @@ export function OrgDashboard({
               <motion.div 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-gradient-to-r from-red-50 to-orange-50 border border-red-100 rounded-xl p-6 mb-8 flex items-center justify-between shadow-sm"
+                className="bg-gradient-to-r from-red-50 to-orange-50 border border-red-100 rounded-xl p-6 mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm"
               >
                  <div className="flex items-start gap-4">
                     <div className="bg-red-100 p-3 rounded-full flex-shrink-0">
@@ -210,7 +137,7 @@ export function OrgDashboard({
                  </div>
                  <button
                     onClick={() => isPro ? setView("emergencySearch") : setShowUpgradeModal(true)}
-                    className="bg-[#EF4444] text-white px-6 py-3 rounded-lg font-bold shadow-md hover:bg-[#DC2626] transition-colors flex items-center gap-2 whitespace-nowrap"
+                    className="bg-[#EF4444] text-white px-6 py-3 rounded-lg font-bold shadow-md hover:bg-[#DC2626] transition-colors flex items-center justify-center gap-2 whitespace-nowrap w-full sm:w-auto flex-shrink-0"
                  >
                     <Zap className="w-4 h-4" fill="currentColor" />
                     Find Short-Notice Engagements
@@ -231,13 +158,13 @@ export function OrgDashboard({
                       </div>
                     )}
 
-                    <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-center justify-between">
-                       <div className="flex items-center gap-3">
-                          <div className="bg-blue-100 p-2 rounded-full">
+                    <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
+                       <div className="flex items-center gap-3 min-w-0">
+                          <div className="bg-blue-100 p-2 rounded-full flex-shrink-0">
                               <Users className="w-5 h-5 text-blue-600" />
                           </div>
-                          <div>
-                              <p className="text-blue-900 font-bold text-lg">
+                          <div className="min-w-0">
+                              <p className="text-blue-900 font-bold text-lg break-words">
                                   {searchResults.length} singers match <span className="text-blue-700">"{submittedFilters.role || submittedFilters.workTitle || submittedFilters.voiceType || 'your criteria'}"</span>
                               </p>
                               <p className="text-blue-700 text-sm">
@@ -367,17 +294,17 @@ export function OrgDashboard({
               ) : (
                 <div className="space-y-3">
                   {revealedSingers.map((singer) => (
-                    <div key={singer.id} className="bg-white rounded-xl border border-slate-200 p-4 flex items-center justify-between shadow-sm" data-testid={`contact-row-${singer.id}`}>
-                      <div className="flex items-center gap-4">
+                    <div key={singer.id} className="bg-white rounded-xl border border-slate-200 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm" data-testid={`contact-row-${singer.id}`}>
+                      <div className="flex items-center gap-4 min-w-0">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                           {singer.first_name?.[0]}{singer.last_name?.[0]}
                         </div>
-                        <div>
-                          <p className="font-semibold text-slate-900">{singer.first_name} {singer.last_name}</p>
-                          <p className="text-sm text-slate-500">{singer.primary_voice_type} · {singer.city}{singer.state ? `, ${singer.state}` : ''}</p>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-slate-900 truncate">{singer.first_name} {singer.last_name}</p>
+                          <p className="text-sm text-slate-500 truncate">{singer.primary_voice_type} · {singer.city}{singer.state ? `, ${singer.state}` : ''}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 flex-shrink-0 flex-wrap">
                         <button
                           onClick={() => viewProfile(singer)}
                           className="text-sm text-blue-600 hover:underline"

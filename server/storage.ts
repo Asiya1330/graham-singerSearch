@@ -100,6 +100,8 @@ export interface IStorage {
     language?: string;
     experienceLevel?: string;
     managedOnly?: string;
+    cityFallback?: string;
+    stateFallback?: string;
   }): Promise<(Singer & { roles: SingerRole[]; works: SingerWork[]; availabilities: Availability[]; distance_miles?: number | null })[]>;
 
   countSingers(filters: {
@@ -121,6 +123,8 @@ export interface IStorage {
     language?: string;
     experienceLevel?: string;
     managedOnly?: string;
+    cityFallback?: string;
+    stateFallback?: string;
   }): Promise<number>;
 
   submitEngagementFeedback(feedback: InsertEngagementFeedback): Promise<EngagementFeedback>;
@@ -462,6 +466,8 @@ export class DatabaseStorage implements IStorage {
     language?: string;
     experienceLevel?: string;
     managedOnly?: string;
+    cityFallback?: string;
+    stateFallback?: string;
   }): Promise<(Singer & { roles: SingerRole[]; works: SingerWork[]; availabilities: Availability[]; distance_miles?: number | null })[]> {
     const conditions: string[] = [];
     const values: any[] = [];
@@ -508,20 +514,44 @@ export class DatabaseStorage implements IStorage {
       values.push(filters.searchLng);
       // Haversine, miles. 3959 = Earth radius in miles. Clamp acos arg to avoid NaN at antipode rounding.
       distanceExpr = `(3959 * acos(LEAST(1.0, GREATEST(-1.0, cos(radians($${latIdx})) * cos(radians(s.latitude)) * cos(radians(s.longitude) - radians($${lngIdx})) + sin(radians($${latIdx})) * sin(radians(s.latitude))))))`;
-      conditions.push(`s.latitude IS NOT NULL AND s.longitude IS NOT NULL`);
       const radius = typeof filters.radiusMiles === "number" && filters.radiusMiles > 0
         ? filters.radiusMiles
         : 50;
-      conditions.push(`${distanceExpr} <= $${index++}`);
+      const radiusIdx = index++;
       values.push(radius);
+      const geoMatch = `(s.latitude IS NOT NULL AND s.longitude IS NOT NULL AND ${distanceExpr} <= $${radiusIdx})`;
+
+      // Fall back to a city/state text match for singers whose coordinates were
+      // never geocoded, so they aren't silently excluded from location search.
+      if (filters.cityFallback) {
+        const cityIdx = index++;
+        values.push(`%${filters.cityFallback}%`);
+        let fallback = `(s.latitude IS NULL OR s.longitude IS NULL) AND s.city ILIKE $${cityIdx}`;
+        if (filters.stateFallback) {
+          const stateIdx = index++;
+          values.push(filters.stateFallback);
+          fallback += ` AND s.state ILIKE $${stateIdx}`;
+        }
+        conditions.push(`(${geoMatch} OR (${fallback}))`);
+      } else {
+        conditions.push(geoMatch);
+      }
     } else if (filters.city) {
       conditions.push(`s.city ILIKE $${index++}`);
       values.push(`%${filters.city}%`);
     }
 
     if (filters.language) {
-      conditions.push(`$${index++} = ANY(s.languages_sung)`);
+      const langIdx = index++;
       values.push(filters.language);
+      // Match either the singer-level languages or any language saved on a role.
+      conditions.push(`(
+        $${langIdx} = ANY(s.languages_sung)
+        OR EXISTS (
+          SELECT 1 FROM singer_roles r
+          WHERE r.singer_id = s.id AND $${langIdx} = ANY(r.languages)
+        )
+      )`);
     }
 
     if (filters.experienceLevel) {
@@ -620,7 +650,7 @@ export class DatabaseStorage implements IStorage {
         values.push(`%${filters.workTitleForWorks}%`);
         conditions.push(`
           (
-            EXISTS (SELECT 1 FROM singer_roles r WHERE r.singer_id = s.id AND LOWER(r.role_name) = ANY($${rnIdx}::text[]))
+            EXISTS (SELECT 1 FROM singer_roles r WHERE r.singer_id = s.id AND (LOWER(r.role_name) = ANY($${rnIdx}::text[]) OR r.work_title ILIKE $${wtIdx}))
             OR EXISTS (SELECT 1 FROM singer_works w WHERE w.singer_id = s.id AND w.work_title ILIKE $${wtIdx})
           )
         `);
@@ -744,6 +774,8 @@ export class DatabaseStorage implements IStorage {
     language?: string;
     experienceLevel?: string;
     managedOnly?: string;
+    cityFallback?: string;
+    stateFallback?: string;
   }): Promise<number> {
     const conditions: string[] = [];
     const values: any[] = [];
@@ -775,10 +807,21 @@ export class DatabaseStorage implements IStorage {
     if (filters.city) {
       conditions.push(`s.city ILIKE $${index++}`);
       values.push(`%${filters.city}%`);
+    } else if (filters.cityFallback) {
+      conditions.push(`s.city ILIKE $${index++}`);
+      values.push(`%${filters.cityFallback}%`);
+      if (filters.stateFallback) {
+        conditions.push(`s.state ILIKE $${index++}`);
+        values.push(filters.stateFallback);
+      }
     }
     if (filters.language) {
-      conditions.push(`$${index++} = ANY(s.languages_sung)`);
+      const langIdx = index++;
       values.push(filters.language);
+      conditions.push(`(
+        $${langIdx} = ANY(s.languages_sung)
+        OR EXISTS (SELECT 1 FROM singer_roles r WHERE r.singer_id = s.id AND $${langIdx} = ANY(r.languages))
+      )`);
     }
     if (filters.experienceLevel) {
       const depthValues = filters.experienceLevel === '1-2' ? ['1-2', '3-5', '6-10', '10+']
@@ -830,7 +873,7 @@ export class DatabaseStorage implements IStorage {
         values.push(filters.roleNames);
         values.push(`%${filters.workTitleForWorks}%`);
         conditions.push(`
-          (EXISTS (SELECT 1 FROM singer_roles r WHERE r.singer_id = s.id AND LOWER(r.role_name) = ANY($${rnIdx}::text[]))
+          (EXISTS (SELECT 1 FROM singer_roles r WHERE r.singer_id = s.id AND (LOWER(r.role_name) = ANY($${rnIdx}::text[]) OR r.work_title ILIKE $${wtIdx}))
           OR EXISTS (SELECT 1 FROM singer_works w WHERE w.singer_id = s.id AND w.work_title ILIKE $${wtIdx}))
         `);
       } else {

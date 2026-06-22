@@ -1,7 +1,6 @@
 import React from "react";
-import { CheckCircle } from "lucide-react";
-import singerSearchLogo from "@assets/Singer_Search_Logo_May_2026_1777734809747.png";
 import { useAppContext } from "./AppContext";
+import { OrgNav } from "./AppNav";
 import { useCityStateAutofill } from "./hooks/useCityStateAutofill";
 import { getErrorMessageFromBody } from "./lib/api";
 
@@ -77,32 +76,7 @@ export function OrgSettings() {
 
     return (
       <div className="min-h-screen bg-slate-50 pb-12">
-        <nav className="bg-[#121212] border-b border-white/10 sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between h-14">
-              <div className="flex">
-                <div className="flex-shrink-0 flex items-center cursor-pointer pr-6" onClick={() => setView("landing")}>
-                  <img src={singerSearchLogo} alt="SingerSearch" className="h-8 object-contain brightness-0 invert" />
-                </div>
-                <div className="hidden sm:flex sm:space-x-6">
-                  <span className="text-white/40 hover:text-white/80 inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium cursor-pointer transition-colors" onClick={() => setView("orgDashboard")}>
-                    Search
-                  </span>
-                  <span className="border-[#3B82F6] text-white inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                    Account &amp; Settings
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center">
-                <span className="text-white/50 text-sm font-medium mr-4 flex items-center gap-2">
-                  {user.organization_name}
-                  {user.verified && <CheckCircle className="w-4 h-4 text-blue-400" />}
-                </span>
-                <button onClick={async () => { await fetch("/api/auth/logout", { method: "POST", credentials: "include" }); setCurrentUser(null); setView("landing"); }} className="text-white/30 hover:text-white/60 text-sm transition-colors">Sign out</button>
-              </div>
-            </div>
-          </div>
-        </nav>
+        <OrgNav />
 
         <div className="max-w-2xl mx-auto px-4 py-10 space-y-8">
           <h1 className="text-2xl font-bold text-slate-900">Account &amp; Settings</h1>
