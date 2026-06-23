@@ -6,7 +6,6 @@ export function AppFooter() {
   const ctx = (() => { try { return useAppContext(); } catch { return null; } })();
   const navTo = (path, view) => (e) => {
     if (e) e.preventDefault();
-    window.history.pushState({}, "", path);
     if (ctx?.setView) ctx.setView(view);
   };
   return (

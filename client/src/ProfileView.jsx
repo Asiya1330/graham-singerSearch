@@ -50,9 +50,17 @@ export function ProfileView({ revealContact, isShortlisted, onToggleShortlist })
       window.scrollTo(0, 0);
     }, []);
 
-    if (!selectedSinger) return null;
+    // Fall back to the logged-in singer's own data so a direct load / reload of
+    // /singer/profile (no in-memory selection) still renders the preview rather
+    // than a blank page.
+    const singer =
+      selectedSinger ||
+      (currentUser?.type === "singer" && currentUser.data
+        ? { ...currentUser.data, previewMode: true }
+        : null);
 
-    const singer = selectedSinger;
+    if (!singer) return null;
+
     const previewMode = !!singer.previewMode && currentUser?.type === "singer";
     const allowOrgActions = !previewMode && currentUser?.type === "organization";
     const isOrg = allowOrgActions || previewMode;
@@ -347,7 +355,7 @@ export function ProfileView({ revealContact, isShortlisted, onToggleShortlist })
                               </p>
                             )}
                             <div className="mt-1 flex gap-2">
-                               {role.languages.map(l => <span key={l} className="text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">{l}</span>)}
+                               {(role.languages || []).map(l => <span key={l} className="text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">{l}</span>)}
                             </div>
                           </div>
                           <div className="text-right">
@@ -537,19 +545,21 @@ export function ProfileView({ revealContact, isShortlisted, onToggleShortlist })
                     <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Union Status</h4>
                     <p className="mt-1 text-sm text-slate-900">{singer.union_status}</p>
                   </div>
-                  <div>
-                    <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Languages</h4>
-                    <div className="mt-1 flex flex-wrap gap-2">
-                      {singer.languages_sung.map((lang) => (
-                        <span
-                          key={lang}
-                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800"
-                        >
-                          {lang}
-                        </span>
-                      ))}
+                  {singer.languages_sung && singer.languages_sung.length > 0 && (
+                    <div>
+                      <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Languages</h4>
+                      <div className="mt-1 flex flex-wrap gap-2">
+                        {singer.languages_sung.map((lang) => (
+                          <span
+                            key={lang}
+                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800"
+                          >
+                            {lang}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
                   {singer.represented && (
                     <div>
                       <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Representation</h4>

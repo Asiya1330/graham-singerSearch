@@ -7,7 +7,6 @@ export function PrivacyPage() {
 
   const navHome = (e) => {
     if (e) e.preventDefault();
-    window.history.pushState({}, "", "/");
     setView("landing");
   };
 

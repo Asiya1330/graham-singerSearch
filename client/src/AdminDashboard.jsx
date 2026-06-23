@@ -246,9 +246,9 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
 
     const getStatusBadge = (singer) => {
       if (singer.subscription_status === "inactive") return { label: "Inactive", color: "bg-slate-100 text-slate-600" };
-      if (singer.admin_approved) return { label: "Approved", color: "bg-emerald-100 text-emerald-700" };
+      if (singer.admin_approved) return { label: "Profile Approved", color: "bg-emerald-100 text-emerald-700" };
       if (singer.admin_rejected) return { label: "Rejected", color: "bg-red-100 text-red-700" };
-      return { label: "Pending", color: "bg-amber-100 text-amber-700" };
+      return { label: "Pending Approval", color: "bg-amber-100 text-amber-700" };
     };
 
     const handleViewOrg = async (orgId) => {
@@ -860,7 +860,7 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
         <nav className="bg-white border-b border-slate-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between h-16 items-center">
-              <div className="flex items-center cursor-pointer" onClick={() => setView("landing")}>
+              <div className="flex items-center cursor-pointer" onClick={() => setView("adminDashboard")}>
                 <span className="text-2xl font-bold text-slate-900">Singer Search</span>
                 <span className="ml-2 text-xs font-semibold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">ADMIN</span>
               </div>
@@ -868,8 +868,8 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
                 data-testid="button-admin-logout"
                 onClick={async () => {
                   await fetch("/api/admin/auth/logout", { method: "POST", credentials: "include" });
+                  setView("landing", { replace: true });
                   setAdminMode(false);
-                  setView("landing");
                 }}
                 className="text-sm font-medium text-slate-600 hover:text-red-600 transition-colors flex items-center gap-1"
               >
@@ -901,14 +901,24 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
           {stats && (
             <>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-4 mb-6">
-                <div className="bg-white rounded-xl border border-slate-200 p-5">
-                  <p className="text-xs font-medium text-slate-500 mb-1">Total Singers</p>
+                <button
+                  type="button"
+                  onClick={() => { setAdminMainTab("singers"); setAdminViewOrg(null); setEditingOrg(null); }}
+                  className="bg-white rounded-xl border border-slate-200 p-5 text-left hover:border-blue-400 hover:shadow-sm transition-all cursor-pointer"
+                  data-testid="card-stat-singers"
+                >
+                  <p className="text-xs font-medium text-slate-500 mb-1">Total Singers →</p>
                   <p className="text-2xl font-bold text-slate-900" data-testid="stat-total-singers">{stats.total_singers}</p>
-                </div>
-                <div className="bg-white rounded-xl border border-slate-200 p-5">
-                  <p className="text-xs font-medium text-slate-500 mb-1">Founding Artists</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setAdminMainTab("singers"); setAdminViewOrg(null); setEditingOrg(null); }}
+                  className="bg-white rounded-xl border border-slate-200 p-5 text-left hover:border-blue-400 hover:shadow-sm transition-all cursor-pointer"
+                  data-testid="card-stat-founding"
+                >
+                  <p className="text-xs font-medium text-slate-500 mb-1">Founding Artists →</p>
                   <p className="text-2xl font-bold text-amber-600" data-testid="stat-founding-count">{stats.founding_count}</p>
-                </div>
+                </button>
                 <button
                   type="button"
                   onClick={() => { setAdminMainTab("orgs"); setAdminViewSinger(null); setEditingSinger(null); }}
@@ -1107,10 +1117,10 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
                 <div className="border-b border-slate-200 px-6">
                   <div className="flex gap-6">
                     {[
-                      { key: "pending", label: "Pending", count: allSingers.filter(s => !s.admin_approved && !s.admin_rejected && s.subscription_status !== "inactive").length },
-                      { key: "requests", label: "Pending Requests", count: allSingers.filter(s => s.emergency_status_requested === true && !s.is_emergency_ready).length },
+                      { key: "pending", label: "Pending Approval", count: allSingers.filter(s => !s.admin_approved && !s.admin_rejected && s.subscription_status !== "inactive").length },
+                      { key: "requests", label: "Urgent Status Requests", count: allSingers.filter(s => s.emergency_status_requested === true && !s.is_emergency_ready).length },
                       { key: "rejected", label: "Rejected", count: allSingers.filter(s => !s.admin_approved && s.admin_rejected && s.subscription_status !== "inactive").length },
-                      { key: "approved", label: "Approved", count: allSingers.filter(s => s.admin_approved && s.subscription_status !== "inactive").length },
+                      { key: "approved", label: "Profile Approved", count: allSingers.filter(s => s.admin_approved && s.subscription_status !== "inactive").length },
                       { key: "inactive", label: "Inactive", count: allSingers.filter(s => s.subscription_status === "inactive").length },
                       { key: "all", label: "All", count: allSingers.length },
                     ].map(tab => (

@@ -10,6 +10,9 @@ const STRIP_REQUEST_HEADERS = new Set([
   "transfer-encoding",
   "upgrade",
   "host",
+  // Let fetch recompute the length for the (possibly re-encoded) body. A stale
+  // content-length corrupts multipart/binary uploads (resume/headshot).
+  "content-length",
 ]);
 
 function getRailwayBase(): string | null {
@@ -64,7 +67,9 @@ export default async function middleware(request: Request): Promise<Response> {
   try {
     const method = request.method.toUpperCase();
     const hasBody = method !== "GET" && method !== "HEAD";
-    const requestBody = hasBody ? await request.text() : undefined;
+    // Forward the raw bytes so multipart/binary uploads are not corrupted by a
+    // text round-trip (await request.text() mangles non-UTF8 file bytes).
+    const requestBody = hasBody ? await request.arrayBuffer() : undefined;
 
     const upstream = await fetch(target, {
       method,

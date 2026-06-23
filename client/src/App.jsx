@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocation } from "wouter";
 import {
   Search,
   Calendar,
@@ -55,7 +56,7 @@ import { TermsPage } from "./TermsPage";
 import { PrivacyPage } from "./PrivacyPage";
 import { SingerLogin, OrganizationLogin, SingerRegistration, OrgRegistration, ResetPasswordPage } from "./AuthPages";
 import { BLANK_FILTERS, AlertBanner, AppFooter } from "./AppShared";
-import { navigateToView, viewFromPath, PUBLIC_PATHS } from "./lib/nav";
+import { navigateToView, viewFromPath, pathFromView, requiredAccessForView } from "./lib/nav";
 import { apiFetch, getErrorMessageFromBody, API_ERRORS } from "./lib/api";
 import { ApiErrorText } from "./components/ApiErrorText";
 // Assets
@@ -136,14 +137,25 @@ function AdminLogin({ onSuccess }) {
 }
 
 export default function App() {
-  const [view, setView] = useState("landing");
+  const [location, navigate] = useLocation();
+  const view = viewFromPath(location) ?? "landing";
+  const setView = useCallback(
+    (nextView, opts = {}) => {
+      navigate(pathFromView(nextView), opts);
+    },
+    [navigate],
+  );
   const [currentUser, setCurrentUser] = useState(null);
+  const [bootstrapLoading, setBootstrapLoading] = useState(true);
   const [alert, setAlert] = useState(null);
   const [adminMode, setAdminMode] = useState(false);
   const [selectedSinger, setSelectedSinger] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [showWelcome, setShowWelcome] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  // Active org dashboard tab, lifted so the Org Settings navbar can stay
+  // consistent with the dashboard and drive which tab opens.
+  const [orgTab, setOrgTab] = useState("search");
 
   const [submittedFilters, setSubmittedFilters] = useState(BLANK_FILTERS);
 
@@ -163,42 +175,79 @@ export default function App() {
     showAlert._t = window.setTimeout(() => setAlert(null), 4000);
   };
 
+  // Hydrate auth + admin session once on load. The URL is the source of truth
+  // for which view renders; the route guards below redirect when access is
+  // denied (including after a hard reload of a protected URL).
   useEffect(() => {
-    const syncFromUrl = () => {
-      const path = window.location.pathname;
-      const matchedView = viewFromPath(path);
-      if (matchedView) {
-        setView(matchedView);
-      } else if (path === "/") {
-        setView((v) =>
-          ["terms", "privacy", "resetPassword", "singerLogin", "organizationLogin", "singerRegister", "orgRegister"].includes(v)
-            ? "landing"
-            : v,
-        );
+    let cancelled = false;
+    (async () => {
+      try {
+        const [meRes, adminRes] = await Promise.all([
+          fetch("/api/auth/me", { credentials: "include" }),
+          fetch("/api/admin/auth/check", { credentials: "include" }),
+        ]);
+        if (cancelled) return;
+        if (meRes.ok) {
+          const data = await meRes.json().catch(() => null);
+          if (data?.userType === "singer") setCurrentUser({ type: "singer", data });
+          else if (data?.userType === "organization") setCurrentUser({ type: "organization", data });
+        }
+        if (adminRes.ok) {
+          const adminData = await adminRes.json().catch(() => null);
+          if (adminData?.authenticated) setAdminMode(true);
+        }
+      } catch {
+        /* treated as unauthenticated */
+      } finally {
+        if (!cancelled) setBootstrapLoading(false);
       }
+    })();
+    return () => {
+      cancelled = true;
     };
-    syncFromUrl();
-    window.addEventListener("popstate", syncFromUrl);
-    return () => window.removeEventListener("popstate", syncFromUrl);
   }, []);
 
+  // Route guards: protect singer/organization/admin-only routes.
   useEffect(() => {
-    const onPublicPage = PUBLIC_PATHS.includes(window.location.pathname);
-    fetch("/api/auth/me", { credentials: "include" })
-      .then(res => res.ok ? res.json() : null)
-      .then(data => {
-        if (data) {
-          if (data.userType === "singer") {
-            setCurrentUser({ type: "singer", data });
-            if (!onPublicPage) setView("singerDashboard");
-          } else if (data.userType === "organization") {
-            setCurrentUser({ type: "organization", data });
-            if (!onPublicPage) setView("orgDashboard");
-          }
-        }
-      })
-      .catch(() => {});
-  }, []);
+    if (bootstrapLoading) return;
+
+    // Keep authenticated users off the login/register pages (this is what made
+    // the browser back button drop a logged-in user back onto the login form).
+    const authedHome =
+      currentUser?.type === "organization"
+        ? "orgDashboard"
+        : currentUser?.type === "singer"
+          ? "singerDashboard"
+          : null;
+    const AUTH_PAGES = ["singerLogin", "organizationLogin", "singerRegister", "orgRegister"];
+    if (authedHome && AUTH_PAGES.includes(view)) {
+      setView(authedHome, { replace: true });
+      return;
+    }
+    if (adminMode && view === "adminLogin") {
+      setView("adminDashboard", { replace: true });
+      return;
+    }
+
+    const access = requiredAccessForView(view);
+    if (access === "singer" && currentUser?.type !== "singer") {
+      setView("singerLogin", { replace: true });
+    } else if (access === "organization" && currentUser?.type !== "organization") {
+      setView("organizationLogin", { replace: true });
+    } else if (access === "user" && !currentUser) {
+      setView("landing", { replace: true });
+    } else if (access === "admin" && !adminMode) {
+      setView("adminLogin", { replace: true });
+    } else if (view === "profileView" && !selectedSinger && currentUser?.type !== "singer") {
+      // Org preview relies on an in-memory selection; on a direct load there is
+      // none, so send the org back to its dashboard. A logged-in singer with no
+      // selection self-loads their own profile in ProfileView (preview mode).
+      setView(
+        currentUser?.type === "organization" ? "orgDashboard" : "landing",
+        { replace: true },
+      );
+    }
+  }, [view, currentUser, adminMode, bootstrapLoading, selectedSinger, setView]);
 
   const performSearch = async (filters) => {
     setIsSearching(true);
@@ -403,6 +452,9 @@ export default function App() {
     currentUser, setCurrentUser,
     alert, setAlert,
     selectedSinger, setSelectedSinger,
+    orgTab, setOrgTab,
+    shortlistedIds, setShowUpgradeModal,
+    setSearchResults,
   };
 
   const renderView = () => {
@@ -482,6 +534,18 @@ export default function App() {
         return <LandingView setAdminMode={setAdminMode} />;
     }
   };
+
+  // Avoid flashing (or prematurely fetching from) a protected view before we
+  // know whether the user is authenticated.
+  if (bootstrapLoading && requiredAccessForView(view)) {
+    return (
+      <AppProvider value={__appContextValue}>
+        <div className="min-h-screen flex items-center justify-center bg-slate-50">
+          <div className="text-sm text-slate-500">Loading…</div>
+        </div>
+      </AppProvider>
+    );
+  }
 
   return (
     <AppProvider value={__appContextValue}>

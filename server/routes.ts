@@ -24,7 +24,7 @@ import { scrypt, randomBytes, timingSafeEqual, createHmac } from "crypto";
 import { promisify } from "util";
 import multer from "multer";
 import express from "express";
-import { uploadToSupabaseStorage } from "./lib/file-upload";
+import { uploadToSupabaseStorage, signStoragePath, signSingerFiles, signSingerFilesBatch } from "./lib/file-upload";
 import { getSessionSecret } from "./lib/env";
 import {
   notifyNewRegistration,
@@ -108,9 +108,13 @@ function requireOrg(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
+// Keep under the Vercel edge proxy body limit (~4.5MB) so prod uploads through
+// middleware.ts are not rejected before reaching the API.
+const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+
 const resumeUpload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { fileSize: MAX_UPLOAD_BYTES },
   fileFilter: (_req, file, cb) => {
     if (file.mimetype === "application/pdf") {
       cb(null, true);
@@ -122,7 +126,7 @@ const resumeUpload = multer({
 
 const headshotUpload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { fileSize: MAX_UPLOAD_BYTES },
   fileFilter: (_req, file, cb) => {
     if (["image/jpeg", "image/jpg", "image/png", "image/webp"].includes(file.mimetype)) {
       cb(null, true);
@@ -131,6 +135,21 @@ const headshotUpload = multer({
     }
   },
 });
+
+// Multer's middleware errors (size/type) bypass the route try/catch and would
+// otherwise surface as a generic 500 (and a hung client spinner). Wrap it so
+// those become a clean 400 JSON response the client can act on.
+function handleUpload(mw: any) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    mw(req, res, (err: any) => {
+      if (!err) return next();
+      if (err.code === "LIMIT_FILE_SIZE") {
+        return res.status(400).json({ message: "File must be under 4MB" });
+      }
+      return res.status(400).json({ message: err.message || "Upload failed" });
+    });
+  };
+}
 
 export async function registerRoutes(
   httpServer: Server,
@@ -152,8 +171,12 @@ export async function registerRoutes(
       cookie: {
         maxAge: 30 * 24 * 60 * 60 * 1000,
         httpOnly: true,
+        // The Vercel edge proxy (middleware.ts) makes the browser talk only to
+        // the frontend origin, so the session cookie is effectively first-party.
+        // "lax" then works in every environment and avoids the cross-site
+        // "none" cookie being dropped by stricter browsers.
         secure: isProduction,
-        sameSite: isProduction ? "none" : "lax",
+        sameSite: "lax",
       },
     })
   );
@@ -162,10 +185,11 @@ export async function registerRoutes(
 
   app.post("/api/auth/register/singer", async (req: Request, res: Response) => {
     try {
-      const { email, password, ...rest } = req.body;
-      if (!email || !password) {
+      const { email: emailRaw, password, ...rest } = req.body;
+      if (!emailRaw || !password) {
         return sendApiError(res, "EMAIL_PASSWORD_REQUIRED");
       }
+      const email = typeof emailRaw === "string" ? emailRaw.trim().toLowerCase() : emailRaw;
 
       const existing = await storage.getSingerByEmail(email);
       if (existing) {
@@ -238,10 +262,11 @@ export async function registerRoutes(
 
   app.post("/api/auth/register/organization", async (req: Request, res: Response) => {
     try {
-      const { email, password, ...rest } = req.body;
-      if (!email || !password) {
+      const { email: emailRaw, password, ...rest } = req.body;
+      if (!emailRaw || !password) {
         return sendApiError(res, "EMAIL_PASSWORD_REQUIRED");
       }
+      const email = typeof emailRaw === "string" ? emailRaw.trim().toLowerCase() : emailRaw;
 
       const existing = await storage.getOrganizationByEmail(email);
       if (existing) {
@@ -296,10 +321,11 @@ export async function registerRoutes(
 
   app.post("/api/auth/login", async (req: Request, res: Response) => {
     try {
-      const { email, password, userType } = req.body;
-      if (!email || !password || !userType) {
+      const { email: emailRaw, password, userType } = req.body;
+      if (!emailRaw || !password || !userType) {
         return sendApiError(res, "EMAIL_USER_TYPE_REQUIRED", "Email, password, and account type are required.");
       }
+      const email = typeof emailRaw === "string" ? emailRaw.trim().toLowerCase() : emailRaw;
 
       let user: any;
       if (userType === "singer") {
@@ -488,7 +514,7 @@ export async function registerRoutes(
         ]);
 
         const { password: _, ...safe } = singer;
-        return res.json({ ...safe, roles, works, availabilities, userType: "singer" });
+        return res.json(await signSingerFiles({ ...safe, roles, works, availabilities, userType: "singer" }));
       }
 
       if (req.session.userType === "organization") {
@@ -523,7 +549,7 @@ export async function registerRoutes(
       ]);
 
       const { password: _, ...safe } = singer;
-      res.json({ ...safe, roles, works, availabilities });
+      res.json(await signSingerFiles({ ...safe, roles, works, availabilities }));
     } catch (error: any) {
       sendRouteError(res, error, "PROFILE_LOAD_FAILED");
     }
@@ -581,7 +607,7 @@ export async function registerRoutes(
       }
 
       const { password: _, ...safe } = singer;
-      res.json(safe);
+      res.json(await signSingerFiles(safe));
     } catch (error: any) {
       sendRouteError(res, error, "PROFILE_UPDATE_FAILED");
     }
@@ -595,7 +621,7 @@ export async function registerRoutes(
       });
       if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
       const { password: _, ...safe } = singer;
-      res.json(safe);
+      res.json(await signSingerFiles(safe));
     } catch (error: any) {
       sendRouteError(res, error, "OPERATION_FAILED");
     }
@@ -639,7 +665,7 @@ export async function registerRoutes(
       const singer = await storage.updateSinger(req.session.userId!, { approval_seen: true });
       if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
       const { password: _, ...safe } = singer;
-      res.json(safe);
+      res.json(await signSingerFiles(safe));
     } catch (error: any) {
       sendRouteError(res, error, "OPERATION_FAILED");
     }
@@ -930,7 +956,7 @@ export async function registerRoutes(
       if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
 
       const { password: _, ...safe } = singer;
-      res.json(safe);
+      res.json(await signSingerFiles(safe));
     } catch (error: any) {
       sendRouteError(res, error, "OPERATION_FAILED");
     }
@@ -1059,6 +1085,10 @@ export async function registerRoutes(
           filters.searchLat = coords.lat;
           filters.searchLng = coords.lng;
           filters.radiusMiles = radiusVal;
+          // Pass the original text so singers without geocoded coordinates can
+          // still match by city/state (see storage.searchSingers geo fallback).
+          filters.cityFallback = resolvedCity;
+          filters.stateFallback = trimmedState;
         } catch (e) {
           console.warn(`[search] Geocode failed for "${resolvedCity}, ${trimmedState}":`, e);
           return res.status(503).json({
@@ -1067,7 +1097,7 @@ export async function registerRoutes(
           });
         }
       }
-      if (language) filters.language = language;
+      if (language && language.toLowerCase() !== "any") filters.language = language;
       if (experienceLevel && experienceLevel !== "any") filters.experienceLevel = experienceLevel;
       if (unionStatus && unionStatus !== "any") filters.unionStatus = unionStatus;
       if (represented && represented !== "any") filters.represented = represented;
@@ -1141,14 +1171,16 @@ export async function registerRoutes(
       const revealedIds = await storage.getRevealedSingerIds(req.session.userId!);
       const revealedSet = new Set(revealedIds);
 
-      const sanitized = results.map((singer) => {
-        const { password: _, ...safe } = singer;
-        const revealed = revealedSet.has(singer.id);
-        if (!revealed) {
-          return { ...safe, email: undefined, agent_email: undefined, revealed: false };
-        }
-        return { ...safe, revealed: true };
-      });
+      const sanitized = await signSingerFilesBatch(
+        results.map((singer) => {
+          const { password: _, ...safe } = singer;
+          const revealed = revealedSet.has(singer.id);
+          if (!revealed) {
+            return { ...safe, email: undefined, agent_email: undefined, revealed: false };
+          }
+          return { ...safe, revealed: true };
+        }),
+      );
 
       // Smart no-results diagnostic
       let noResultsDiagnostic: null | { mostRestrictiveFilter: string; suggestion: string } = null;
@@ -1518,7 +1550,7 @@ export async function registerRoutes(
         }
       }
       const { password: _, ...safe } = singer;
-      res.json(safe);
+      res.json(await signSingerFiles(safe));
     } catch (error: any) {
       sendRouteError(res, error, "OPERATION_FAILED");
     }
@@ -1536,7 +1568,7 @@ export async function registerRoutes(
         storage.getAdminGifts('singer', singerId),
       ]);
       const { password: _, ...safe } = singer;
-      res.json({ ...safe, roles, works, availabilities: avails, gift_history: giftHistory });
+      res.json(await signSingerFiles({ ...safe, roles, works, availabilities: avails, gift_history: giftHistory }));
     } catch (error: any) {
       sendRouteError(res, error, "OPERATION_FAILED");
     }
@@ -1607,7 +1639,7 @@ export async function registerRoutes(
         reason: reason || null,
       });
       const { password: _, ...safe } = updated!;
-      res.json({ singer: safe, gift });
+      res.json({ singer: await signSingerFiles(safe), gift });
     } catch (error: any) {
       sendRouteError(res, error, "OPERATION_FAILED");
     }
@@ -1644,13 +1676,14 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/singer/resume", requireAuth, requireSinger, resumeUpload.single("resume"), async (req: Request, res: Response) => {
+  app.post("/api/singer/resume", requireAuth, requireSinger, handleUpload(resumeUpload.single("resume")), async (req: Request, res: Response) => {
     try {
       if (!req.file) return res.status(400).json({ message: "No file uploaded" });
-      const resumeUrl = await uploadToSupabaseStorage("resumes", req.file);
-      const singer = await storage.updateSinger(req.session.userId!, { resume_url: resumeUrl });
+      const resumePath = await uploadToSupabaseStorage("resumes", req.file);
+      const singer = await storage.updateSinger(req.session.userId!, { resume_url: resumePath });
       if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
-      res.json({ resume_url: resumeUrl, message: "Resume uploaded successfully" });
+      const signedResumeUrl = await signStoragePath(resumePath);
+      res.json({ resume_url: signedResumeUrl, message: "Resume uploaded successfully" });
     } catch (error: any) {
       if (error.message === "Only PDF files are allowed") {
         return res.status(400).json({ message: "Only PDF files are allowed" });
@@ -1696,14 +1729,15 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/singer/headshot", requireAuth, requireSinger, headshotUpload.single("headshot"), async (req: Request, res: Response) => {
+  app.post("/api/singer/headshot", requireAuth, requireSinger, handleUpload(headshotUpload.single("headshot")), async (req: Request, res: Response) => {
     try {
       if (!req.file) return res.status(400).json({ message: "No file uploaded" });
-      const url = await uploadToSupabaseStorage("headshots", req.file);
-      const singer = await storage.updateSinger(req.session.userId!, { headshot_url: url });
+      const headshotPath = await uploadToSupabaseStorage("headshots", req.file);
+      const singer = await storage.updateSinger(req.session.userId!, { headshot_url: headshotPath });
       if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
       const { password: _, ...safe } = singer;
-      res.json({ headshot_url: url, ...safe });
+      const signed = await signSingerFiles(safe);
+      res.json({ ...signed, headshot_url: signed?.headshot_url ?? (await signStoragePath(headshotPath)) });
     } catch (error: any) {
       sendRouteError(res, error, "OPERATION_FAILED");
     }
@@ -1778,14 +1812,16 @@ export async function registerRoutes(
       ]);
       const revealedSet = new Set(ids);
       const visible = singersList.filter((s: any) => s.admin_approved === true);
-      const safe = visible.map(({ password, ...s }: any) => {
-        const isRevealed = revealedSet.has(s.id);
-        if (isRevealed) {
-          return { ...s, revealed: true };
-        }
-        const { email, agent_name, agent_email, manager_name, manager_email, manager_phone, ...redacted } = s;
-        return { ...redacted, revealed: false };
-      });
+      const safe = await signSingerFilesBatch(
+        visible.map(({ password, ...s }: any) => {
+          const isRevealed = revealedSet.has(s.id);
+          if (isRevealed) {
+            return { ...s, revealed: true };
+          }
+          const { email, agent_name, agent_email, manager_name, manager_email, manager_phone, ...redacted } = s;
+          return { ...redacted, revealed: false };
+        }),
+      );
       res.json(safe);
     } catch (error: any) {
       sendRouteError(res, error, "OPERATION_FAILED");
@@ -1796,7 +1832,7 @@ export async function registerRoutes(
   app.get("/api/org/revealed-singers", requireAuth, requireOrg, async (req: Request, res: Response) => {
     try {
       const singers = await storage.getRevealedSingersWithData(req.session.userId!);
-      const safeSingers = singers.map(({ password, ...s }: any) => s);
+      const safeSingers = await signSingerFilesBatch(singers.map(({ password, ...s }: any) => s));
       res.json(safeSingers);
     } catch (error: any) {
       sendRouteError(res, error, "OPERATION_FAILED");

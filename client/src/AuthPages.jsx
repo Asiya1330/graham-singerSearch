@@ -50,7 +50,7 @@ export function SingerLogin({ showAlert, setShowWelcome }) {
 
         const { data: profile } = await apiFetch("/api/auth/me", {}, "PROFILE_LOAD_FAILED");
         setCurrentUser({ type: "singer", data: profile });
-        setView("singerDashboard");
+        setView("singerDashboard", { replace: true });
         setShowWelcome(true);
       } catch (err) {
         showAlert(err.message || API_ERRORS.LOGIN_FAILED.message, "error");
@@ -231,7 +231,7 @@ export function OrganizationLogin({ showAlert, setShowWelcome }) {
 
         const { data: profile } = await apiFetch("/api/auth/me", {}, "PROFILE_LOAD_FAILED");
         setCurrentUser({ type: "organization", data: profile });
-        setView("orgDashboard");
+        setView("orgDashboard", { replace: true });
         setShowWelcome(true);
       } catch (err) {
         showAlert(err.message || API_ERRORS.LOGIN_FAILED.message, "error");
@@ -527,7 +527,7 @@ export function SingerRegistration({ showAlert, setShowWelcome }) {
 
         const { data: profile } = await apiFetch("/api/auth/me", {}, "PROFILE_LOAD_FAILED");
         setCurrentUser({ type: "singer", data: profile });
-        setView("singerDashboard");
+        setView("singerDashboard", { replace: true });
         setShowWelcome(true);
         showAlert("Account created successfully!", "success");
       } catch (err) {
@@ -642,7 +642,7 @@ export function OrgRegistration({ showAlert, setShowWelcome }) {
 
         const { data: profile } = await apiFetch("/api/auth/me", {}, "PROFILE_LOAD_FAILED");
         setCurrentUser({ type: "organization", data: profile });
-        setView("orgDashboard");
+        setView("orgDashboard", { replace: true });
         setShowWelcome(true);
         showAlert("Organization account created!", "success");
       } catch (err) {

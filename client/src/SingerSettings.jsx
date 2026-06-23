@@ -1,6 +1,6 @@
 import React from "react";
-import singerSearchLogo from "@assets/Singer_Search_Logo_May_2026_1777734809747.png";
 import { useAppContext } from "./AppContext";
+import { SingerNav } from "./AppNav";
 import { US_STATES } from "./AppShared";
 import { useCityStateAutofill } from "./hooks/useCityStateAutofill";
 import { getErrorMessageFromBody } from "./lib/api";
@@ -56,6 +56,40 @@ export function SingerSettings() {
     const [mgmtMsg, setMgmtMsg] = React.useState(null);
     const [mgmtSaving, setMgmtSaving] = React.useState(false);
 
+    // Re-hydrate the forms when the authenticated user becomes available or
+    // changes identity (e.g. Settings mounted before /api/auth/me resolved, which
+    // would otherwise leave the form initialised with blanks and let a full-object
+    // PUT overwrite saved values). Keyed on user.id so it doesn't clobber edits
+    // made within the same session.
+    React.useEffect(() => {
+      if (!user?.id) return;
+      setProfile({
+        first_name: user.first_name || "",
+        last_name: user.last_name || "",
+        primary_voice_type: user.primary_voice_type || "",
+        primary_fach: user.primary_fach || "",
+        union_status: user.union_status || "",
+        represented: user.represented || false,
+        agent_name: user.agent_name || "",
+        agent_email: user.agent_email || "",
+        website_url: user.website_url || "",
+        video_link_1: user.video_link_1 || "",
+        video_link_2: user.video_link_2 || "",
+        audio_link_1: user.audio_link_1 || "",
+        languages_sung: Array.isArray(user.languages_sung) ? user.languages_sung : [],
+        performance_types: Array.isArray(user.performance_types) ? user.performance_types : [],
+        city: user.city || "",
+        state: user.state || "",
+      });
+      setMgmt({
+        is_managed: user.is_managed || false,
+        manager_name: user.manager_name || "",
+        manager_email: user.manager_email || "",
+        manager_phone: user.manager_phone || "",
+      });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user?.id]);
+
     const saveMgmt = async () => {
       setMgmtSaving(true);
       setMgmtMsg(null);
@@ -82,10 +116,12 @@ export function SingerSettings() {
     const voiceTypes = ["Soprano","Mezzo-Soprano","Contralto","Tenor","Baritone","Bass","Countertenor"];
 
     const saveProfile = async () => {
-      if (profile.website_url && !/^https?:\/\//i.test(profile.website_url)) {
-        setProfileMsg({ type: "error", text: "Website URL must start with http:// or https://" });
-        return;
-      }
+      // Website: accept a bare domain by normalising to https:// rather than rejecting.
+      const normalizedWebsite = profile.website_url && profile.website_url.trim()
+        ? (/^https?:\/\//i.test(profile.website_url.trim())
+            ? profile.website_url.trim()
+            : `https://${profile.website_url.trim()}`)
+        : "";
       const mediaFields = [
         { key: "video_link_1", label: "Video Link 1" },
         { key: "video_link_2", label: "Video Link 2" },
@@ -100,7 +136,7 @@ export function SingerSettings() {
       setProfileSaving(true);
       setProfileMsg(null);
       try {
-        const payload = { ...profile };
+        const payload = { ...profile, website_url: normalizedWebsite };
         if (!payload.represented) {
           payload.agent_name = "";
           payload.agent_email = "";
@@ -155,32 +191,7 @@ export function SingerSettings() {
 
     return (
       <div className="min-h-screen bg-slate-50 pb-12">
-        <nav className="bg-[#121212] border-b border-white/10 sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between h-14">
-              <div className="flex">
-                <div className="flex-shrink-0 flex items-center cursor-pointer pr-6" onClick={() => setView("landing")}>
-                  <img src={singerSearchLogo} alt="SingerSearch" className="h-8 object-contain brightness-0 invert" />
-                </div>
-                <div className="hidden sm:flex sm:space-x-6">
-                  <span className="text-white/40 hover:text-white/80 inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium cursor-pointer transition-colors" onClick={() => setView("singerDashboard")}>
-                    Dashboard
-                  </span>
-                  <span className="text-white/40 hover:text-white/80 inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium cursor-pointer transition-colors" onClick={() => { const el = document.getElementById("singer-subscription-section"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }} data-testid="link-my-subscription-settings">
-                    My Subscription
-                  </span>
-                  <span className="border-[#3B82F6] text-white inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                    Account &amp; Profile
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center">
-                <span className="text-white/50 text-sm font-medium mr-4">{user.first_name} {user.last_name}</span>
-                <button onClick={async () => { await fetch("/api/auth/logout", { method: "POST", credentials: "include" }); setCurrentUser(null); setView("landing"); }} className="text-white/30 hover:text-white/60 text-sm transition-colors">Sign out</button>
-              </div>
-            </div>
-          </div>
-        </nav>
+        <SingerNav />
 
         <div className="max-w-2xl mx-auto px-4 py-10 space-y-8">
           <h1 className="text-2xl font-bold text-slate-900">Account &amp; Profile</h1>
@@ -259,42 +270,9 @@ export function SingerSettings() {
               </div>
             </div>
 
-            <div>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  data-testid="toggle-represented"
-                  type="checkbox"
-                  checked={profile.represented}
-                  onChange={e => setProfile(p => ({ ...p, represented: e.target.checked }))}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm font-medium text-slate-700">Represented by an agent</span>
-              </label>
-              {profile.represented && (
-                <div className="mt-3 grid grid-cols-2 gap-4 pl-7 border-l-2 border-blue-100 py-2">
-                  <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">Agent Name</label>
-                    <input
-                      data-testid="input-agent-name"
-                      type="text"
-                      value={profile.agent_name}
-                      onChange={e => setProfile(p => ({ ...p, agent_name: e.target.value }))}
-                      className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">Agent Email</label>
-                    <input
-                      data-testid="input-agent-email"
-                      type="email"
-                      value={profile.agent_email}
-                      onChange={e => setProfile(p => ({ ...p, agent_email: e.target.value }))}
-                      className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
+            {/* Agent representation is managed solely in the Management section
+                below (single source of truth) — the duplicate inline agent block
+                was removed per QA. */}
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Website URL <span className="text-slate-400 font-normal">(optional)</span></label>
@@ -306,7 +284,7 @@ export function SingerSettings() {
                 placeholder="https://yourname.com"
                 className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <p className="text-xs text-slate-400 mt-1">Must start with http:// or https://</p>
+              <p className="text-xs text-slate-400 mt-1">e.g. yourname.com — we'll add https:// for you.</p>
             </div>
 
             <div className="border-t border-slate-200 pt-4" data-testid="section-media-links">
