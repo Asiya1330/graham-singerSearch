@@ -361,7 +361,7 @@ export function ProfileView({ revealContact, isShortlisted, onToggleShortlist })
                           <div className="text-right">
                              <p className="text-sm text-slate-600 italic">{role.composer}</p>
                              {role.last_performed_date && <p className="text-xs text-slate-400 mt-1">Last: {formatMonthYear(role.last_performed_date)}</p>}
-                             {role.performance_types.includes("fully_staged") && (
+                             {Array.isArray(role.performance_types) && role.performance_types.includes("fully_staged") && (
                                 <span className="inline-flex mt-1 items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
                                    Fully Staged
                                 </span>

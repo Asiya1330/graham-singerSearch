@@ -149,7 +149,7 @@ export function OrgSettings() {
             <p className="text-sm text-slate-500 mt-2">
               {user.subscription_tier === "pro"
                 ? "Unlimited contact reveals and urgent search access."
-                : `${user.contact_reveals_used ?? 0} of 3 free contact reveals used.`}
+                : `${user.contact_reveals_used_this_month ?? 0} of ${user.contact_reveal_limit ?? 3} free contact reveals used.`}
             </p>
             {user.subscription_tier === "pro" && (
               <button
