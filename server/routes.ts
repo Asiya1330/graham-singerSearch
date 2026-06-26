@@ -1785,6 +1785,65 @@ export async function registerRoutes(
     }
   });
 
+  // ── Login email change (gated by current password) ──────────────────────
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  app.put("/api/singer/email", requireAuth, requireSinger, async (req: Request, res: Response) => {
+    try {
+      const { email: emailRaw, currentPassword } = req.body;
+      const email = typeof emailRaw === "string" ? emailRaw.trim().toLowerCase() : "";
+      if (!email || !EMAIL_REGEX.test(email)) {
+        return sendApiError(res, "INVALID_EMAIL");
+      }
+      const singer = await storage.getSinger(req.session.userId!);
+      if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
+      if (!currentPassword || !(await comparePasswords(currentPassword, singer.password))) {
+        return sendApiError(res, "CURRENT_PASSWORD_INCORRECT");
+      }
+      if (email !== singer.email) {
+        const existing = await storage.getSingerByEmail(email);
+        if (existing && existing.id !== singer.id) {
+          return sendApiError(res, "EMAIL_ALREADY_REGISTERED");
+        }
+      }
+      const updated = await storage.updateSinger(singer.id, { email });
+      if (!updated) return sendApiError(res, "SINGER_NOT_FOUND");
+      const { password: _, ...safe } = updated;
+      res.json(safe);
+    } catch (error: any) {
+      if (error?.code === "23505") return sendApiError(res, "EMAIL_ALREADY_REGISTERED");
+      sendRouteError(res, error, "PROFILE_UPDATE_FAILED");
+    }
+  });
+
+  app.put("/api/org/email", requireAuth, requireOrg, async (req: Request, res: Response) => {
+    try {
+      const { email: emailRaw, currentPassword } = req.body;
+      const email = typeof emailRaw === "string" ? emailRaw.trim().toLowerCase() : "";
+      if (!email || !EMAIL_REGEX.test(email)) {
+        return sendApiError(res, "INVALID_EMAIL");
+      }
+      const org = await storage.getOrganization(req.session.userId!);
+      if (!org) return sendApiError(res, "ORG_NOT_FOUND");
+      if (!currentPassword || !(await comparePasswords(currentPassword, org.password))) {
+        return sendApiError(res, "CURRENT_PASSWORD_INCORRECT");
+      }
+      if (email !== org.email) {
+        const existing = await storage.getOrganizationByEmail(email);
+        if (existing && existing.id !== org.id) {
+          return sendApiError(res, "EMAIL_ALREADY_REGISTERED");
+        }
+      }
+      const updated = await storage.updateOrganization(org.id, { email });
+      if (!updated) return sendApiError(res, "ORG_NOT_FOUND");
+      const { password: _, ...safe } = updated;
+      res.json(safe);
+    } catch (error: any) {
+      if (error?.code === "23505") return sendApiError(res, "EMAIL_ALREADY_REGISTERED");
+      sendRouteError(res, error, "PROFILE_UPDATE_FAILED");
+    }
+  });
+
   // ── Org: Shortlist (Favorites) ──────────────────────────────────────────
   app.post("/api/shortlist/:singerId", requireAuth, requireOrg, async (req: Request, res: Response) => {
     try {
