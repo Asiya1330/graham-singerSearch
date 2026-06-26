@@ -24,8 +24,8 @@ export function PrivacyPage() {
 
         <article className="bg-white rounded-xl shadow-sm border border-slate-200 px-6 sm:px-10 py-10 text-slate-700 leading-relaxed">
           <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-2">Singer Search — Privacy Policy</h1>
-          <p className="text-sm text-slate-500 mb-1"><strong>Effective Date:</strong> [INSERT DATE]</p>
-          <p className="text-sm text-slate-500 mb-8"><strong>Last Updated:</strong> [INSERT DATE]</p>
+          <p className="text-sm text-slate-500 mb-1"><strong>Effective Date:</strong> June 1, 2026</p>
+          <p className="text-sm text-slate-500 mb-8"><strong>Last Updated:</strong> June 1, 2026</p>
           <hr className="border-slate-200 mb-8" />
 
           <Section title="1. Introduction">
@@ -130,7 +130,7 @@ export function PrivacyPage() {
           <Section title="5. Data Retention">
             <p>We retain your account information for as long as your account is active or as needed to provide services. If you delete your account:</p>
             <ul className="list-disc pl-6 space-y-1">
-              <li>Singer profile data is removed from public visibility within [30 days]</li>
+              <li>Singer profile data is removed from public visibility within 30 days</li>
               <li>Engagement feedback data associated with your profile is retained in anonymized form for platform integrity purposes</li>
               <li>Billing and transaction records are retained for a minimum of 7 years as required by applicable tax and financial regulations</li>
             </ul>
@@ -179,7 +179,7 @@ export function PrivacyPage() {
               <li><strong>Opt out</strong> of the sale of personal information (Singer Search does not sell personal information)</li>
               <li><strong>Non-discrimination</strong> for exercising your privacy rights</li>
             </ul>
-            <p>To exercise any of these rights, contact us at [support@YOURDOMAIN.com]. We will respond to verified requests within 45 days.</p>
+            <p>To exercise any of these rights, contact us at support@singersearch.com. We will respond to verified requests within 45 days.</p>
           </Section>
 
           <Section title="9. Users Outside the United States">
@@ -209,13 +209,12 @@ export function PrivacyPage() {
             <p>For privacy-related inquiries, requests, or complaints:</p>
             <p>
               <strong>Singer Search</strong><br />
-              [support@YOURDOMAIN.com]<br />
-              [Mailing address — insert upon incorporation]
+              support@singersearch.com
             </p>
           </Section>
 
           <hr className="border-slate-200 my-8" />
-          <p className="text-sm text-slate-500 italic">This Privacy Policy was last updated [INSERT DATE].</p>
+          <p className="text-sm text-slate-500 italic">This Privacy Policy was last updated June 1, 2026.</p>
         </article>
       </div>
     </div>
