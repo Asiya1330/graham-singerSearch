@@ -46,6 +46,10 @@ export function SingerSettings() {
     const [pwMsg, setPwMsg] = React.useState(null);
     const [pwSaving, setPwSaving] = React.useState(false);
 
+    const [emailForm, setEmailForm] = React.useState({ email: user.email || "", password: "" });
+    const [emailMsg, setEmailMsg] = React.useState(null);
+    const [emailSaving, setEmailSaving] = React.useState(false);
+
 
     const [mgmt, setMgmt] = React.useState({
       is_managed: user.is_managed || false,
@@ -87,8 +91,41 @@ export function SingerSettings() {
         manager_email: user.manager_email || "",
         manager_phone: user.manager_phone || "",
       });
+      setEmailForm({ email: user.email || "", password: "" });
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user?.id]);
+
+    const saveEmail = async () => {
+      if (!emailForm.email.trim()) {
+        setEmailMsg({ type: "error", text: "Email is required." });
+        return;
+      }
+      if (!emailForm.password) {
+        setEmailMsg({ type: "error", text: "Enter your current password to confirm this change." });
+        return;
+      }
+      setEmailSaving(true);
+      setEmailMsg(null);
+      try {
+        const res = await fetch("/api/singer/email", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ email: emailForm.email.trim(), currentPassword: emailForm.password }),
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data) throw new Error(getErrorMessageFromBody(data, "PROFILE_UPDATE_FAILED"));
+        setCurrentUser(prev => prev?.data
+          ? { ...prev, data: { ...prev.data, email: data.email } }
+          : { ...prev, email: data.email });
+        setEmailForm({ email: data.email, password: "" });
+        setEmailMsg({ type: "success", text: "Email updated. Use this address to sign in from now on." });
+      } catch (e) {
+        setEmailMsg({ type: "error", text: e.message });
+      } finally {
+        setEmailSaving(false);
+      }
+    };
 
     const saveMgmt = async () => {
       setMgmtSaving(true);
@@ -447,6 +484,56 @@ export function SingerSettings() {
                 </>
               );
             })()}
+          </div>
+
+          {/* Email Address */}
+          <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+            <h2 className="text-lg font-semibold text-slate-800">Email Address</h2>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Login Email</label>
+              <input
+                data-testid="input-singer-email"
+                type="email"
+                value={emailForm.email}
+                onChange={e => setEmailForm(f => ({ ...f, email: e.target.value }))}
+                placeholder="you@example.com"
+                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Current Password</label>
+              <input
+                data-testid="input-singer-email-password"
+                type="password"
+                value={emailForm.password}
+                onChange={e => setEmailForm(f => ({ ...f, password: e.target.value }))}
+                placeholder="Confirm your password"
+                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="flex gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+              <span aria-hidden="true" className="text-base leading-none">⚠️</span>
+              <div className="space-y-1">
+                <p className="font-semibold">Changing your email affects your account:</p>
+                <ul className="list-disc pl-4 space-y-0.5">
+                  <li>You'll sign in with the new email from now on.</li>
+                  <li>Password-reset links and all account notifications go to the new address.</li>
+                  <li>Organizations who reveal your contact will see this new email.</li>
+                  <li>You can't use an email already registered to another account.</li>
+                </ul>
+              </div>
+            </div>
+            {emailMsg && (
+              <p className={`text-sm ${emailMsg.type === "success" ? "text-emerald-600" : "text-red-600"}`}>{emailMsg.text}</p>
+            )}
+            <button
+              data-testid="button-save-singer-email"
+              onClick={saveEmail}
+              disabled={emailSaving || !emailForm.email.trim() || !emailForm.password}
+              className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            >
+              {emailSaving ? "Saving…" : "Update Email"}
+            </button>
           </div>
 
           {/* Password */}

@@ -203,6 +203,19 @@ CREATE INDEX IF NOT EXISTS contact_reveals_singer_id_idx    ON contact_reveals (
 CREATE INDEX IF NOT EXISTS contact_reveals_revealed_at_idx  ON contact_reveals (revealed_at);
 
 -- ---------------------------------------------------------------------
+-- shortlists
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS shortlists (
+  id          serial PRIMARY KEY,
+  org_id      integer NOT NULL REFERENCES organizations(id),
+  singer_id   integer NOT NULL REFERENCES singers(id),
+  created_at  timestamp DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS shortlists_org_id_idx    ON shortlists (org_id);
+CREATE INDEX IF NOT EXISTS shortlists_singer_id_idx ON shortlists (singer_id);
+CREATE UNIQUE INDEX IF NOT EXISTS shortlists_unique_org_singer_idx ON shortlists (org_id, singer_id);
+
+-- ---------------------------------------------------------------------
 -- search_logs
 -- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS search_logs (
