@@ -13,6 +13,7 @@ export type ApiErrorCode =
   | "EMAIL_PASSWORD_REQUIRED"
   | "EMAIL_USER_TYPE_REQUIRED"
   | "EMAIL_ALREADY_REGISTERED"
+  | "INVALID_EMAIL"
   | "USER_NOT_FOUND"
   | "INVALID_PASSWORD"
   | "CURRENT_PASSWORD_INCORRECT"
@@ -82,6 +83,10 @@ export const API_ERRORS: Record<ApiErrorCode, ApiErrorDefinition> = {
   EMAIL_ALREADY_REGISTERED: {
     status: 409,
     message: "An account with this email already exists. Try signing in instead.",
+  },
+  INVALID_EMAIL: {
+    status: 400,
+    message: "Please enter a valid email address.",
   },
   USER_NOT_FOUND: {
     status: 404,
