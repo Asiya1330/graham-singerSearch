@@ -24,8 +24,8 @@ export function TermsPage() {
 
         <article className="bg-white rounded-xl shadow-sm border border-slate-200 px-6 sm:px-10 py-10 text-slate-700 leading-relaxed">
           <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-2">Singer Search — Terms of Service</h1>
-          <p className="text-sm text-slate-500 mb-1"><strong>Effective Date:</strong> [INSERT DATE]</p>
-          <p className="text-sm text-slate-500 mb-8"><strong>Last Updated:</strong> [INSERT DATE]</p>
+          <p className="text-sm text-slate-500 mb-1"><strong>Effective Date:</strong> June 1, 2026</p>
+          <p className="text-sm text-slate-500 mb-8"><strong>Last Updated:</strong> June 1, 2026</p>
           <hr className="border-slate-200 mb-8" />
 
           <Section title="1. Acceptance of Terms">
@@ -177,13 +177,12 @@ export function TermsPage() {
             <p>Questions about these Terms should be directed to:</p>
             <p>
               <strong>Singer Search</strong><br />
-              [support@YOURDOMAIN.com]<br />
-              [Mailing address — insert upon incorporation]
+              support@singersearch.com
             </p>
           </Section>
 
           <hr className="border-slate-200 my-8" />
-          <p className="text-sm text-slate-500 italic">These Terms of Service were last updated [INSERT DATE]. Users are encouraged to review them periodically.</p>
+          <p className="text-sm text-slate-500 italic">These Terms of Service were last updated June 1, 2026. Users are encouraged to review them periodically.</p>
         </article>
       </div>
     </div>
