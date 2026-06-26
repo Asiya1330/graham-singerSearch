@@ -1,8 +1,8 @@
 import React from "react";
-import { useAppContext } from "./AppContext";
-import { OrgNav } from "./AppNav";
-import { useCityStateAutofill } from "./hooks/useCityStateAutofill";
-import { getErrorMessageFromBody } from "./lib/api";
+import { useAppContext } from "../../AppContext";
+import { OrgNav } from "../../AppNav";
+import { useCityStateAutofill } from "../../hooks/useCityStateAutofill";
+import { getErrorMessageFromBody } from "../../lib/api";
 
 export function OrgSettings() {
   const { currentUser, setCurrentUser, setView } = useAppContext();

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Award, BarChart2, CheckCircle, Eye, Globe, Heart, Lock, Mail, MapPin, Shield, Star, Users, Video, Zap } from "lucide-react";
-import { useAppContext } from "./AppContext";
-import { AlertBanner, formatMonthYear } from "./AppShared";
+import { useAppContext } from "../../AppContext";
+import { AlertBanner, formatMonthYear } from "../../AppShared";
 
 function sanitizeHttpUrl(url) {
   if (!url || typeof url !== "string") return null;
@@ -73,6 +73,34 @@ export function ProfileView({ revealContact, isShortlisted, onToggleShortlist })
       })
       .filter(Boolean);
 
+    const renderVideoTile = (tile, idx, sizingClass = "aspect-video") => (
+      <div key={idx} className={`rounded-lg overflow-hidden bg-slate-900 border border-slate-200 flex items-center justify-center ${sizingClass}`} data-testid={`section-singer-video-${idx + 1}`}>
+        {tile.embedUrl ? (
+          <iframe
+            src={tile.embedUrl}
+            title={`${singer.first_name} ${singer.last_name} — performance video ${idx + 1}`}
+            className="w-full h-full"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            data-testid={`iframe-singer-video-${idx + 1}`}
+          />
+        ) : (
+          <a
+            href={tile.safeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex flex-col items-center justify-center gap-2 text-slate-300 hover:text-white text-sm font-medium"
+            data-testid={`link-singer-video-external-${idx + 1}`}
+          >
+            <Video className="w-10 h-10" />
+            <span>Open video in new tab</span>
+            <span className="text-xs text-slate-500 break-all max-w-xs px-4 text-center">{tile.safeUrl}</span>
+          </a>
+        )}
+      </div>
+    );
+
     return (
       <div className="min-h-screen bg-slate-50 pb-12">
         <div className="bg-white shadow">
@@ -103,33 +131,6 @@ export function ProfileView({ revealContact, isShortlisted, onToggleShortlist })
               </div>
             )}
             {(() => {
-              const renderVideoTile = (tile, idx, sizingClass = "aspect-video") => (
-                <div key={idx} className={`rounded-lg overflow-hidden bg-slate-900 border border-slate-200 flex items-center justify-center ${sizingClass}`} data-testid={`section-singer-video-${idx + 1}`}>
-                  {tile.embedUrl ? (
-                    <iframe
-                      src={tile.embedUrl}
-                      title={`${singer.first_name} ${singer.last_name} — performance video ${idx + 1}`}
-                      className="w-full h-full"
-                      frameBorder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      data-testid={`iframe-singer-video-${idx + 1}`}
-                    />
-                  ) : (
-                    <a
-                      href={tile.safeUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex flex-col items-center justify-center gap-2 text-slate-300 hover:text-white text-sm font-medium"
-                      data-testid={`link-singer-video-external-${idx + 1}`}
-                    >
-                      <Video className="w-10 h-10" />
-                      <span>Open video in new tab</span>
-                      <span className="text-xs text-slate-500 break-all max-w-xs px-4 text-center">{tile.safeUrl}</span>
-                    </a>
-                  )}
-                </div>
-              );
               const headshotTile = (
                 <div className="rounded-lg overflow-hidden bg-slate-100 border border-slate-200 aspect-[4/5] md:aspect-auto md:h-80">
                   {singer.headshot_url ? (

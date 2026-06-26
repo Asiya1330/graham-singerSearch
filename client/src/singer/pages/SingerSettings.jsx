@@ -1,9 +1,9 @@
 import React from "react";
-import { useAppContext } from "./AppContext";
-import { SingerNav } from "./AppNav";
-import { US_STATES } from "./AppShared";
-import { useCityStateAutofill } from "./hooks/useCityStateAutofill";
-import { getErrorMessageFromBody } from "./lib/api";
+import { useAppContext } from "../../AppContext";
+import { SingerNav } from "../../AppNav";
+import { US_STATES } from "../../AppShared";
+import { useCityStateAutofill } from "../../hooks/useCityStateAutofill";
+import { getErrorMessageFromBody } from "../../lib/api";
 
 export function SingerSettings() {
   const { currentUser, setCurrentUser, setView } = useAppContext();

@@ -39,17 +39,17 @@ import {
   ArrowDown,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import SingerCard from "./SingerCard";
+import SingerCard from "./singer/components/SingerCard";
 import RepertoireAutocomplete, { VOICE_TYPE_DB_TO_LABEL, CATEGORY_DB_TO_PERFTYPE } from "./RepertoireAutocomplete";
 import { AppProvider } from "./AppContext";
 import { AdminDashboard } from "./AdminDashboard";
-import { SingerDashboard } from "./SingerDashboard";
-import { SingerSettings } from "./SingerSettings";
-import { OrgSettings } from "./OrgSettings";
+import { SingerDashboard } from "./singer/pages/SingerDashboard";
+import { SingerSettings } from "./singer/pages/SingerSettings";
+import { OrgSettings } from "./organization/pages/OrgSettings";
 import { LandingView } from "./LandingView";
 import { EmergencySearch } from "./EmergencySearch";
-import { OrgDashboard } from "./OrgDashboard";
-import { ProfileView } from "./ProfileView";
+import { OrgDashboard } from "./organization/pages/OrgDashboard";
+import { ProfileView } from "./singer/pages/ProfileView";
 import { PricingPage } from "./PricingPage";
 import { AboutPage } from "./AboutPage";
 import { TermsPage } from "./TermsPage";
@@ -451,6 +451,7 @@ export default function App() {
     view, setView,
     currentUser, setCurrentUser,
     alert, setAlert,
+    showAlert,
     selectedSinger, setSelectedSinger,
     orgTab, setOrgTab,
     shortlistedIds, setShowUpgradeModal,
@@ -476,9 +477,9 @@ export default function App() {
       case "orgRegister":
         return <OrgRegistration showAlert={showAlert} setShowWelcome={setShowWelcome} />;
       case "singerDashboard":
-        return <><SingerDashboard setSearchResults={setSearchResults} showAlert={showAlert} /><AppFooter /></>;
+        return <><SingerDashboard /><AppFooter /></>;
       case "orgDashboard":
-        if (currentUser?.type === "singer") return <><SingerDashboard setSearchResults={setSearchResults} showAlert={showAlert} /><AppFooter /></>;
+        if (currentUser?.type === "singer") return <><SingerDashboard /><AppFooter /></>;
         return <><OrgDashboard
           setSearchResults={setSearchResults}
           setShowUpgradeModal={setShowUpgradeModal}
@@ -519,7 +520,7 @@ export default function App() {
       case "adminDashboard":
         return <><AdminDashboard setAdminMode={setAdminMode} showAlert={showAlert} /><AppFooter /></>;
       case "emergencySearch":
-        if (currentUser?.type === "singer") return <SingerDashboard setSearchResults={setSearchResults} showAlert={showAlert} />;
+        if (currentUser?.type === "singer") return <SingerDashboard />;
         return <EmergencySearch
           showAlert={showAlert}
           revealContact={revealContact}
