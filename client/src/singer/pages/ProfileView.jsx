@@ -132,7 +132,7 @@ export function ProfileView({ revealContact, isShortlisted, onToggleShortlist })
             )}
             {(() => {
               const headshotTile = (
-                <div className="rounded-lg overflow-hidden bg-slate-100 border border-slate-200 aspect-[4/5] md:aspect-auto md:h-80">
+                <div className="rounded-lg overflow-hidden bg-slate-100 border border-slate-200 aspect-[4/5]">
                   {singer.headshot_url ? (
                     <img
                       src={singer.headshot_url}
@@ -147,7 +147,7 @@ export function ProfileView({ revealContact, isShortlisted, onToggleShortlist })
               );
               return (
                 <div className="mb-8" data-testid="section-singer-hero">
-                  <div className="md:max-w-lg mx-auto md:mx-0">{headshotTile}</div>
+                  <div className="max-w-xs mx-auto md:mx-0">{headshotTile}</div>
                 </div>
               );
             })()}
