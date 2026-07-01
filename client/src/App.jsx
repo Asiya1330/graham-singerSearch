@@ -461,7 +461,7 @@ export default function App() {
   const renderView = () => {
     switch (view) {
       case "landing":
-        return <><LandingView setAdminMode={setAdminMode} /><AppFooter /></>;
+        return <LandingView setAdminMode={setAdminMode} />;
       case "terms":
         return <><TermsPage /><AppFooter /></>;
       case "privacy":
