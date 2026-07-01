@@ -190,6 +190,12 @@ export async function registerRoutes(
         return sendApiError(res, "EMAIL_PASSWORD_REQUIRED");
       }
       const email = typeof emailRaw === "string" ? emailRaw.trim().toLowerCase() : emailRaw;
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return sendApiError(res, "INVALID_EMAIL", "Please enter a valid email address.");
+      }
+      if (typeof password !== "string" || password.length < 8) {
+        return res.status(400).json({ code: "WEAK_PASSWORD", message: "Password must be at least 8 characters." });
+      }
 
       const existing = await storage.getSingerByEmail(email);
       if (existing) {
@@ -267,6 +273,12 @@ export async function registerRoutes(
         return sendApiError(res, "EMAIL_PASSWORD_REQUIRED");
       }
       const email = typeof emailRaw === "string" ? emailRaw.trim().toLowerCase() : emailRaw;
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return sendApiError(res, "INVALID_EMAIL", "Please enter a valid email address.");
+      }
+      if (typeof password !== "string" || password.length < 8) {
+        return res.status(400).json({ code: "WEAK_PASSWORD", message: "Password must be at least 8 characters." });
+      }
 
       const existing = await storage.getOrganizationByEmail(email);
       if (existing) {
@@ -921,6 +933,10 @@ export async function registerRoutes(
 
   app.post("/api/singer/availability", requireAuth, requireSinger, async (req: Request, res: Response) => {
     try {
+      const { start_date, end_date } = req.body;
+      if (start_date && end_date && start_date > end_date) {
+        return res.status(400).json({ message: "End date must be on or after start date." });
+      }
       const parsed = insertAvailabilitySchema.parse({ ...req.body, singer_id: req.session.userId! });
       const avail = await storage.createAvailability(parsed);
       res.status(201).json(avail);
@@ -1011,7 +1027,7 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/search", async (req, res) => {
+  app.get("/api/search", requireAuth, requireOrg, async (req, res) => {
     res.set("Cache-Control", "no-store");
     try {
       const {
