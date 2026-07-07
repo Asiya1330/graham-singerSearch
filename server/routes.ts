@@ -382,7 +382,7 @@ export async function registerRoutes(
         return sendApiError(res, "INVALID_USER_TYPE");
       }
 
-      const normalizedEmail = String(email).trim();
+      const normalizedEmail = String(email).trim().toLowerCase();
       let user: { id: number; email: string; displayName: string } | undefined;
 
       if (userType === "singer") {
@@ -1538,6 +1538,9 @@ export async function registerRoutes(
     try {
       const singerId = parseInt(req.params.id as string);
       const { password, id, created_at, viewed_count, is_trending, pro_expires_at, founding_artist, is_gifted, ...updates } = req.body;
+      if (updates.email && typeof updates.email === "string") {
+        updates.email = updates.email.trim().toLowerCase();
+      }
       const before = await storage.getSinger(singerId);
       const cityChanged = before && (
         (updates.city ?? before.city) !== before.city ||
