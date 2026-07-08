@@ -164,7 +164,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getSingerByEmail(email: string): Promise<Singer | undefined> {
-    const [singer] = await db.select().from(singers).where(eq(singers.email, email));
+    const [singer] = await db.select().from(singers).where(ilike(singers.email, email));
     return singer;
   }
 
@@ -232,7 +232,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getOrganizationByEmail(email: string): Promise<Organization | undefined> {
-    const [org] = await db.select().from(organizations).where(eq(organizations.email, email));
+    const [org] = await db.select().from(organizations).where(ilike(organizations.email, email));
     return org;
   }
 
