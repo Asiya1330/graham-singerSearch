@@ -1,7 +1,9 @@
-export async function startStripeCheckout() {
+export async function startStripeCheckout(interval = "monthly") {
   const res = await fetch("/api/stripe/checkout", {
     method: "POST",
     credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ interval }),
   });
   const data = await res.json();
   if (!res.ok) {
@@ -35,6 +37,30 @@ export async function syncStripeSubscription() {
   return data;
 }
 
+export async function cancelStripeSubscription() {
+  const res = await fetch("/api/stripe/cancel", {
+    method: "POST",
+    credentials: "include",
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to cancel subscription");
+  }
+  return data;
+}
+
+export async function resumeStripeSubscription() {
+  const res = await fetch("/api/stripe/resume", {
+    method: "POST",
+    credentials: "include",
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to resume subscription");
+  }
+  return data;
+}
+
 export function stripeStatusLabel(status) {
   switch (status) {
     case "trialing":
@@ -43,6 +69,8 @@ export function stripeStatusLabel(status) {
       return "Active";
     case "past_due":
       return "Past due";
+    case "canceling":
+      return "Canceling";
     case "canceled":
       return "Canceled";
     case "unpaid":

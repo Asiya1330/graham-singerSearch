@@ -179,42 +179,6 @@ export default function App() {
   // Hydrate auth + admin session once on load. The URL is the source of truth
   // for which view renders; the route guards below redirect when access is
   // denied (including after a hard reload of a protected URL).
-  // Handle Stripe checkout redirect query params
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const checkout = params.get("checkout");
-    const viewParam = params.get("view");
-    if (checkout === "success") {
-      showAlert("Subscription started! Syncing your account…", "success");
-      syncStripeSubscription()
-        .then((data) => {
-          if (data?.userType === "singer") setCurrentUser({ type: "singer", data });
-          else if (data?.userType === "organization") setCurrentUser({ type: "organization", data });
-          showAlert("Pro subscription active!", "success");
-        })
-        .catch(() => {
-          fetch("/api/auth/me", { credentials: "include" })
-            .then(res => res.ok ? res.json() : null)
-            .then(data => {
-              if (data?.userType === "singer") setCurrentUser({ type: "singer", data });
-              else if (data?.userType === "organization") setCurrentUser({ type: "organization", data });
-            })
-            .catch(() => {});
-        });
-    } else if (checkout === "cancel") {
-      showAlert("Checkout canceled.", "error");
-    }
-    if (viewParam) {
-      setView(viewParam);
-    }
-    if (checkout || viewParam) {
-      const url = new URL(window.location.href);
-      url.searchParams.delete("checkout");
-      url.searchParams.delete("view");
-      window.history.replaceState({}, "", `${url.pathname}${url.search}`);
-    }
-  }, []);
-
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -232,6 +196,38 @@ export default function App() {
         if (adminRes.ok) {
           const adminData = await adminRes.json().catch(() => null);
           if (adminData?.authenticated) setAdminMode(true);
+        }
+
+        // Handle Stripe checkout redirect after auth is established
+        const params = new URLSearchParams(window.location.search);
+        const checkout = params.get("checkout");
+        const viewParam = params.get("view");
+        if (checkout === "success") {
+          showAlert("Subscription started! Syncing your account…", "success");
+          try {
+            const syncData = await syncStripeSubscription();
+            if (!cancelled && syncData) {
+              const ut = syncData.userType;
+              if (ut === "singer" || ut === "organization") {
+                setCurrentUser({ type: ut, data: syncData });
+              }
+              showAlert("Pro subscription active!", "success");
+            }
+          } catch {
+            // Sync failed — the auth/me call above already set the user with
+            // whatever tier the DB had; a page reload will pick up webhook updates.
+          }
+        } else if (checkout === "cancel") {
+          showAlert("Checkout canceled.", "error");
+        }
+        if (viewParam && !cancelled) {
+          setView(viewParam);
+        }
+        if (checkout || viewParam) {
+          const url = new URL(window.location.href);
+          url.searchParams.delete("checkout");
+          url.searchParams.delete("view");
+          window.history.replaceState({}, "", `${url.pathname}${url.search}`);
         }
       } catch {
         /* treated as unauthenticated */

@@ -3,7 +3,7 @@ import { useAppContext } from "../../AppContext";
 import { OrgNav } from "../../AppNav";
 import { useCityStateAutofill } from "../../hooks/useCityStateAutofill";
 import { getErrorMessageFromBody } from "../../lib/api";
-import { startStripeCheckout, openStripeBillingPortal, stripeStatusLabel } from "../../lib/stripe";
+import { SubscriptionSection } from "../../components/SubscriptionSection";
 
 export function OrgSettings() {
   const { currentUser, setCurrentUser, setView } = useAppContext();
@@ -26,6 +26,20 @@ export function OrgSettings() {
     const [emailForm, setEmailForm] = React.useState({ email: user.email || "", password: "" });
     const [emailMsg, setEmailMsg] = React.useState(null);
     const [emailSaving, setEmailSaving] = React.useState(false);
+
+    // Re-fetch user data when page regains focus (e.g. returning from Stripe portal)
+    React.useEffect(() => {
+      const onFocus = () => {
+        fetch("/api/auth/me", { credentials: "include" })
+          .then(res => res.ok ? res.json() : null)
+          .then(data => {
+            if (data?.userType === "organization") setCurrentUser({ type: "organization", data });
+          })
+          .catch(() => {});
+      };
+      window.addEventListener("focus", onFocus);
+      return () => window.removeEventListener("focus", onFocus);
+    }, [setCurrentUser]);
 
     React.useEffect(() => {
       if (!user?.id) return;
@@ -178,93 +192,8 @@ export function OrgSettings() {
             </button>
           </div>
 
-          {/* Subscription info */}
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
-            <h2 className="text-lg font-semibold text-slate-800 mb-3">Subscription</h2>
-            <div className="flex items-center gap-3 flex-wrap">
-              <span className={`px-3 py-1 rounded-full text-sm font-semibold ${user.subscription_tier === "pro" ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-600"}`}>
-                {user.subscription_tier === "pro" ? "Pro" : "Free"}
-              </span>
-              {stripeStatusLabel(user.stripe_subscription_status) && (
-                <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
-                  {stripeStatusLabel(user.stripe_subscription_status)}
-                </span>
-              )}
-              {user.subscription_tier !== "pro" && (
-                <button
-                  onClick={async () => {
-                    try {
-                      await startStripeCheckout();
-                    } catch (e) {
-                      setProfileMsg({ type: "error", text: e.message || "Failed to start checkout." });
-                    }
-                  }}
-                  className="text-sm text-blue-600 hover:underline font-medium"
-                >
-                  Start free trial →
-                </button>
-              )}
-            </div>
-            <p className="text-sm text-slate-500 mt-2">
-              {user.subscription_tier === "pro"
-                ? user.stripe_subscription_status === "trialing" && user.pro_expires_at
-                  ? `Free trial active — billing starts ${new Date(user.pro_expires_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`
-                  : "Unlimited contact reveals and urgent search access."
-                : `${user.contact_reveals_used_this_month ?? 0} of ${user.contact_reveal_limit ?? 3} free contact reveals used.`}
-            </p>
-            {user.stripe_subscription_status === "past_due" && (
-              <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-2 mt-2">
-                Your payment is past due. Update your payment method in billing settings.
-              </p>
-            )}
-            {user.subscription_tier === "pro" && user.stripe_subscription_id && (
-              <button
-                onClick={async () => {
-                  try {
-                    await openStripeBillingPortal();
-                  } catch (e) {
-                    setProfileMsg({ type: "error", text: e.message || "Failed to open billing portal." });
-                  }
-                }}
-                className="mt-3 text-sm font-medium text-blue-700 hover:text-blue-900 border border-blue-200 hover:bg-blue-50 px-4 py-2 rounded-lg transition-colors"
-                data-testid="button-manage-billing-org"
-              >
-                Manage billing
-              </button>
-            )}
-            {user.subscription_tier === "pro" && (
-              <button
-                onClick={async () => {
-                  if (user.stripe_subscription_id) {
-                    try {
-                      await openStripeBillingPortal();
-                    } catch (e) {
-                      setProfileMsg({ type: "error", text: e.message || "Failed to open billing portal." });
-                    }
-                    return;
-                  }
-                  if (!window.confirm("Downgrade to the Free tier? Your organization will lose unlimited contact reveals and urgent search access.")) return;
-                  try {
-                    const res = await fetch("/api/org/downgrade", { method: "POST", credentials: "include" });
-                    const data = await res.json().catch(() => ({}));
-                    if (res.status === 409 && data.usePortal) {
-                      await openStripeBillingPortal();
-                      return;
-                    }
-                    if (!res.ok) { setProfileMsg({ type: "error", text: data.message || "Failed to downgrade. Please try again." }); return; }
-                    setProfileMsg({ type: "success", text: "Your organization has been moved to the Free tier." });
-                    window.location.reload();
-                  } catch (e) {
-                    setProfileMsg({ type: "error", text: "Network error. Please try again." });
-                  }
-                }}
-                className="mt-3 text-sm font-medium text-slate-600 hover:text-red-700 border border-slate-300 hover:border-red-300 hover:bg-red-50 px-4 py-2 rounded-lg transition-colors"
-                data-testid="button-downgrade-org"
-              >
-                {user.stripe_subscription_id ? "Cancel subscription" : "Downgrade to Free"}
-              </button>
-            )}
-          </div>
+          {/* Subscription */}
+          <SubscriptionSection user={user} setCurrentUser={setCurrentUser} setProfileMsg={setProfileMsg} userType="organization" />
 
           {/* Email Address */}
           <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4">

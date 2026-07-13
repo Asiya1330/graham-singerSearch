@@ -37,7 +37,8 @@ import {
 import { eq, desc, and } from "drizzle-orm";
 import { sendApiError, sendRouteError } from "./lib/api-response";
 import { registerStripeRoutes } from "./stripe-routes";
-import { hasActiveStripeSubscription } from "./lib/stripe";
+import { hasActiveStripeSubscription, syncSubscriptionForUser } from "./lib/stripe";
+import { isStripeCheckoutConfigured } from "./lib/env";
 
 const scryptAsync = promisify(scrypt);
 
@@ -342,17 +343,23 @@ export async function registerRoutes(
         return sendApiError(res, "EMAIL_USER_TYPE_REQUIRED", "Email, password, and account type are required.");
       }
       const email = typeof emailRaw === "string" ? emailRaw.trim().toLowerCase() : emailRaw;
+      console.log("[LOGIN DEBUG] Raw email:", emailRaw);
+      console.log("[LOGIN DEBUG] Normalized email:", email);
+      console.log("[LOGIN DEBUG] userType:", userType);
 
       let user: any;
       if (userType === "singer") {
         user = await storage.getSingerByEmail(email);
+        console.log("[LOGIN DEBUG] Singer lookup result:", user ? `Found (id=${user.id}, db_email="${user.email}")` : "NOT FOUND");
       } else if (userType === "organization") {
         user = await storage.getOrganizationByEmail(email);
+        console.log("[LOGIN DEBUG] Org lookup result:", user ? `Found (id=${user.id}, db_email="${user.email}")` : "NOT FOUND");
       } else {
         return sendApiError(res, "INVALID_USER_TYPE");
       }
 
       if (!user) {
+        console.log("[LOGIN DEBUG] User not found — case mismatch likely. Raw:", emailRaw, "→ Queried:", email);
         return sendApiError(res, "USER_NOT_FOUND");
       }
 
@@ -515,6 +522,15 @@ export async function registerRoutes(
         let singer = await storage.getSinger(req.session.userId);
         if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
 
+        if (singer.stripe_customer_id && isStripeCheckoutConfigured()) {
+          try {
+            const synced = await syncSubscriptionForUser("singer", singer.id);
+            if (synced) singer = synced as typeof singer;
+          } catch (e) {
+            console.warn("[auth/me] stripe sync failed for singer", singer.id, (e as Error).message);
+          }
+        }
+
         if (singer.subscription_tier === 'founding' && singer.founding_expires_at && new Date(singer.founding_expires_at) < new Date()) {
           singer = (await storage.updateSinger(singer.id, { subscription_tier: 'standard', founding_expires_at: null }))!;
         }
@@ -536,6 +552,15 @@ export async function registerRoutes(
       if (req.session.userType === "organization") {
         let org = await storage.getOrganization(req.session.userId);
         if (!org) return sendApiError(res, "ORG_NOT_FOUND");
+
+        if (org.stripe_customer_id && isStripeCheckoutConfigured()) {
+          try {
+            const synced = await syncSubscriptionForUser("organization", org.id);
+            if (synced) org = synced as typeof org;
+          } catch (e) {
+            console.warn("[auth/me] stripe sync failed for org", org.id, (e as Error).message);
+          }
+        }
 
         if (org.subscription_tier === 'pro' && org.pro_expires_at && new Date(org.pro_expires_at) < new Date() && !hasActiveStripeSubscription(org)) {
           org = (await storage.updateOrganization(org.id, { subscription_tier: 'free', pro_expires_at: null, founding_org: false, is_gifted: false }))!;

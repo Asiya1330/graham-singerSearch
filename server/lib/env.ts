@@ -171,6 +171,10 @@ export function getStripePriceSingerPro(): string {
   return price;
 }
 
+export function getStripePriceSingerProAnnual(): string | null {
+  return process.env.STRIPE_PRICE_SINGER_PRO_ANNUAL?.trim() || null;
+}
+
 export function getStripePriceOrgPro(): string {
   const price = process.env.STRIPE_PRICE_ORG_PRO?.trim();
   if (!price) {

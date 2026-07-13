@@ -3,6 +3,7 @@ import type { Organization, Singer } from "@shared/schema";
 import {
   getStripePriceOrgPro,
   getStripePriceSingerPro,
+  getStripePriceSingerProAnnual,
   getStripeReturnBaseUrl,
   getStripeSecretKey,
   getStripeWebhookSecret,
@@ -13,7 +14,7 @@ export const STRIPE_TRIAL_DAYS = 7;
 
 export type StripeUserType = "singer" | "organization";
 
-const ACTIVE_STRIPE_STATUSES = new Set(["trialing", "active", "past_due"]);
+const ACTIVE_STRIPE_STATUSES = new Set(["trialing", "active", "past_due", "canceling"]);
 
 let stripeInstance: Stripe | null = null;
 
@@ -34,7 +35,14 @@ export function hasActiveStripeSubscription(
   );
 }
 
-function getPriceId(userType: StripeUserType): string {
+function getPriceId(userType: StripeUserType, interval?: "monthly" | "annual"): string {
+  if (userType === "singer" && interval === "annual") {
+    const annualPrice = getStripePriceSingerProAnnual();
+    if (!annualPrice) {
+      throw new Error("Annual billing is not configured yet. Please choose monthly billing.");
+    }
+    return annualPrice;
+  }
   return userType === "singer" ? getStripePriceSingerPro() : getStripePriceOrgPro();
 }
 
@@ -75,6 +83,7 @@ export async function createCheckoutSession(
   userId: number,
   email: string,
   user: Singer | Organization,
+  interval?: "monthly" | "annual",
 ): Promise<string> {
   const customerId = await getOrCreateStripeCustomer(
     userType,
@@ -87,14 +96,19 @@ export async function createCheckoutSession(
   const siteUrl = getStripeReturnBaseUrl();
   const settingsView = userType === "singer" ? "singerSettings" : "orgSettings";
 
+  const subscriptionData: Record<string, unknown> = {
+    metadata: { userId: String(userId), userType },
+  };
+  if (userType === "organization") {
+    subscriptionData.trial_period_days = STRIPE_TRIAL_DAYS;
+  }
+
   const session = await getStripe().checkout.sessions.create({
     mode: "subscription",
     customer: customerId,
-    line_items: [{ price: getPriceId(userType), quantity: 1 }],
-    subscription_data: {
-      trial_period_days: STRIPE_TRIAL_DAYS,
-      metadata: { userId: String(userId), userType },
-    },
+    line_items: [{ price: getPriceId(userType, interval), quantity: 1 }],
+    subscription_data: subscriptionData as Stripe.Checkout.SessionCreateParams["subscription_data"],
+    allow_promotion_codes: true,
     metadata: { userId: String(userId), userType },
     success_url: `${siteUrl}/?checkout=success&view=${settingsView}`,
     cancel_url: `${siteUrl}/?checkout=cancel&view=pricing`,
@@ -120,6 +134,22 @@ export async function createPortalSession(
   });
 
   return session.url;
+}
+
+export async function cancelSubscription(
+  subscriptionId: string,
+): Promise<Stripe.Subscription> {
+  return getStripe().subscriptions.update(subscriptionId, {
+    cancel_at_period_end: true,
+  });
+}
+
+export async function resumeSubscription(
+  subscriptionId: string,
+): Promise<Stripe.Subscription> {
+  return getStripe().subscriptions.update(subscriptionId, {
+    cancel_at_period_end: false,
+  });
 }
 
 export function constructWebhookEvent(rawBody: Buffer, signature: string | string[] | undefined): Stripe.Event {
@@ -171,16 +201,21 @@ function hasNonStripeProAccess(user: Singer | Organization): boolean {
 export function mapSubscriptionToDbUpdate(sub: Stripe.Subscription): {
   stripe_subscription_id: string;
   stripe_subscription_status: string;
+  stripe_billing_interval: string | null;
   subscription_tier: "free" | "pro";
   pro_expires_at: Date | null;
   contact_reveal_limit?: number;
 } {
-  const status = sub.status;
+  const status = sub.cancel_at_period_end && sub.status === "active"
+    ? "canceling"
+    : sub.status;
   const expiresAt = subscriptionExpiresAt(sub);
+  const interval = sub.items?.data?.[0]?.plan?.interval ?? null;
 
   const base = {
     stripe_subscription_id: sub.id,
     stripe_subscription_status: status,
+    stripe_billing_interval: interval,
   };
 
   if (ACTIVE_STRIPE_STATUSES.has(status)) {
@@ -267,10 +302,12 @@ export async function applySubscriptionUpdate(
       ? storage.updateSinger(userId, {
           stripe_subscription_id: update.stripe_subscription_id,
           stripe_subscription_status: update.stripe_subscription_status,
+          stripe_billing_interval: update.stripe_billing_interval,
         })
       : storage.updateOrganization(userId, {
           stripe_subscription_id: update.stripe_subscription_id,
           stripe_subscription_status: update.stripe_subscription_status,
+          stripe_billing_interval: update.stripe_billing_interval,
         }));
     return;
   }
@@ -279,6 +316,7 @@ export async function applySubscriptionUpdate(
     await storage.updateSinger(userId, {
       stripe_subscription_id: update.stripe_subscription_id,
       stripe_subscription_status: update.stripe_subscription_status,
+      stripe_billing_interval: update.stripe_billing_interval,
       subscription_tier: update.subscription_tier,
       pro_expires_at: update.pro_expires_at,
     });
@@ -288,6 +326,7 @@ export async function applySubscriptionUpdate(
   await storage.updateOrganization(userId, {
     stripe_subscription_id: update.stripe_subscription_id,
     stripe_subscription_status: update.stripe_subscription_status,
+    stripe_billing_interval: update.stripe_billing_interval,
     subscription_tier: update.subscription_tier,
     pro_expires_at: update.pro_expires_at,
     contact_reveal_limit: update.subscription_tier === "pro" ? 50 : 3,

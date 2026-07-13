@@ -5,16 +5,21 @@ import {
   isStripeWebhookConfigured,
 } from "./lib/env";
 import {
+  cancelSubscription,
   constructWebhookEvent,
   createCheckoutSession,
   createPortalSession,
   handleStripeWebhookEvent,
   hasActiveStripeSubscription,
+  resumeSubscription,
   syncSubscriptionForUser,
 } from "./lib/stripe";
 import { storage } from "./storage";
 
 type AuthMiddleware = (req: Request, res: Response, next: () => void) => void;
+
+const pendingCheckouts = new Map<string, number>();
+const CHECKOUT_COOLDOWN_MS = 10_000;
 
 function stripeNotReadyMessage(): string {
   const { issues } = getStripeConfigStatus();
@@ -41,13 +46,26 @@ export function registerStripeRoutes(
         return res.status(401).json({ message: "Not authenticated" });
       }
 
+      const checkoutKey = `${userType}:${userId}`;
+      const lastCheckout = pendingCheckouts.get(checkoutKey);
+      if (lastCheckout && Date.now() - lastCheckout < CHECKOUT_COOLDOWN_MS) {
+        return res.status(429).json({ message: "A checkout session was just created. Please complete or cancel it before starting another." });
+      }
+
+      const interval = req.body?.interval === "annual" ? "annual" : "monthly";
+
       if (userType === "singer") {
         const singer = await storage.getSinger(userId);
         if (!singer) return res.status(404).json({ message: "Singer not found" });
         if (hasActiveStripeSubscription(singer)) {
           return res.status(400).json({ message: "You already have an active subscription" });
         }
-        const url = await createCheckoutSession("singer", userId, singer.email, singer);
+        if (singer.subscription_tier === "pro" && !singer.stripe_subscription_id) {
+          const reason = singer.founding_artist ? "Founding Artist" : singer.is_gifted ? "gifted" : "active Pro";
+          return res.status(400).json({ message: `You already have free Pro access as a ${reason} member. No payment needed!` });
+        }
+        const url = await createCheckoutSession("singer", userId, singer.email, singer, interval);
+        pendingCheckouts.set(checkoutKey, Date.now());
         return res.json({ url });
       }
 
@@ -56,7 +74,12 @@ export function registerStripeRoutes(
       if (hasActiveStripeSubscription(org)) {
         return res.status(400).json({ message: "You already have an active subscription" });
       }
+      if (org.subscription_tier === "pro" && !org.stripe_subscription_id) {
+        const reason = org.founding_org ? "Founding Organization" : org.is_gifted ? "gifted" : "active Pro";
+        return res.status(400).json({ message: `You already have free Pro access as a ${reason} member. No payment needed!` });
+      }
       const url = await createCheckoutSession("organization", userId, org.email, org);
+      pendingCheckouts.set(checkoutKey, Date.now());
       return res.json({ url });
     } catch (error: any) {
       console.error("[stripe] checkout error:", error);
@@ -119,6 +142,70 @@ export function registerStripeRoutes(
     } catch (error: any) {
       console.error("[stripe] sync error:", error);
       res.status(500).json({ message: error.message || "Failed to sync subscription" });
+    }
+  });
+
+  app.post("/api/stripe/cancel", requireAuth, async (req: Request, res: Response) => {
+    try {
+      if (!isStripeCheckoutConfigured()) {
+        return res.status(503).json({ message: stripeNotReadyMessage() });
+      }
+
+      const userType = req.session.userType;
+      const userId = req.session.userId;
+      if (!userType || !userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = userType === "singer"
+        ? await storage.getSinger(userId)
+        : await storage.getOrganization(userId);
+      if (!user?.stripe_subscription_id) {
+        return res.status(400).json({ message: "No active subscription to cancel" });
+      }
+
+      const sub = await cancelSubscription(user.stripe_subscription_id);
+      const expiresAt = sub.current_period_end
+        ? new Date(sub.current_period_end * 1000).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+        : null;
+
+      const updated = await syncSubscriptionForUser(userType, userId);
+      if (!updated) return res.status(404).json({ message: "User not found" });
+      const { password: _, ...safe } = updated;
+      res.json({ ...safe, userType, cancelAt: expiresAt });
+    } catch (error: any) {
+      console.error("[stripe] cancel error:", error);
+      res.status(500).json({ message: error.message || "Failed to cancel subscription" });
+    }
+  });
+
+  app.post("/api/stripe/resume", requireAuth, async (req: Request, res: Response) => {
+    try {
+      if (!isStripeCheckoutConfigured()) {
+        return res.status(503).json({ message: stripeNotReadyMessage() });
+      }
+
+      const userType = req.session.userType;
+      const userId = req.session.userId;
+      if (!userType || !userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = userType === "singer"
+        ? await storage.getSinger(userId)
+        : await storage.getOrganization(userId);
+      if (!user?.stripe_subscription_id) {
+        return res.status(400).json({ message: "No subscription to resume" });
+      }
+
+      await resumeSubscription(user.stripe_subscription_id);
+      const updated = await syncSubscriptionForUser(userType, userId);
+      if (!updated) return res.status(404).json({ message: "User not found" });
+      const { password: _, ...safe } = updated;
+      res.json({ ...safe, userType });
+    } catch (error: any) {
+      console.error("[stripe] resume error:", error);
+      res.status(500).json({ message: error.message || "Failed to resume subscription" });
     }
   });
 

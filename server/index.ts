@@ -81,12 +81,14 @@ async function runStartupMaintenance() {
       ALTER TABLE singers ADD COLUMN IF NOT EXISTS stripe_customer_id text;
       ALTER TABLE singers ADD COLUMN IF NOT EXISTS stripe_subscription_id text;
       ALTER TABLE singers ADD COLUMN IF NOT EXISTS stripe_subscription_status text;
+      ALTER TABLE singers ADD COLUMN IF NOT EXISTS stripe_billing_interval text;
 
       -- organizations schema backfill
       ALTER TABLE organizations ADD COLUMN IF NOT EXISTS founding_expires_at timestamp;
       ALTER TABLE organizations ADD COLUMN IF NOT EXISTS stripe_customer_id text;
       ALTER TABLE organizations ADD COLUMN IF NOT EXISTS stripe_subscription_id text;
       ALTER TABLE organizations ADD COLUMN IF NOT EXISTS stripe_subscription_status text;
+      ALTER TABLE organizations ADD COLUMN IF NOT EXISTS stripe_billing_interval text;
 
       -- role/work schema backfill
       ALTER TABLE singer_roles ADD COLUMN IF NOT EXISTS status text DEFAULT 'performed';
