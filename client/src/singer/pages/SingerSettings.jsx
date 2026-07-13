@@ -4,6 +4,7 @@ import { SingerNav } from "../../AppNav";
 import { US_STATES } from "../../AppShared";
 import { useCityStateAutofill } from "../../hooks/useCityStateAutofill";
 import { getErrorMessageFromBody } from "../../lib/api";
+import { SubscriptionSection } from "../../components/SubscriptionSection";
 
 export function SingerSettings() {
   const { currentUser, setCurrentUser, setView } = useAppContext();
@@ -60,11 +61,20 @@ export function SingerSettings() {
     const [mgmtMsg, setMgmtMsg] = React.useState(null);
     const [mgmtSaving, setMgmtSaving] = React.useState(false);
 
-    // Re-hydrate the forms when the authenticated user becomes available or
-    // changes identity (e.g. Settings mounted before /api/auth/me resolved, which
-    // would otherwise leave the form initialised with blanks and let a full-object
-    // PUT overwrite saved values). Keyed on user.id so it doesn't clobber edits
-    // made within the same session.
+    // Re-fetch user data when page regains focus (e.g. returning from Stripe portal)
+    React.useEffect(() => {
+      const onFocus = () => {
+        fetch("/api/auth/me", { credentials: "include" })
+          .then(res => res.ok ? res.json() : null)
+          .then(data => {
+            if (data?.userType === "singer") setCurrentUser({ type: "singer", data });
+          })
+          .catch(() => {});
+      };
+      window.addEventListener("focus", onFocus);
+      return () => window.removeEventListener("focus", onFocus);
+    }, [setCurrentUser]);
+
     React.useEffect(() => {
       if (!user?.id) return;
       setProfile({
@@ -409,82 +419,7 @@ export function SingerSettings() {
           </div>
 
           {/* Subscription */}
-          <div id="singer-subscription-section" className="bg-white rounded-xl border border-slate-200 p-6 space-y-4 scroll-mt-20" data-testid="section-singer-subscription">
-            <h2 className="text-lg font-semibold text-slate-800">My Subscription</h2>
-            {(() => {
-              const tier = user.subscription_tier;
-              const isFounding = tier === "founding" && user.founding_expires_at;
-              const isPro = tier === "pro";
-              const foundingDate = isFounding
-                ? new Date(user.founding_expires_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
-                : null;
-              const planLabel = isPro ? "Pro" : isFounding ? "Founding Artist" : "Free";
-              const planColor = isPro
-                ? "bg-blue-100 text-blue-700"
-                : isFounding
-                  ? "bg-amber-100 text-amber-800"
-                  : "bg-slate-100 text-slate-600";
-              return (
-                <>
-                  <div className="flex items-center gap-3">
-                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${planColor}`} data-testid="text-subscription-tier">
-                      {planLabel}
-                    </span>
-                    {isPro && <span className="text-sm text-slate-600">$9.99/month</span>}
-                  </div>
-                  {isFounding && (
-                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3" data-testid="text-founding-info">
-                      <p className="text-sm text-amber-900 font-medium">Founding Artist — Pro access free until {foundingDate}</p>
-                      <p className="text-xs text-amber-700 mt-1">Enjoy full Pro features at no charge as one of our earliest members.</p>
-                    </div>
-                  )}
-                  {isPro && !isFounding && (
-                    <div className="space-y-3">
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3" data-testid="text-pro-info">
-                        <p className="text-sm text-blue-900 font-medium">You are on the Pro plan — $9.99/month</p>
-                        <p className="text-xs text-blue-700 mt-1">To manage your subscription contact <a href="mailto:support@singersearch.net" className="underline font-medium">support@singersearch.net</a></p>
-                      </div>
-                      <button
-                        onClick={async () => {
-                          if (!window.confirm("Downgrade to the Free tier? You will lose Pro features (priority short-notice access, profile view analytics, Castability Score) at the end of the current period.")) return;
-                          try {
-                            const res = await fetch("/api/singer/downgrade", { method: "POST", credentials: "include" });
-                            if (!res.ok) { setProfileMsg({ type: "error", text: "Failed to downgrade. Please try again." }); return; }
-                            setProfileMsg({ type: "success", text: "Your account has been moved to the Free tier." });
-                            const me = await fetch("/api/auth/me", { credentials: "include" });
-                            if (me.ok) { const data = await me.json(); window.location.reload(); }
-                          } catch (e) {
-                            setProfileMsg({ type: "error", text: "Network error. Please try again." });
-                          }
-                        }}
-                        className="text-sm font-medium text-slate-600 hover:text-red-700 border border-slate-300 hover:border-red-300 hover:bg-red-50 px-4 py-2 rounded-lg transition-colors"
-                        data-testid="button-downgrade-singer"
-                      >
-                        Downgrade to Free
-                      </button>
-                    </div>
-                  )}
-                  {!isPro && !isFounding && (
-                    <div className="space-y-3">
-                      <p className="text-sm text-slate-600">Upgrade to Pro for expedited Short-Notice Engagement access, profile view analytics, and the Castability Score.</p>
-                      <button
-                        onClick={() => setProfileMsg({ type: "success", text: "Online payments coming soon. To upgrade contact us at support@singersearch.net" })}
-                        className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-                        data-testid="button-upgrade-pro"
-                      >
-                        Upgrade to Pro — $9.99/month
-                      </button>
-                      {profileMsg?.text?.startsWith("Online payments") && (
-                        <p className="text-sm text-blue-700 bg-blue-50 border border-blue-200 rounded p-2" data-testid="text-upgrade-message">
-                          Online payments coming soon. To upgrade contact us at <a href="mailto:support@singersearch.net" className="underline font-semibold">support@singersearch.net</a>
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </>
-              );
-            })()}
-          </div>
+          <SubscriptionSection user={user} setCurrentUser={setCurrentUser} setProfileMsg={setProfileMsg} userType="singer" />
 
           {/* Email Address */}
           <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
