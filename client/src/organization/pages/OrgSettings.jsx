@@ -3,6 +3,7 @@ import { useAppContext } from "../../AppContext";
 import { OrgNav } from "../../AppNav";
 import { useCityStateAutofill } from "../../hooks/useCityStateAutofill";
 import { getErrorMessageFromBody } from "../../lib/api";
+import { SubscriptionSection } from "../../components/SubscriptionSection";
 
 export function OrgSettings() {
   const { currentUser, setCurrentUser, setView } = useAppContext();
@@ -25,6 +26,20 @@ export function OrgSettings() {
     const [emailForm, setEmailForm] = React.useState({ email: user.email || "", password: "" });
     const [emailMsg, setEmailMsg] = React.useState(null);
     const [emailSaving, setEmailSaving] = React.useState(false);
+
+    // Re-fetch user data when page regains focus (e.g. returning from Stripe portal)
+    React.useEffect(() => {
+      const onFocus = () => {
+        fetch("/api/auth/me", { credentials: "include" })
+          .then(res => res.ok ? res.json() : null)
+          .then(data => {
+            if (data?.userType === "organization") setCurrentUser({ type: "organization", data });
+          })
+          .catch(() => {});
+      };
+      window.addEventListener("focus", onFocus);
+      return () => window.removeEventListener("focus", onFocus);
+    }, [setCurrentUser]);
 
     React.useEffect(() => {
       if (!user?.id) return;
@@ -177,42 +192,8 @@ export function OrgSettings() {
             </button>
           </div>
 
-          {/* Subscription info */}
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
-            <h2 className="text-lg font-semibold text-slate-800 mb-3">Subscription</h2>
-            <div className="flex items-center gap-3">
-              <span className={`px-3 py-1 rounded-full text-sm font-semibold ${user.subscription_tier === "pro" ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-600"}`}>
-                {user.subscription_tier === "pro" ? "Pro" : "Free"}
-              </span>
-              {user.subscription_tier !== "pro" && (
-                <button onClick={() => setView("pricing")} className="text-sm text-blue-600 hover:underline font-medium">Upgrade to Pro →</button>
-              )}
-            </div>
-            <p className="text-sm text-slate-500 mt-2">
-              {user.subscription_tier === "pro"
-                ? "Unlimited contact reveals and urgent search access."
-                : `${user.contact_reveals_used_this_month ?? 0} of ${user.contact_reveal_limit ?? 3} free contact reveals used.`}
-            </p>
-            {user.subscription_tier === "pro" && (
-              <button
-                onClick={async () => {
-                  if (!window.confirm("Downgrade to the Free tier? Your organization will lose unlimited contact reveals and urgent search access.")) return;
-                  try {
-                    const res = await fetch("/api/org/downgrade", { method: "POST", credentials: "include" });
-                    if (!res.ok) { setProfileMsg({ type: "error", text: "Failed to downgrade. Please try again." }); return; }
-                    setProfileMsg({ type: "success", text: "Your organization has been moved to the Free tier." });
-                    window.location.reload();
-                  } catch (e) {
-                    setProfileMsg({ type: "error", text: "Network error. Please try again." });
-                  }
-                }}
-                className="mt-3 text-sm font-medium text-slate-600 hover:text-red-700 border border-slate-300 hover:border-red-300 hover:bg-red-50 px-4 py-2 rounded-lg transition-colors"
-                data-testid="button-downgrade-org"
-              >
-                Downgrade to Free
-              </button>
-            )}
-          </div>
+          {/* Subscription */}
+          <SubscriptionSection user={user} setCurrentUser={setCurrentUser} setProfileMsg={setProfileMsg} userType="organization" />
 
           {/* Email Address */}
           <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4">

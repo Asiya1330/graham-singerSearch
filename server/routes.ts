@@ -36,6 +36,9 @@ import {
 } from "./lib/email";
 import { eq, desc, and } from "drizzle-orm";
 import { sendApiError, sendRouteError } from "./lib/api-response";
+import { registerStripeRoutes } from "./stripe-routes";
+import { hasActiveStripeSubscription, syncSubscriptionForUser } from "./lib/stripe";
+import { isStripeCheckoutConfigured } from "./lib/env";
 
 const scryptAsync = promisify(scrypt);
 
@@ -180,6 +183,8 @@ export async function registerRoutes(
       },
     })
   );
+
+  registerStripeRoutes(app, requireAuth);
 
   // Auth Routes
 
@@ -338,17 +343,23 @@ export async function registerRoutes(
         return sendApiError(res, "EMAIL_USER_TYPE_REQUIRED", "Email, password, and account type are required.");
       }
       const email = typeof emailRaw === "string" ? emailRaw.trim().toLowerCase() : emailRaw;
+      console.log("[LOGIN DEBUG] Raw email:", emailRaw);
+      console.log("[LOGIN DEBUG] Normalized email:", email);
+      console.log("[LOGIN DEBUG] userType:", userType);
 
       let user: any;
       if (userType === "singer") {
         user = await storage.getSingerByEmail(email);
+        console.log("[LOGIN DEBUG] Singer lookup result:", user ? `Found (id=${user.id}, db_email="${user.email}")` : "NOT FOUND");
       } else if (userType === "organization") {
         user = await storage.getOrganizationByEmail(email);
+        console.log("[LOGIN DEBUG] Org lookup result:", user ? `Found (id=${user.id}, db_email="${user.email}")` : "NOT FOUND");
       } else {
         return sendApiError(res, "INVALID_USER_TYPE");
       }
 
       if (!user) {
+        console.log("[LOGIN DEBUG] User not found — case mismatch likely. Raw:", emailRaw, "→ Queried:", email);
         return sendApiError(res, "USER_NOT_FOUND");
       }
 
@@ -511,11 +522,20 @@ export async function registerRoutes(
         let singer = await storage.getSinger(req.session.userId);
         if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
 
+        if (singer.stripe_customer_id && isStripeCheckoutConfigured()) {
+          try {
+            const synced = await syncSubscriptionForUser("singer", singer.id);
+            if (synced) singer = synced as typeof singer;
+          } catch (e) {
+            console.warn("[auth/me] stripe sync failed for singer", singer.id, (e as Error).message);
+          }
+        }
+
         if (singer.subscription_tier === 'founding' && singer.founding_expires_at && new Date(singer.founding_expires_at) < new Date()) {
           singer = (await storage.updateSinger(singer.id, { subscription_tier: 'standard', founding_expires_at: null }))!;
         }
 
-        if (singer.subscription_tier === 'pro' && singer.pro_expires_at && new Date(singer.pro_expires_at) < new Date()) {
+        if (singer.subscription_tier === 'pro' && singer.pro_expires_at && new Date(singer.pro_expires_at) < new Date() && !hasActiveStripeSubscription(singer)) {
           singer = (await storage.updateSinger(singer.id, { subscription_tier: 'free', pro_expires_at: null, founding_artist: false, is_gifted: false }))!;
         }
 
@@ -533,7 +553,16 @@ export async function registerRoutes(
         let org = await storage.getOrganization(req.session.userId);
         if (!org) return sendApiError(res, "ORG_NOT_FOUND");
 
-        if (org.subscription_tier === 'pro' && org.pro_expires_at && new Date(org.pro_expires_at) < new Date()) {
+        if (org.stripe_customer_id && isStripeCheckoutConfigured()) {
+          try {
+            const synced = await syncSubscriptionForUser("organization", org.id);
+            if (synced) org = synced as typeof org;
+          } catch (e) {
+            console.warn("[auth/me] stripe sync failed for org", org.id, (e as Error).message);
+          }
+        }
+
+        if (org.subscription_tier === 'pro' && org.pro_expires_at && new Date(org.pro_expires_at) < new Date() && !hasActiveStripeSubscription(org)) {
           org = (await storage.updateOrganization(org.id, { subscription_tier: 'free', pro_expires_at: null, founding_org: false, is_gifted: false }))!;
         }
 
@@ -574,6 +603,7 @@ export async function registerRoutes(
         admin_approved, admin_rejected, approval_seen,
         pro_expires_at, founding_artist, is_gifted,
         subscription_tier, is_pro_verified, is_management_verified,
+        stripe_customer_id, stripe_subscription_id, stripe_subscription_status,
         confidence_tier, reliability_score, total_gigs,
         is_emergency_ready, latitude, longitude, email,
         ...updates
@@ -641,14 +671,24 @@ export async function registerRoutes(
 
   app.post("/api/singer/downgrade", requireAuth, requireSinger, async (req: Request, res: Response) => {
     try {
-      const singer = await storage.updateSinger(req.session.userId!, {
+      const singer = await storage.getSinger(req.session.userId!);
+      if (!singer) return res.status(404).json({ message: "Singer not found" });
+
+      if (singer.stripe_subscription_id) {
+        return res.status(409).json({
+          message: "Manage your subscription in the billing portal to cancel at period end.",
+          usePortal: true,
+        });
+      }
+
+      const updated = await storage.updateSinger(req.session.userId!, {
         subscription_tier: 'free',
         pro_expires_at: null,
         founding_artist: false,
         is_gifted: false,
       });
-      if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
-      const { password: _, ...safe } = singer;
+      if (!updated) return sendApiError(res, "SINGER_NOT_FOUND");
+      const { password: _, ...safe } = updated;
       res.json(safe);
     } catch (error: any) {
       sendRouteError(res, error, "OPERATION_FAILED");
@@ -657,15 +697,25 @@ export async function registerRoutes(
 
   app.post("/api/org/downgrade", requireAuth, requireOrg, async (req: Request, res: Response) => {
     try {
-      const org = await storage.updateOrganization(req.session.userId!, {
+      const org = await storage.getOrganization(req.session.userId!);
+      if (!org) return res.status(404).json({ message: "Organization not found" });
+
+      if (org.stripe_subscription_id) {
+        return res.status(409).json({
+          message: "Manage your subscription in the billing portal to cancel at period end.",
+          usePortal: true,
+        });
+      }
+
+      const updated = await storage.updateOrganization(req.session.userId!, {
         subscription_tier: 'free',
         pro_expires_at: null,
         founding_org: false,
         is_gifted: false,
         contact_reveal_limit: 3,
       });
-      if (!org) return sendApiError(res, "ORG_NOT_FOUND");
-      const { password: _, ...safe } = org;
+      if (!updated) return sendApiError(res, "ORG_NOT_FOUND");
+      const { password: _, ...safe } = updated;
       res.json(safe);
     } catch (error: any) {
       sendRouteError(res, error, "OPERATION_FAILED");
@@ -1316,6 +1366,7 @@ export async function registerRoutes(
         contact_reveals_used_this_month, contact_reveals_used,
         contact_reveal_limit, subscription_tier,
         pro_expires_at, founding_org, is_gifted, email,
+        stripe_customer_id, stripe_subscription_id, stripe_subscription_status,
         ...updates
       } = req.body;
       const org = await storage.updateOrganization(req.session.userId!, updates);
@@ -1331,15 +1382,31 @@ export async function registerRoutes(
   app.put("/api/org/subscription", requireAuth, requireOrg, async (req: Request, res: Response) => {
     try {
       const { tier } = req.body;
-      const revealLimit = tier === "pro" ? 50 : 3;
 
-      const org = await storage.updateOrganization(req.session.userId!, {
+      if (tier === "pro") {
+        return res.status(403).json({
+          message: "Pro upgrades require payment. Start checkout from the pricing page.",
+        });
+      }
+
+      const org = await storage.getOrganization(req.session.userId!);
+      if (!org) return res.status(404).json({ message: "Organization not found" });
+
+      if (tier === "free" && org.stripe_subscription_id) {
+        return res.status(409).json({
+          message: "Manage your subscription in the billing portal to cancel at period end.",
+          usePortal: true,
+        });
+      }
+
+      const revealLimit = tier === "pro" ? 50 : 3;
+      const updated = await storage.updateOrganization(req.session.userId!, {
         subscription_tier: tier,
         contact_reveal_limit: revealLimit,
       });
-      if (!org) return sendApiError(res, "ORG_NOT_FOUND");
+      if (!updated) return sendApiError(res, "ORG_NOT_FOUND");
 
-      const { password: _, ...safe } = org;
+      const { password: _, ...safe } = updated;
       res.json(safe);
     } catch (error: any) {
       sendRouteError(res, error, "OPERATION_FAILED");

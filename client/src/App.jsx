@@ -59,6 +59,7 @@ import { BLANK_FILTERS, AlertBanner, AppFooter } from "./AppShared";
 import { navigateToView, viewFromPath, pathFromView, requiredAccessForView } from "./lib/nav";
 import { apiFetch, getErrorMessageFromBody, API_ERRORS } from "./lib/api";
 import { ApiErrorText } from "./components/ApiErrorText";
+import { syncStripeSubscription } from "./lib/stripe";
 // Assets
 import heroVideo from "./assets/hero-opera.mp4";
 import singerBanner from "@assets/singer-banner_1771276151336.gif";
@@ -195,6 +196,38 @@ export default function App() {
         if (adminRes.ok) {
           const adminData = await adminRes.json().catch(() => null);
           if (adminData?.authenticated) setAdminMode(true);
+        }
+
+        // Handle Stripe checkout redirect after auth is established
+        const params = new URLSearchParams(window.location.search);
+        const checkout = params.get("checkout");
+        const viewParam = params.get("view");
+        if (checkout === "success") {
+          showAlert("Subscription started! Syncing your account…", "success");
+          try {
+            const syncData = await syncStripeSubscription();
+            if (!cancelled && syncData) {
+              const ut = syncData.userType;
+              if (ut === "singer" || ut === "organization") {
+                setCurrentUser({ type: ut, data: syncData });
+              }
+              showAlert("Pro subscription active!", "success");
+            }
+          } catch {
+            // Sync failed — the auth/me call above already set the user with
+            // whatever tier the DB had; a page reload will pick up webhook updates.
+          }
+        } else if (checkout === "cancel") {
+          showAlert("Checkout canceled.", "error");
+        }
+        if (viewParam && !cancelled) {
+          setView(viewParam);
+        }
+        if (checkout || viewParam) {
+          const url = new URL(window.location.href);
+          url.searchParams.delete("checkout");
+          url.searchParams.delete("view");
+          window.history.replaceState({}, "", `${url.pathname}${url.search}`);
         }
       } catch {
         /* treated as unauthenticated */

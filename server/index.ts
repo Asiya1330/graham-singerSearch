@@ -8,6 +8,8 @@ import { pool } from "./storage";
 import { seedRepertoire } from "./seed-repertoire";
 import { geocodeCityState } from "./lib/geocode";
 import { HttpApiError, sendApiError } from "./lib/api-response";
+import { logEmailConfigStatus } from "./lib/email";
+import { logStripeConfigStatus } from "./lib/env";
 const app = express();
 app.set("trust proxy", 1);
 const httpServer = createServer(app);
@@ -76,9 +78,17 @@ async function runStartupMaintenance() {
       ALTER TABLE singers ADD COLUMN IF NOT EXISTS audio_link_1 text;
       ALTER TABLE singers ADD COLUMN IF NOT EXISTS founding_expires_at timestamp;
       ALTER TABLE singers ADD COLUMN IF NOT EXISTS performance_types text[];
+      ALTER TABLE singers ADD COLUMN IF NOT EXISTS stripe_customer_id text;
+      ALTER TABLE singers ADD COLUMN IF NOT EXISTS stripe_subscription_id text;
+      ALTER TABLE singers ADD COLUMN IF NOT EXISTS stripe_subscription_status text;
+      ALTER TABLE singers ADD COLUMN IF NOT EXISTS stripe_billing_interval text;
 
       -- organizations schema backfill
       ALTER TABLE organizations ADD COLUMN IF NOT EXISTS founding_expires_at timestamp;
+      ALTER TABLE organizations ADD COLUMN IF NOT EXISTS stripe_customer_id text;
+      ALTER TABLE organizations ADD COLUMN IF NOT EXISTS stripe_subscription_id text;
+      ALTER TABLE organizations ADD COLUMN IF NOT EXISTS stripe_subscription_status text;
+      ALTER TABLE organizations ADD COLUMN IF NOT EXISTS stripe_billing_interval text;
 
       -- role/work schema backfill
       ALTER TABLE singer_roles ADD COLUMN IF NOT EXISTS status text DEFAULT 'performed';
@@ -211,6 +221,9 @@ async function runStartupMaintenance() {
 
 (async () => {
   await registerRoutes(httpServer, app);
+
+  logEmailConfigStatus("startup");
+  logStripeConfigStatus("startup");
 
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
     console.error("Internal Server Error:", err);
