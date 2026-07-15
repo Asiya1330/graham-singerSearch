@@ -516,7 +516,9 @@ export async function seedDatabase(client: PoolClient | Pool) {
     const travel = shuffledTravel[i];
     const avail = shuffledAvail[i];
     const emergency = shuffledEmergency[i];
-    const tier = shuffledTiers[i];
+    const seedTier = shuffledTiers[i];
+    const isFounding = seedTier === "founding";
+    const tier = isFounding ? "pro" : seedTier;
     const langs = pickLanguages(i);
     const female = isFemaleVoice(s.voiceType);
     const headshot = female
@@ -532,11 +534,9 @@ export async function seedDatabase(client: PoolClient | Pool) {
 
     const shortBio = `${s.first} ${s.last} is a ${s.fach.toLowerCase()} based in ${loc.city}, ${loc.state} with ${yearsActive} years of professional experience in ${perfTypes.map(t => t.toLowerCase()).join(" and ")} performance.`;
 
-    const isFounding = tier === "founding";
-
     const result = await client.query(
-      `INSERT INTO singers (email, password, first_name, last_name, city, state, primary_voice_type, primary_fach, union_status, represented, agent_name, agent_email, website_url, short_bio, headshot_url, companies_worked_with, languages_sung, subscription_status, subscription_tier, admin_approved, emergency_opt_in, emergency_lead_time_hours, emergency_travel_radius_miles, emergency_travel_modes, languages_spoken, performance_types, viewed_count, founding_expires_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,'active',$18,true,$19,$20,$21,$22,$23,$24,$25,$26)
+      `INSERT INTO singers (email, password, first_name, last_name, city, state, primary_voice_type, primary_fach, union_status, represented, agent_name, agent_email, website_url, short_bio, headshot_url, companies_worked_with, languages_sung, subscription_status, subscription_tier, admin_approved, emergency_opt_in, emergency_lead_time_hours, emergency_travel_radius_miles, emergency_travel_modes, languages_spoken, performance_types, viewed_count, founding_artist, pro_expires_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,'active',$18,true,$19,$20,$21,$22,$23,$24,$25,$26,$27)
        RETURNING id`,
       [
         s.email, pw, s.first, s.last, loc.city, loc.state,
@@ -547,7 +547,7 @@ export async function seedDatabase(client: PoolClient | Pool) {
         langs, tier, emergency.optIn,
         emergency.hours, travel.radius, travel.modes,
         langs, perfTypes, viewedCount,
-        isFounding ? foundingExpires : null,
+        isFounding, isFounding ? foundingExpires : null,
       ]
     );
 

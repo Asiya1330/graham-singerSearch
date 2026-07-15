@@ -30,15 +30,15 @@ export function SubscriptionSection({ user, setCurrentUser, setProfileMsg, userT
   const isSinger = userType === "singer";
   const tier = user.subscription_tier;
   const isFounding = isSinger
-    ? tier === "founding" && user.founding_expires_at
+    ? user.founding_artist && tier === "pro" && user.pro_expires_at
     : user.founding_org && (!user.pro_expires_at || new Date(user.pro_expires_at) > new Date());
   const isPro = tier === "pro";
   const hasStripeSub = Boolean(user.stripe_subscription_id);
   const stripeStatus = stripeStatusLabel(user.stripe_subscription_status);
   const cancelAtPeriodEnd = user.stripe_subscription_status === "canceling";
 
-  const foundingDate = isFounding && (isSinger ? user.founding_expires_at : user.pro_expires_at)
-    ? new Date(isSinger ? user.founding_expires_at : user.pro_expires_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+  const foundingDate = isFounding && user.pro_expires_at
+    ? new Date(user.pro_expires_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
     : null;
   const trialEndDate = user.pro_expires_at && user.stripe_subscription_status === "trialing"
     ? new Date(user.pro_expires_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
@@ -49,11 +49,11 @@ export function SubscriptionSection({ user, setCurrentUser, setProfileMsg, userT
 
   const isAnnualSub = isSinger && isPro && hasStripeSub && user.stripe_billing_interval === "year";
 
-  const planLabel = isPro ? "Pro" : isFounding ? (isSinger ? "Founding Artist" : "Founding Organization") : "Free";
-  const planColor = isPro
-    ? "bg-blue-100 text-blue-700"
-    : isFounding
-      ? "bg-amber-100 text-amber-800"
+  const planLabel = isFounding ? (isSinger ? "Founding Artist" : "Founding Organization") : isPro ? "Pro" : "Free";
+  const planColor = isFounding
+    ? "bg-amber-100 text-amber-800"
+    : isPro
+      ? "bg-blue-100 text-blue-700"
       : "bg-slate-100 text-slate-600";
   const priceDisplay = isSinger
     ? (billingInterval === "annual" ? "$8.25/month" : "$9.99/month")

@@ -179,7 +179,7 @@ export function ProfileView({ revealContact, isShortlisted, onToggleShortlist })
                            <CheckCircle className="w-3 h-3 mr-1" /> Verified Profile
                         </span>
                     )}
-                    {singer.subscription_tier === 'founding' && (
+                    {singer.founding_artist && (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800" data-testid="profile-founding-badge">
                            <Star className="w-3 h-3 fill-amber-500" /> Founding Artist 2025
                         </span>

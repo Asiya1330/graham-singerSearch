@@ -103,6 +103,24 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
       }
     };
 
+    const handleFoundingToggle = async (type, id, name, grant) => {
+      try {
+        const base = type === 'singer' ? `/api/admin/singers/${id}` : `/api/admin/orgs/${id}`;
+        const res = await fetch(`${base}/${grant ? 'grant-founding' : 'revoke-founding'}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+        const data = await res.json();
+        if (!res.ok) { showAlert(data.message || `Failed to ${grant ? 'grant' : 'revoke'} founding status`, "error"); return; }
+        showAlert(`Founding status ${grant ? 'granted to' : 'revoked from'} ${name}`, "success");
+        await loadAdminData();
+        if (type === 'singer' && adminViewSinger && adminViewSinger.id === id) await handleViewSinger(id);
+        if (type === 'org' && adminViewOrg && adminViewOrg.id === id) await handleViewOrg(id);
+      } catch (err) {
+        showAlert(`Failed to ${grant ? 'grant' : 'revoke'} founding status`, "error");
+      }
+    };
+
     const renderGiftModal = () => {
       if (!giftTarget) return null;
       const close = () => { setGiftTarget(null); setGiftError(""); setGiftForm({ duration: "1y", customDate: "", reason: "" }); };
@@ -151,7 +169,7 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
     const FACH_OPTIONS_ADMIN = ["Soprano","Mezzo-Soprano","Contralto","Countertenor","Tenor","Baritone","Bass-Baritone","Bass"];
     const VOICE_TYPE_OPTIONS_ADMIN = ["Soprano","Mezzo-Soprano","Contralto","Countertenor","Tenor","Baritone","Bass-Baritone","Bass"];
     const UNION_OPTIONS_ADMIN = ["Non-Union","AGMA","AEA","AFM","AGMA Member","AEA Member","AFM Member"];
-    const TIER_OPTIONS_ADMIN = ["free","pro","founding"];
+    const TIER_OPTIONS_ADMIN = ["free","pro"];
     const STATE_OPTIONS_ADMIN = ["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY","DC"];
     const CREDIT_REASONS = ["Promotional Grant","Support Adjustment","Refund","Correction","Other"];
 
@@ -464,7 +482,10 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
                     <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full ${o.subscription_tier === "pro" ? "bg-indigo-100 text-indigo-700" : "bg-slate-100 text-slate-600"}`}>{(o.subscription_tier || "free").toUpperCase()}</span>
                     <p className="text-xs text-slate-500 mt-1">Joined {o.created_at ? new Date(o.created_at).toLocaleDateString() : "—"}</p>
                   </div>
-                  <button onClick={() => setGiftTarget({ type: 'org', id: o.id, name: o.organization_name })} className="px-3 py-1.5 text-sm rounded-md bg-violet-600 text-white hover:bg-violet-700 flex items-center gap-1 ml-auto" data-testid="button-gift-org-detail">🎁 Gift Pro</button>
+                  <div className="flex items-center gap-2 ml-auto">
+                    <button onClick={() => handleFoundingToggle('org', o.id, o.organization_name, !o.founding_org)} className="px-3 py-1.5 text-sm rounded-md bg-amber-500 text-white hover:bg-amber-600 flex items-center gap-1" data-testid="button-founding-org-detail">🌟 {o.founding_org ? 'Revoke Founding' : 'Grant Founding'}</button>
+                    <button onClick={() => setGiftTarget({ type: 'org', id: o.id, name: o.organization_name })} className="px-3 py-1.5 text-sm rounded-md bg-violet-600 text-white hover:bg-violet-700 flex items-center gap-1" data-testid="button-gift-org-detail">🎁 Gift Pro</button>
+                  </div>
                 </div>
               </div>
               <div className="p-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -685,7 +706,10 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
                       <p className="text-xs text-slate-500 mt-0.5">Pro access until {new Date(s.pro_expires_at).toLocaleDateString()}</p>
                     )}
                   </div>
-                  <button onClick={() => setGiftTarget({ type: 'singer', id: s.id, name: `${s.first_name} ${s.last_name}` })} className="px-3 py-1.5 text-sm rounded-md bg-violet-600 text-white hover:bg-violet-700 flex items-center gap-1" data-testid="button-gift-singer-detail">🎁 Gift Pro</button>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => handleFoundingToggle('singer', s.id, `${s.first_name} ${s.last_name}`, !s.founding_artist)} className="px-3 py-1.5 text-sm rounded-md bg-amber-500 text-white hover:bg-amber-600 flex items-center gap-1" data-testid="button-founding-singer-detail">🌟 {s.founding_artist ? 'Revoke Founding' : 'Grant Founding'}</button>
+                    <button onClick={() => setGiftTarget({ type: 'singer', id: s.id, name: `${s.first_name} ${s.last_name}` })} className="px-3 py-1.5 text-sm rounded-md bg-violet-600 text-white hover:bg-violet-700 flex items-center gap-1" data-testid="button-gift-singer-detail">🎁 Gift Pro</button>
+                  </div>
                 </div>
               </div>
               <div className="p-6 space-y-6">
@@ -1079,6 +1103,7 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
                                       <button onClick={() => handleToggleOrgSubscription(org.id, org.subscription_tier)} className={`p-1 rounded ${isPro ? "text-amber-600 hover:bg-amber-50" : "text-indigo-600 hover:bg-indigo-50"}`} title={isPro ? "Downgrade to Free" : "Upgrade to Pro"} data-testid={`button-toggle-org-tier-${org.id}`}>
                                         {isPro ? <ArrowDown className="w-4 h-4" /> : <ArrowUp className="w-4 h-4" />}
                                       </button>
+                                      <button onClick={() => handleFoundingToggle('org', org.id, org.organization_name, !org.founding_org)} className="text-amber-600 hover:text-amber-800 p-1 rounded hover:bg-amber-50 text-base leading-none" title={org.founding_org ? "Revoke Founding" : "Grant Founding"} data-testid={`button-founding-org-${org.id}`}>🌟</button>
                                       <button onClick={() => setGiftTarget({ type: 'org', id: org.id, name: org.organization_name })} className="text-violet-600 hover:text-violet-800 p-1 rounded hover:bg-violet-50 text-base leading-none" title="Gift Pro Access" data-testid={`button-gift-org-${org.id}`}>🎁</button>
                                       <button onClick={() => handleDeleteOrg(org.id)} className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50" title="Delete" data-testid={`button-delete-org-${org.id}`}><Trash2 className="w-4 h-4" /></button>
                                     </div>
@@ -1200,6 +1225,7 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
                                       <UserCheck className="w-4 h-4" />
                                     </button>
                                   )}
+                                  <button onClick={() => handleFoundingToggle('singer', singer.id, `${singer.first_name} ${singer.last_name}`, !singer.founding_artist)} className="text-amber-600 hover:text-amber-800 p-1 rounded hover:bg-amber-50 text-base leading-none" title={singer.founding_artist ? "Revoke Founding" : "Grant Founding"} data-testid={`button-founding-singer-${singer.id}`}>🌟</button>
                                   <button onClick={() => setGiftTarget({ type: 'singer', id: singer.id, name: `${singer.first_name} ${singer.last_name}` })} className="text-violet-600 hover:text-violet-800 p-1 rounded hover:bg-violet-50 text-base leading-none" title="Gift Pro Access" data-testid={`button-gift-singer-${singer.id}`}>🎁</button>
                                   <button onClick={() => handleAdminAction(singer.id, "delete")} className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50" title="Delete" data-testid={`button-delete-singer-${singer.id}`}>
                                     <Trash2 className="w-4 h-4" />

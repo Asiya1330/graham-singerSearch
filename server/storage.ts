@@ -65,6 +65,8 @@ export interface IStorage {
 
   getSingerCount(): Promise<number>;
   getOrganizationCount(): Promise<number>;
+  getFoundingSingerCount(): Promise<number>;
+  getFoundingOrgCount(): Promise<number>;
   createAdminGift(data: { recipient_type: 'singer' | 'org'; recipient_id: number; duration_days: number; expires_at: Date; reason?: string | null }): Promise<AdminGift>;
   getAdminGifts(recipientType: 'singer' | 'org', recipientId: number): Promise<AdminGift[]>;
 
@@ -371,6 +373,16 @@ export class DatabaseStorage implements IStorage {
     return result.value;
   }
 
+  async getFoundingSingerCount(): Promise<number> {
+    const [result] = await db.select({ value: count() }).from(singers).where(eq(singers.founding_artist, true));
+    return result.value;
+  }
+
+  async getFoundingOrgCount(): Promise<number> {
+    const [result] = await db.select({ value: count() }).from(organizations).where(eq(organizations.founding_org, true));
+    return result.value;
+  }
+
   async createAdminGift(data: { recipient_type: 'singer' | 'org'; recipient_id: number; duration_days: number; expires_at: Date; reason?: string | null }): Promise<AdminGift> {
     const [created] = await db.insert(adminGifts).values({
       recipient_type: data.recipient_type,
@@ -401,7 +413,7 @@ export class DatabaseStorage implements IStorage {
     total_contact_reveals: number;
   }> {
     const [singerCount] = await db.select({ value: count() }).from(singers);
-    const [foundingCount] = await db.select({ value: count() }).from(singers).where(eq(singers.subscription_tier, 'founding'));
+    const [foundingCount] = await db.select({ value: count() }).from(singers).where(eq(singers.founding_artist, true));
     const [orgCount] = await db.select({ value: count() }).from(organizations);
     const [searchCount] = await db.select({ value: count() }).from(searchLogs);
     const [revealCount] = await db.select({ value: count() }).from(contactReveals);
