@@ -207,9 +207,6 @@ export async function registerRoutes(
         return sendApiError(res, "EMAIL_ALREADY_REGISTERED");
       }
 
-      const singerCount = await storage.getSingerCount();
-      const isFounding = singerCount < 50;
-
       const hashedPassword = await hashPassword(password);
       const parsed = insertSingerSchema.parse({
         email,
@@ -218,16 +215,10 @@ export async function registerRoutes(
         // Enforce location invariant: never trust client-supplied coords on create
         latitude: null,
         longitude: null,
-        subscription_tier: isFounding ? 'pro' : 'free',
+        subscription_tier: 'free',
         subscription_status: 'active',
       });
       const singer = await storage.createSinger(parsed);
-
-      if (isFounding) {
-        const proExpires = new Date();
-        proExpires.setFullYear(proExpires.getFullYear() + 1);
-        await storage.updateSinger(singer.id, { pro_expires_at: proExpires, founding_artist: true });
-      }
 
       req.session.userId = singer.id;
       req.session.userType = "singer";
@@ -255,7 +246,7 @@ export async function registerRoutes(
         state: updated!.state,
         detailLabel: "Voice type",
         detailValue: updated!.primary_voice_type,
-        isFoundingMember: isFounding,
+        isFoundingMember: false,
         registeredAt: updated!.created_at ?? new Date(),
       });
       void notifyRegistrationConfirmation({
@@ -290,23 +281,14 @@ export async function registerRoutes(
         return sendApiError(res, "EMAIL_ALREADY_REGISTERED");
       }
 
-      const orgCount = await storage.getOrganizationCount();
-      const isFounding = orgCount < 10;
-
       const hashedPassword = await hashPassword(password);
       const parsed = insertOrganizationSchema.parse({
         email,
         password: hashedPassword,
         ...rest,
-        subscription_tier: isFounding ? 'pro' : 'free',
+        subscription_tier: 'free',
       });
-      let org = await storage.createOrganization(parsed);
-
-      if (isFounding) {
-        const proExpires = new Date();
-        proExpires.setFullYear(proExpires.getFullYear() + 1);
-        org = (await storage.updateOrganization(org.id, { pro_expires_at: proExpires, founding_org: true }))!;
-      }
+      const org = await storage.createOrganization(parsed);
 
       req.session.userId = org.id;
       req.session.userType = "organization";
@@ -320,7 +302,7 @@ export async function registerRoutes(
         state: org.state,
         detailLabel: "Organization type",
         detailValue: org.organization_type,
-        isFoundingMember: isFounding,
+        isFoundingMember: false,
         registeredAt: org.created_at ?? new Date(),
       });
       void notifyRegistrationConfirmation({
@@ -529,10 +511,6 @@ export async function registerRoutes(
           } catch (e) {
             console.warn("[auth/me] stripe sync failed for singer", singer.id, (e as Error).message);
           }
-        }
-
-        if (singer.subscription_tier === 'founding' && singer.founding_expires_at && new Date(singer.founding_expires_at) < new Date()) {
-          singer = (await storage.updateSinger(singer.id, { subscription_tier: 'standard', founding_expires_at: null }))!;
         }
 
         if (singer.subscription_tier === 'pro' && singer.pro_expires_at && new Date(singer.pro_expires_at) < new Date() && !hasActiveStripeSubscription(singer)) {
@@ -1660,25 +1638,6 @@ export async function registerRoutes(
     }
   });
 
-  // ── Public Founding Status ───────────────────────────────────────────────
-  app.get("/api/public/founding-status", async (req: Request, res: Response) => {
-    try {
-      const type = (req.query.type as string) === 'org' ? 'org' : 'singer';
-      const total = type === 'org' ? 10 : 50;
-      const taken = type === 'org' ? await storage.getOrganizationCount() : await storage.getSingerCount();
-      const remaining = Math.max(0, total - taken);
-      res.json({
-        type,
-        spotsTotal: total,
-        spotsTaken: taken,
-        spotsRemaining: remaining,
-        isAvailable: remaining > 0,
-      });
-    } catch (error: any) {
-      sendRouteError(res, error, "OPERATION_FAILED");
-    }
-  });
-
   // ── Admin Gift Pro ───────────────────────────────────────────────────────
   const computeGiftExpiry = (duration: string, customDate?: string): { expiresAt: Date; durationDays: number } | null => {
     const PRESETS: Record<string, number> = { '1m': 30, '3m': 90, '6m': 180, '1y': 365 };
@@ -1757,6 +1716,81 @@ export async function registerRoutes(
       });
       const { password: _, ...safe } = updated!;
       res.json({ org: safe, gift });
+    } catch (error: any) {
+      sendRouteError(res, error, "OPERATION_FAILED");
+    }
+  });
+
+  app.post("/api/admin/singers/:id/grant-founding", requireAdminAuth, async (req: Request, res: Response) => {
+    try {
+      const singerId = parseInt(req.params.id as string);
+      const singer = await storage.getSinger(singerId);
+      if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
+
+      const proExpires = new Date();
+      proExpires.setFullYear(proExpires.getFullYear() + 1);
+      const updated = await storage.updateSinger(singerId, {
+        founding_artist: true,
+        subscription_tier: 'pro',
+        subscription_status: 'active',
+        pro_expires_at: proExpires,
+      });
+      const { password: _, ...safe } = updated!;
+      res.json(await signSingerFiles(safe));
+    } catch (error: any) {
+      sendRouteError(res, error, "OPERATION_FAILED");
+    }
+  });
+
+  app.post("/api/admin/singers/:id/revoke-founding", requireAdminAuth, async (req: Request, res: Response) => {
+    try {
+      const singerId = parseInt(req.params.id as string);
+      const singer = await storage.getSinger(singerId);
+      if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
+
+      const updates = hasActiveStripeSubscription(singer)
+        ? { founding_artist: false }
+        : { subscription_tier: 'free' as const, pro_expires_at: null, founding_artist: false, is_gifted: false };
+      const updated = await storage.updateSinger(singerId, updates);
+      const { password: _, ...safe } = updated!;
+      res.json(await signSingerFiles(safe));
+    } catch (error: any) {
+      sendRouteError(res, error, "OPERATION_FAILED");
+    }
+  });
+
+  app.post("/api/admin/orgs/:id/grant-founding", requireAdminAuth, async (req: Request, res: Response) => {
+    try {
+      const orgId = parseInt(req.params.id as string);
+      const org = await storage.getOrganization(orgId);
+      if (!org) return sendApiError(res, "ORG_NOT_FOUND");
+
+      const proExpires = new Date();
+      proExpires.setFullYear(proExpires.getFullYear() + 1);
+      const updated = await storage.updateOrganization(orgId, {
+        founding_org: true,
+        subscription_tier: 'pro',
+        pro_expires_at: proExpires,
+      });
+      const { password: _, ...safe } = updated!;
+      res.json(safe);
+    } catch (error: any) {
+      sendRouteError(res, error, "OPERATION_FAILED");
+    }
+  });
+
+  app.post("/api/admin/orgs/:id/revoke-founding", requireAdminAuth, async (req: Request, res: Response) => {
+    try {
+      const orgId = parseInt(req.params.id as string);
+      const org = await storage.getOrganization(orgId);
+      if (!org) return sendApiError(res, "ORG_NOT_FOUND");
+
+      const updates = hasActiveStripeSubscription(org)
+        ? { founding_org: false }
+        : { subscription_tier: 'free' as const, pro_expires_at: null, founding_org: false, is_gifted: false };
+      const updated = await storage.updateOrganization(orgId, updates);
+      const { password: _, ...safe } = updated!;
+      res.json(safe);
     } catch (error: any) {
       sendRouteError(res, error, "OPERATION_FAILED");
     }

@@ -9,6 +9,7 @@ import {
   constructWebhookEvent,
   createCheckoutSession,
   createPortalSession,
+  getPeriodEnd,
   handleStripeWebhookEvent,
   hasActiveStripeSubscription,
   resumeSubscription,
@@ -165,8 +166,9 @@ export function registerStripeRoutes(
       }
 
       const sub = await cancelSubscription(user.stripe_subscription_id);
-      const expiresAt = sub.current_period_end
-        ? new Date(sub.current_period_end * 1000).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+      const periodEnd = getPeriodEnd(sub);
+      const expiresAt = periodEnd
+        ? new Date(periodEnd * 1000).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
         : null;
 
       const updated = await syncSubscriptionForUser(userType, userId);

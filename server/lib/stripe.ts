@@ -159,8 +159,14 @@ export function constructWebhookEvent(rawBody: Buffer, signature: string | strin
   return getStripe().webhooks.constructEvent(rawBody, signature, getStripeWebhookSecret());
 }
 
+/** Current billing-period end (Unix seconds), read from the subscription item —
+ * newer Stripe API versions moved this off the top-level Subscription object. */
+export function getPeriodEnd(sub: Stripe.Subscription): number | null {
+  return sub.items?.data?.[0]?.current_period_end ?? null;
+}
+
 function subscriptionExpiresAt(sub: Stripe.Subscription): Date | null {
-  const endTs = sub.trial_end ?? sub.current_period_end;
+  const endTs = sub.trial_end ?? getPeriodEnd(sub);
   if (!endTs) return null;
   return new Date(endTs * 1000);
 }
@@ -312,13 +318,24 @@ export async function applySubscriptionUpdate(
     return;
   }
 
+  // Don't let a Stripe-derived expiry regress below an existing non-Stripe grant
+  // (founding membership, admin gift) that's still valid — e.g. an ordinary renewal
+  // webhook shouldn't erase a founding member's granted expiry date.
+  let proExpiresAt = update.pro_expires_at;
+  if (hasNonStripeProAccess(user) && user.pro_expires_at) {
+    const existingExpiry = new Date(user.pro_expires_at);
+    if (!proExpiresAt || existingExpiry > proExpiresAt) {
+      proExpiresAt = existingExpiry;
+    }
+  }
+
   if (userType === "singer") {
     await storage.updateSinger(userId, {
       stripe_subscription_id: update.stripe_subscription_id,
       stripe_subscription_status: update.stripe_subscription_status,
       stripe_billing_interval: update.stripe_billing_interval,
       subscription_tier: update.subscription_tier,
-      pro_expires_at: update.pro_expires_at,
+      pro_expires_at: proExpiresAt,
     });
     return;
   }
@@ -328,7 +345,7 @@ export async function applySubscriptionUpdate(
     stripe_subscription_status: update.stripe_subscription_status,
     stripe_billing_interval: update.stripe_billing_interval,
     subscription_tier: update.subscription_tier,
-    pro_expires_at: update.pro_expires_at,
+    pro_expires_at: proExpiresAt,
     contact_reveal_limit: update.subscription_tier === "pro" ? 50 : 3,
   });
 }
