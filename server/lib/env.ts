@@ -182,3 +182,7 @@ export function getStripePriceOrgPro(): string {
   }
   return price;
 }
+
+export function getStripePriceOrgProAnnual(): string | null {
+  return process.env.STRIPE_PRICE_ORG_PRO_ANNUAL?.trim() || null;
+}

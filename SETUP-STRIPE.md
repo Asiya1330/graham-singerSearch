@@ -10,7 +10,9 @@ Copy from `.env.example` and fill in your **Stripe test mode** values:
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 STRIPE_PRICE_SINGER_PRO=price_...
+STRIPE_PRICE_SINGER_PRO_ANNUAL=price_...
 STRIPE_PRICE_ORG_PRO=price_...
+STRIPE_PRICE_ORG_PRO_ANNUAL=price_...
 ```
 
 You do **not** need `SITE_URL` for local dev — Checkout and the billing portal return to `http://localhost:5000` automatically in development.
@@ -22,9 +24,11 @@ In the [Stripe Dashboard](https://dashboard.stripe.com/test/products) (Test mode
 | Plan | Price |
 |------|-------|
 | Singer Pro | $9.99/month |
+| Singer Pro Annual | $99/year (shown as $8.25/mo billed annually) |
 | Organization Pro | $79/month |
+| Organization Pro Annual | $790/year (shown as $65.83/mo billed annually) |
 
-Copy each **Price ID** into your `.env`.
+Copy each **Price ID** into your `.env`. Annual price IDs are optional for monthly-only checkout, but required when a user selects **Annual**.
 
 ## 3. Run two terminals
 
@@ -86,7 +90,9 @@ Set on Railway:
 - `STRIPE_SECRET_KEY`
 - `STRIPE_WEBHOOK_SECRET` (from Dashboard webhook endpoint, not CLI)
 - `STRIPE_PRICE_SINGER_PRO`
+- `STRIPE_PRICE_SINGER_PRO_ANNUAL`
 - `STRIPE_PRICE_ORG_PRO`
+- `STRIPE_PRICE_ORG_PRO_ANNUAL`
 - `SITE_URL` (your public frontend URL, e.g. Vercel domain)
 
 Webhook URL: `https://<railway-service>.up.railway.app/api/stripe/webhook`

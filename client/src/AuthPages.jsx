@@ -509,11 +509,6 @@ export function SingerRegistration({ showAlert, setShowWelcome }) {
     const [form, setForm] = useState({ first_name: "", last_name: "", email: "", password: "", primary_voice_type: "", city: "", state: "" });
     const { stateAutoFilled, handleCityChange, handleStateChange } = useCityStateAutofill(setForm);
     const [loading, setLoading] = useState(false);
-    const [foundingStatus, setFoundingStatus] = useState(null);
-
-    React.useEffect(() => {
-      fetch("/api/public/founding-status?type=singer").then(r => r.json()).then(setFoundingStatus).catch(() => {});
-    }, []);
 
     const handleRegister = async (e) => {
       e.preventDefault();
@@ -550,17 +545,15 @@ export function SingerRegistration({ showAlert, setShowWelcome }) {
           </p>
         </div>
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-          {foundingStatus?.isAvailable && (
-            <div className="mb-4 bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-lg p-4" data-testid="banner-founding-singer">
-              <div className="flex items-start gap-3">
-                <span className="text-2xl flex-shrink-0">🎉</span>
-                <div className="text-sm">
-                  <p className="font-bold text-amber-900">Founding Singer Program</p>
-                  <p className="text-amber-800 mt-0.5">Only <span className="font-bold">{foundingStatus.spotsRemaining} of {foundingStatus.spotsTotal}</span> spots left — register now and get <span className="font-bold">1 year of Pro free</span>.</p>
-                </div>
+          <div className="mb-4 bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-lg p-4" data-testid="banner-founding-singer">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl flex-shrink-0">🌟</span>
+              <div className="text-sm">
+                <p className="font-bold text-amber-900">Founding Member spots are filling fast.</p>
+                <p className="text-amber-800 mt-0.5">Register now to be considered for a <span className="font-bold">free year of Pro</span>.</p>
               </div>
             </div>
-          )}
+          </div>
           <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
             <form className="space-y-6" onSubmit={handleRegister}>
               <div className="grid grid-cols-2 gap-4">
@@ -624,11 +617,6 @@ export function OrgRegistration({ showAlert, setShowWelcome }) {
     const [form, setForm] = useState({ organization_name: "", email: "", password: "", organization_type: "", city: "", state: "" });
     const { stateAutoFilled, handleCityChange, handleStateChange } = useCityStateAutofill(setForm);
     const [loading, setLoading] = useState(false);
-    const [foundingStatus, setFoundingStatus] = useState(null);
-
-    React.useEffect(() => {
-      fetch("/api/public/founding-status?type=org").then(r => r.json()).then(setFoundingStatus).catch(() => {});
-    }, []);
 
     const handleRegister = async (e) => {
       e.preventDefault();
@@ -665,17 +653,15 @@ export function OrgRegistration({ showAlert, setShowWelcome }) {
           </p>
         </div>
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-          {foundingStatus?.isAvailable && (
-            <div className="mb-4 bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-lg p-4" data-testid="banner-founding-org">
-              <div className="flex items-start gap-3">
-                <span className="text-2xl flex-shrink-0">🎉</span>
-                <div className="text-sm">
-                  <p className="font-bold text-amber-900">Founding Organization Program</p>
-                  <p className="text-amber-800 mt-0.5">Only <span className="font-bold">{foundingStatus.spotsRemaining} of {foundingStatus.spotsTotal}</span> spots left — register now and get <span className="font-bold">1 year of Pro free</span>.</p>
-                </div>
+          <div className="mb-4 bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-lg p-4" data-testid="banner-founding-org">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl flex-shrink-0">🌟</span>
+              <div className="text-sm">
+                <p className="font-bold text-amber-900">Founding Member spots are filling fast.</p>
+                <p className="text-amber-800 mt-0.5">Register now to be considered for a <span className="font-bold">free year of Pro</span>.</p>
               </div>
             </div>
-          )}
+          </div>
           <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
             <form className="space-y-6" onSubmit={handleRegister}>
               <div>

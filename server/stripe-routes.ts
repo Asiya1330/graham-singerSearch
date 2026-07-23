@@ -9,6 +9,7 @@ import {
   constructWebhookEvent,
   createCheckoutSession,
   createPortalSession,
+  getPeriodEnd,
   handleStripeWebhookEvent,
   hasActiveStripeSubscription,
   resumeSubscription,
@@ -78,7 +79,7 @@ export function registerStripeRoutes(
         const reason = org.founding_org ? "Founding Organization" : org.is_gifted ? "gifted" : "active Pro";
         return res.status(400).json({ message: `You already have free Pro access as a ${reason} member. No payment needed!` });
       }
-      const url = await createCheckoutSession("organization", userId, org.email, org);
+      const url = await createCheckoutSession("organization", userId, org.email, org, interval);
       pendingCheckouts.set(checkoutKey, Date.now());
       return res.json({ url });
     } catch (error: any) {
@@ -165,8 +166,9 @@ export function registerStripeRoutes(
       }
 
       const sub = await cancelSubscription(user.stripe_subscription_id);
-      const expiresAt = sub.current_period_end
-        ? new Date(sub.current_period_end * 1000).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+      const periodEnd = getPeriodEnd(sub);
+      const expiresAt = periodEnd
+        ? new Date(periodEnd * 1000).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
         : null;
 
       const updated = await syncSubscriptionForUser(userType, userId);

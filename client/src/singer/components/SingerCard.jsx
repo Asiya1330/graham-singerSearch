@@ -101,7 +101,7 @@ function SingerCard({
                   <CheckCircle className="w-3 h-3 mr-1" /> Verified
                 </span>
               )}
-              {singer.subscription_tier === "founding" && (
+              {singer.founding_artist && (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-100 text-amber-800">
                   <Star className="w-3 h-3 fill-amber-500" /> Founding
                 </span>
