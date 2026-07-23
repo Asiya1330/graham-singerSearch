@@ -2,6 +2,7 @@ import Stripe from "stripe";
 import type { Organization, Singer } from "@shared/schema";
 import {
   getStripePriceOrgPro,
+  getStripePriceOrgProAnnual,
   getStripePriceSingerPro,
   getStripePriceSingerProAnnual,
   getStripeReturnBaseUrl,
@@ -36,8 +37,9 @@ export function hasActiveStripeSubscription(
 }
 
 function getPriceId(userType: StripeUserType, interval?: "monthly" | "annual"): string {
-  if (userType === "singer" && interval === "annual") {
-    const annualPrice = getStripePriceSingerProAnnual();
+  if (interval === "annual") {
+    const annualPrice =
+      userType === "singer" ? getStripePriceSingerProAnnual() : getStripePriceOrgProAnnual();
     if (!annualPrice) {
       throw new Error("Annual billing is not configured yet. Please choose monthly billing.");
     }
@@ -103,10 +105,12 @@ export async function createCheckoutSession(
     subscriptionData.trial_period_days = STRIPE_TRIAL_DAYS;
   }
 
+  const priceId = getPriceId(userType, interval);
+
   const session = await getStripe().checkout.sessions.create({
     mode: "subscription",
     customer: customerId,
-    line_items: [{ price: getPriceId(userType, interval), quantity: 1 }],
+    line_items: [{ price: priceId, quantity: 1 }],
     subscription_data: subscriptionData as Stripe.Checkout.SessionCreateParams["subscription_data"],
     allow_promotion_codes: true,
     metadata: { userId: String(userId), userType },

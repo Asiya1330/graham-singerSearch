@@ -7,10 +7,10 @@ import {
   syncStripeSubscription,
   stripeStatusLabel,
 } from "../lib/stripe";
+import { getBillingDisplay } from "./BillingIntervalPicker";
 
 export function SubscriptionSection({ user, setCurrentUser, setProfileMsg, userType }) {
   const [stripeLoading, setStripeLoading] = React.useState(null);
-  const [billingInterval, setBillingInterval] = React.useState("annual");
 
   React.useEffect(() => {
     if (!user.stripe_subscription_id) return;
@@ -47,7 +47,7 @@ export function SubscriptionSection({ user, setCurrentUser, setProfileMsg, userT
     ? new Date(user.pro_expires_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
     : null;
 
-  const isAnnualSub = isSinger && isPro && hasStripeSub && user.stripe_billing_interval === "year";
+  const isAnnualSub = isPro && hasStripeSub && user.stripe_billing_interval === "year";
 
   const planLabel = isFounding ? (isSinger ? "Founding Artist" : "Founding Organization") : isPro ? "Pro" : "Free";
   const planColor = isFounding
@@ -55,10 +55,10 @@ export function SubscriptionSection({ user, setCurrentUser, setProfileMsg, userT
     : isPro
       ? "bg-blue-100 text-blue-700"
       : "bg-slate-100 text-slate-600";
-  const priceDisplay = isSinger
-    ? (billingInterval === "annual" ? "$8.25/month" : "$9.99/month")
-    : "$79/month";
-  const billedNote = isSinger && billingInterval === "annual" ? "billed annually" : null;
+  const billing = getBillingDisplay(isSinger, "annual");
+  const activePriceDisplay = isAnnualSub
+    ? `${billing.annualMonthlyEquiv}/month, billed annually`
+    : `${billing.monthlyPrice}/month`;
   const suffix = isSinger ? "singer" : "org";
 
   const withLoading = (key, fn) => async () => {
@@ -72,7 +72,7 @@ export function SubscriptionSection({ user, setCurrentUser, setProfileMsg, userT
     }
   };
 
-  const handleCheckout = withLoading("checkout", () => startStripeCheckout(isSinger ? billingInterval : "monthly"));
+  const handleCheckout = (interval) => withLoading(`checkout-${interval}`, () => startStripeCheckout(interval))();
   const handleBilling = withLoading("billing", () => openStripeBillingPortal());
 
   const handleCancel = async () => {
@@ -113,7 +113,7 @@ export function SubscriptionSection({ user, setCurrentUser, setProfileMsg, userT
         </span>
         {isPro && !isFounding && hasStripeSub && (
           <span className="text-sm text-slate-600">
-            {isSinger ? (isAnnualSub ? "$8.25/month, billed annually" : "$9.99/month") : "$79/month"}
+            {activePriceDisplay}
           </span>
         )}
         {stripeStatus && (
@@ -174,9 +174,7 @@ export function SubscriptionSection({ user, setCurrentUser, setProfileMsg, userT
             <p className="text-sm text-blue-900 font-medium">
               {user.stripe_subscription_status === "trialing"
                 ? `Free trial active — billing starts ${trialEndDate || "after trial"}`
-                : isSinger
-                  ? `You are on the Pro plan — ${isAnnualSub ? "$8.25/month, billed annually" : "$9.99/month"}`
-                  : "You are on the Pro plan — unlimited contact reveals and urgent search access."}
+                : `You are on the Pro plan — ${activePriceDisplay}`}
             </p>
             {hasStripeSub ? (
               <p className="text-xs text-blue-700 mt-1">Manage your subscription, payment method, and invoices in the billing portal.</p>
@@ -220,48 +218,57 @@ export function SubscriptionSection({ user, setCurrentUser, setProfileMsg, userT
               : "Upgrade to Pro for unlimited contact reveals, urgent search access, and priority support. Start with a 7-day free trial."}
           </p>
 
-          {isSinger && (
-            <div className="inline-flex bg-slate-900 p-1 rounded-full shadow-md">
+          <div className="grid sm:grid-cols-[1.15fr_1fr] gap-3 items-stretch">
+            <div className="relative rounded-xl border-2 border-blue-600 bg-blue-50/40 p-4 flex flex-col">
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide">
+                  Recommended
+                </span>
+                <span className="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide">
+                  2 months free
+                </span>
+              </div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-blue-600">Yearly</p>
+              <div className="mt-1 flex items-baseline gap-1">
+                <span className="text-2xl font-bold text-slate-900">{billing.annualMonthlyEquiv}</span>
+                <span className="text-sm text-slate-500">/month</span>
+              </div>
+              <p className="text-xs text-slate-500 mt-0.5">billed {billing.annualTotal}/year</p>
               <button
-                onClick={() => setBillingInterval("monthly")}
-                className={`px-5 py-1.5 rounded-full text-sm font-bold transition-all ${
-                  billingInterval === "monthly"
-                    ? "bg-white text-slate-900 shadow"
-                    : "text-slate-400 hover:text-white"
-                }`}
+                onClick={() => handleCheckout("annual")}
+                disabled={stripeLoading !== null}
+                className="mt-3 w-full bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+                data-testid={`button-upgrade-pro-annual-${suffix}`}
               >
-                Monthly
-              </button>
-              <button
-                onClick={() => setBillingInterval("annual")}
-                className={`px-5 py-1.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 ${
-                  billingInterval === "annual"
-                    ? "bg-white text-slate-900 shadow"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                Annual
-                <span className="bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">2 months free</span>
+                {stripeLoading === "checkout-annual"
+                  ? "Redirecting…"
+                  : isSinger
+                    ? "Get yearly Pro"
+                    : "Start yearly trial"}
               </button>
             </div>
-          )}
 
-          <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-bold text-slate-900">
-              {isSinger ? (billingInterval === "annual" ? "$8.25" : "$9.99") : "$79"}
-            </span>
-            <span className="text-sm text-slate-500">/month</span>
+            <div className="rounded-xl border border-slate-200 bg-white p-4 flex flex-col">
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Monthly</p>
+              <div className="mt-1 flex items-baseline gap-1">
+                <span className="text-2xl font-bold text-slate-900">{billing.monthlyPrice}</span>
+                <span className="text-sm text-slate-500">/month</span>
+              </div>
+              <p className="text-xs text-slate-500 mt-0.5">billed monthly</p>
+              <button
+                onClick={() => handleCheckout("monthly")}
+                disabled={stripeLoading !== null}
+                className="mt-auto pt-3 w-full border border-slate-300 text-slate-800 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors disabled:opacity-50"
+                data-testid={`button-upgrade-pro-${suffix}`}
+              >
+                {stripeLoading === "checkout-monthly"
+                  ? "Redirecting…"
+                  : isSinger
+                    ? "Get monthly Pro"
+                    : "Start monthly trial"}
+              </button>
+            </div>
           </div>
-          {billedNote && <p className="text-xs text-slate-500">{billedNote}</p>}
-
-          <button
-            onClick={handleCheckout}
-            disabled={stripeLoading !== null}
-            className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
-            data-testid={`button-upgrade-pro-${suffix}`}
-          >
-            {stripeLoading === "checkout" ? "Redirecting…" : isSinger ? "Upgrade to Pro" : "Start free trial"}
-          </button>
         </div>
       )}
     </div>
