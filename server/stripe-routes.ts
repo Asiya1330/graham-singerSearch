@@ -79,7 +79,7 @@ export function registerStripeRoutes(
         const reason = org.founding_org ? "Founding Organization" : org.is_gifted ? "gifted" : "active Pro";
         return res.status(400).json({ message: `You already have free Pro access as a ${reason} member. No payment needed!` });
       }
-      const url = await createCheckoutSession("organization", userId, org.email, org);
+      const url = await createCheckoutSession("organization", userId, org.email, org, interval);
       pendingCheckouts.set(checkoutKey, Date.now());
       return res.json({ url });
     } catch (error: any) {

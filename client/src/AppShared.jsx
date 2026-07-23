@@ -227,7 +227,7 @@ export function UpgradeModal({ onClose, onUpgrade }) {
              onClick={onUpgrade}
              className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200 mt-4"
            >
-             Get Pro Access - $79/mo
+             Get Pro Access — from $65.83/mo
            </button>
            <button 
              onClick={onClose}
