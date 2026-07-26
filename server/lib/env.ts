@@ -102,7 +102,7 @@ export function getStripeReturnBaseUrl(): string {
   }
   const siteUrl = process.env.SITE_URL?.trim();
   if (siteUrl) return siteUrl.replace(/\/$/, "");
-  return "https://singersearch.net";
+  return "https://www.singer-search.com";
 }
 
 export function getStripeConfigStatus(): StripeConfigStatus {

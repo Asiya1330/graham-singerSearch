@@ -14,8 +14,8 @@ export function AppFooter() {
         <div className="flex items-center gap-2">
           <span className="font-semibold text-slate-700">Singer Search</span>
           <span className="text-slate-300">·</span>
-          <a href="mailto:support@singersearch.com" className="inline-flex items-center gap-1 hover:text-slate-700 transition-colors" data-testid="link-footer-support">
-            <Mail className="w-3.5 h-3.5" /> support@singersearch.com
+          <a href="mailto:support@singer-search.com" className="inline-flex items-center gap-1 hover:text-slate-700 transition-colors" data-testid="link-footer-support">
+            <Mail className="w-3.5 h-3.5" /> support@singer-search.com
           </a>
         </div>
         <div className="flex items-center gap-4">

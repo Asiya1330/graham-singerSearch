@@ -36,7 +36,7 @@ export async function geocodeCityState(
     });
     const res = await fetch(
       `https://nominatim.openstreetmap.org/search?${params.toString()}`,
-      { headers: { "User-Agent": "SingerSearch.net/1.0 (geocoding)" } }
+      { headers: { "User-Agent": "SingerSearch/1.0 (https://www.singer-search.com; geocoding)" } }
     );
     if (!res.ok) {
       cache.set(key, null);

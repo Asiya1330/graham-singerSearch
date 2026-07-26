@@ -1,5 +1,5 @@
 -- =====================================================================
-  -- SingerSearch.net — production demo data reseed
+  -- SingerSearch (singer-search.com) — production demo data reseed
   -- Generated from server/seed-data.ts (mirrors what seedDatabase() inserts).
   -- Safe to run in the Supabase SQL editor or psql against the production DB.
   --
