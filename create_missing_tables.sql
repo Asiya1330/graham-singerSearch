@@ -1,5 +1,5 @@
 -- =====================================================================
--- SingerSearch.net — create missing tables in production
+-- SingerSearch (singer-search.com) — create missing tables in production
 -- Generated to match shared/schema.ts (Drizzle ORM definitions).
 --
 -- Safe to run repeatedly: every CREATE uses IF NOT EXISTS.
