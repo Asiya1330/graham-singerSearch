@@ -179,7 +179,7 @@ export function SubscriptionSection({ user, setCurrentUser, setProfileMsg, userT
             {hasStripeSub ? (
               <p className="text-xs text-blue-700 mt-1">Manage your subscription, payment method, and invoices in the billing portal.</p>
             ) : (
-              <p className="text-xs text-blue-700 mt-1">To manage your subscription contact <a href="mailto:support@singersearch.net" className="underline font-medium">support@singersearch.net</a></p>
+              <p className="text-xs text-blue-700 mt-1">To manage your subscription contact <a href="mailto:support@singer-search.com" className="underline font-medium">support@singer-search.com</a></p>
             )}
           </div>
           {hasStripeSub && (

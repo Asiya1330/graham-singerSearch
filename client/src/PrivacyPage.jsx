@@ -179,7 +179,7 @@ export function PrivacyPage() {
               <li><strong>Opt out</strong> of the sale of personal information (Singer Search does not sell personal information)</li>
               <li><strong>Non-discrimination</strong> for exercising your privacy rights</li>
             </ul>
-            <p>To exercise any of these rights, contact us at support@singersearch.com. We will respond to verified requests within 45 days.</p>
+            <p>To exercise any of these rights, contact us at support@singer-search.com. We will respond to verified requests within 45 days.</p>
           </Section>
 
           <Section title="9. Users Outside the United States">
@@ -209,7 +209,7 @@ export function PrivacyPage() {
             <p>For privacy-related inquiries, requests, or complaints:</p>
             <p>
               <strong>Singer Search</strong><br />
-              support@singersearch.com
+              support@singer-search.com
             </p>
           </Section>
 

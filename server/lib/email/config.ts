@@ -75,7 +75,7 @@ export function getSiteUrl(): string {
   const url = process.env.SITE_URL?.trim();
   if (url) return url.replace(/\/$/, "");
   if (process.env.NODE_ENV === "production") {
-    return "https://singersearch.com";
+    return "https://www.singer-search.com";
   }
   return `http://localhost:${process.env.PORT || "5000"}`;
 }
@@ -93,7 +93,7 @@ export function getEmailUrls() {
     singerLogin: `${siteUrl}/login/singer`,
     organizationLogin: `${siteUrl}/login/organization`,
     privacy: `${siteUrl}/privacy`,
-    supportEmail: process.env.SUPPORT_EMAIL?.trim() || "support@singersearch.com",
+    supportEmail: process.env.SUPPORT_EMAIL?.trim() || "support@singer-search.com",
   };
 }
 

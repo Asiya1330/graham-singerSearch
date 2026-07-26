@@ -177,7 +177,7 @@ export function TermsPage() {
             <p>Questions about these Terms should be directed to:</p>
             <p>
               <strong>Singer Search</strong><br />
-              support@singersearch.com
+              support@singer-search.com
             </p>
           </Section>
 

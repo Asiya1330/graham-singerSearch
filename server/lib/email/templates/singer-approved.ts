@@ -29,7 +29,7 @@ export function buildSingerApprovedEmail(details: SingerApprovedDetails) {
     preheader: "Your Singer Search profile is now live in search results.",
     title: "Profile approved",
     bodyHtml,
-    footerNote: "Questions? Reply to this email or contact support@singersearch.com.",
+    footerNote: "Questions? Reply to this email or contact support@singer-search.com.",
   });
 
   const text = [

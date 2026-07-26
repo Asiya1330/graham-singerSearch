@@ -35,7 +35,7 @@ Store it as `RESEND_API_KEY` on Railway (see step 4).
 
 ## 3. Configure sender and recipient (no custom domain yet)
 
-**Do not add `gmail.com` (or any public provider) under Domains.** Resend only accepts domains **you own** (e.g. `singersearch.net`). Gmail, Outlook, Yahoo, etc. cannot be added.
+**Do not add `gmail.com` (or any public provider) under Domains.** Resend only accepts domains **you own** (e.g. `singer-search.com`). Gmail, Outlook, Yahoo, etc. cannot be added.
 
 | Role | Where it goes | Value |
 |------|----------------|-------|
@@ -56,18 +56,18 @@ If Resend was created with a different email, either:
 - change `ADMIN_NOTIFICATION_EMAIL` to match your Resend account email, **or**
 - add your own domain (below) so you can send to any address.
 
-### Production: verified domain (singersearch.com)
+### Production: verified domain (singer-search.com)
 
-Once the client has verified `singersearch.com` in Resend, you can email **any recipient** (Gmail, Outlook, etc.) — not just the Resend signup inbox.
+Once the client has verified `singer-search.com` in Resend, you can email **any recipient** (Gmail, Outlook, etc.) — not just the Resend signup inbox.
 
 Update **Railway** (and local `.env` for testing):
 
 ```env
 RESEND_API_KEY=re_client_production_key
-RESEND_FROM_EMAIL=Singer Search <notifications@singersearch.com>
-ADMIN_NOTIFICATION_EMAIL=admin@singersearch.com
-SITE_URL=https://singersearch.com
-SUPPORT_EMAIL=support@singersearch.com
+RESEND_FROM_EMAIL=Singer Search <notifications@singer-search.com>
+ADMIN_NOTIFICATION_EMAIL=admin@singer-search.com
+SITE_URL=https://www.singer-search.com
+SUPPORT_EMAIL=support@singer-search.com
 EMAIL_NOTIFICATIONS_ENABLED=true
 ```
 
@@ -77,7 +77,7 @@ Notes:
 - `ADMIN_NOTIFICATION_EMAIL` can be any inbox you want for admin alerts.
 - Logo in emails loads from `{SITE_URL}/singer-search-logo.png` — ensure that URL works after Vercel deploy.
 
-Redeploy Railway after saving variables. No code deploy is required beyond env updates (defaults in code fall back to `singersearch.com` if `SITE_URL` is unset).
+Redeploy Railway after saving variables. No code deploy is required beyond env updates (defaults in code fall back to `https://www.singer-search.com` if `SITE_URL` is unset).
 
 ---
 
