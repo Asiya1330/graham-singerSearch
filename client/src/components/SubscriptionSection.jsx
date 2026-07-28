@@ -3,6 +3,7 @@ import {
   startStripeCheckout,
   openStripeBillingPortal,
   cancelStripeSubscription,
+  getStripePricing,
   resumeStripeSubscription,
   syncStripeSubscription,
   stripeStatusLabel,
@@ -11,6 +12,19 @@ import { getBillingDisplay } from "./BillingIntervalPicker";
 
 export function SubscriptionSection({ user, setCurrentUser, setProfileMsg, userType }) {
   const [stripeLoading, setStripeLoading] = React.useState(null);
+  const [pricingData, setPricingData] = React.useState(null);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    getStripePricing()
+      .then((data) => {
+        if (!cancelled) setPricingData(data);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   React.useEffect(() => {
     if (!user.stripe_subscription_id) return;
@@ -55,7 +69,7 @@ export function SubscriptionSection({ user, setCurrentUser, setProfileMsg, userT
     : isPro
       ? "bg-blue-100 text-blue-700"
       : "bg-slate-100 text-slate-600";
-  const billing = getBillingDisplay(isSinger, "annual");
+  const billing = getBillingDisplay(isSinger, "annual", pricingData);
   const activePriceDisplay = isAnnualSub
     ? `${billing.annualMonthlyEquiv}/month, billed annually`
     : `${billing.monthlyPrice}/month`;

@@ -37,7 +37,7 @@ import {
 import { eq, desc, and } from "drizzle-orm";
 import { sendApiError, sendRouteError } from "./lib/api-response";
 import { registerStripeRoutes } from "./stripe-routes";
-import { hasActiveStripeSubscription, syncSubscriptionForUser } from "./lib/stripe";
+import { hasActiveStripeSubscription, shouldSyncStripeState, syncSubscriptionForUser } from "./lib/stripe";
 import { isStripeCheckoutConfigured } from "./lib/env";
 
 const scryptAsync = promisify(scrypt);
@@ -504,7 +504,7 @@ export async function registerRoutes(
         let singer = await storage.getSinger(req.session.userId);
         if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
 
-        if (singer.stripe_customer_id && isStripeCheckoutConfigured()) {
+        if (isStripeCheckoutConfigured() && shouldSyncStripeState(singer)) {
           try {
             const synced = await syncSubscriptionForUser("singer", singer.id);
             if (synced) singer = synced as typeof singer;
@@ -531,7 +531,7 @@ export async function registerRoutes(
         let org = await storage.getOrganization(req.session.userId);
         if (!org) return sendApiError(res, "ORG_NOT_FOUND");
 
-        if (org.stripe_customer_id && isStripeCheckoutConfigured()) {
+        if (isStripeCheckoutConfigured() && shouldSyncStripeState(org)) {
           try {
             const synced = await syncSubscriptionForUser("organization", org.id);
             if (synced) org = synced as typeof org;
