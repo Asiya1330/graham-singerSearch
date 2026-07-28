@@ -211,11 +211,14 @@ export default function App() {
               if (ut === "singer" || ut === "organization") {
                 setCurrentUser({ type: ut, data: syncData });
               }
-              showAlert("Pro subscription active!", "success");
+              if (syncData.subscription_tier === "pro") {
+                showAlert("Pro subscription active!", "success");
+              } else {
+                showAlert("Payment succeeded, but your Pro access is still activating. Please refresh in a few moments if it does not appear automatically.", "error");
+              }
             }
           } catch {
-            // Sync failed — the auth/me call above already set the user with
-            // whatever tier the DB had; a page reload will pick up webhook updates.
+            showAlert("Payment succeeded, but we could not confirm your Pro access yet. Please refresh shortly or contact support if billing does not activate.", "error");
           }
         } else if (checkout === "cancel") {
           showAlert("Checkout canceled.", "error");

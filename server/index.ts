@@ -82,6 +82,7 @@ async function runStartupMaintenance() {
       ALTER TABLE singers ADD COLUMN IF NOT EXISTS stripe_subscription_id text;
       ALTER TABLE singers ADD COLUMN IF NOT EXISTS stripe_subscription_status text;
       ALTER TABLE singers ADD COLUMN IF NOT EXISTS stripe_billing_interval text;
+      ALTER TABLE singers ADD COLUMN IF NOT EXISTS stripe_last_synced_at timestamp;
 
       -- organizations schema backfill
       ALTER TABLE organizations ADD COLUMN IF NOT EXISTS founding_expires_at timestamp;
@@ -89,6 +90,8 @@ async function runStartupMaintenance() {
       ALTER TABLE organizations ADD COLUMN IF NOT EXISTS stripe_subscription_id text;
       ALTER TABLE organizations ADD COLUMN IF NOT EXISTS stripe_subscription_status text;
       ALTER TABLE organizations ADD COLUMN IF NOT EXISTS stripe_billing_interval text;
+      ALTER TABLE organizations ADD COLUMN IF NOT EXISTS stripe_last_synced_at timestamp;
+      ALTER TABLE organizations ADD COLUMN IF NOT EXISTS stripe_trial_started_at timestamp;
 
       -- role/work schema backfill
       ALTER TABLE singer_roles ADD COLUMN IF NOT EXISTS status text DEFAULT 'performed';
@@ -112,6 +115,20 @@ async function runStartupMaintenance() {
       );
       CREATE UNIQUE INDEX IF NOT EXISTS password_reset_tokens_token_hash_idx ON password_reset_tokens (token_hash);
       CREATE INDEX IF NOT EXISTS password_reset_tokens_user_idx ON password_reset_tokens (user_type, user_id);
+      CREATE UNIQUE INDEX IF NOT EXISTS singers_stripe_customer_id_idx ON singers (stripe_customer_id) WHERE stripe_customer_id IS NOT NULL;
+      CREATE UNIQUE INDEX IF NOT EXISTS singers_stripe_subscription_id_idx ON singers (stripe_subscription_id) WHERE stripe_subscription_id IS NOT NULL;
+      CREATE UNIQUE INDEX IF NOT EXISTS organizations_stripe_customer_id_idx ON organizations (stripe_customer_id) WHERE stripe_customer_id IS NOT NULL;
+      CREATE UNIQUE INDEX IF NOT EXISTS organizations_stripe_subscription_id_idx ON organizations (stripe_subscription_id) WHERE stripe_subscription_id IS NOT NULL;
+      CREATE TABLE IF NOT EXISTS stripe_webhook_events (
+        event_id text PRIMARY KEY,
+        event_type text NOT NULL,
+        status text NOT NULL,
+        attempts integer NOT NULL DEFAULT 1,
+        last_error text,
+        created_at timestamp NOT NULL DEFAULT now(),
+        updated_at timestamp NOT NULL DEFAULT now(),
+        processed_at timestamp
+      );
     `);
 
     const { rows: untagged } = await pool.query(
