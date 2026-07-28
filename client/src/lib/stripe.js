@@ -24,6 +24,17 @@ export async function openStripeBillingPortal() {
   window.location.href = data.url;
 }
 
+export async function getStripePricing() {
+  const res = await fetch("/api/stripe/prices", {
+    credentials: "include",
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to load Stripe pricing");
+  }
+  return data;
+}
+
 /** Pull latest subscription state from Stripe after checkout (local dev fallback). */
 export async function syncStripeSubscription() {
   const res = await fetch("/api/stripe/sync", {

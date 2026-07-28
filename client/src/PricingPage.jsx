@@ -3,7 +3,7 @@ import { CheckCircle, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAppContext } from "./AppContext";
 import { navigateToView } from "./lib/nav";
-import { startStripeCheckout, openStripeBillingPortal } from "./lib/stripe";
+import { getStripePricing, startStripeCheckout, openStripeBillingPortal } from "./lib/stripe";
 import { Navbar } from "./landing/Navbar";
 import { AppFooter } from "./AppShared";
 import { getBillingDisplay } from "./components/BillingIntervalPicker";
@@ -24,11 +24,24 @@ export function PricingPage({ showAlert }) {
 
   const [pricingType, setPricingType] = useState(currentUser?.type || "singer");
   const [checkoutLoading, setCheckoutLoading] = useState(null);
+  const [pricingData, setPricingData] = useState(null);
   const isSinger = pricingType === "singer";
   const isPro = currentUser?.data?.subscription_tier === "pro";
   const isFree = currentUser?.data?.subscription_tier === "free";
   const hasStripeSub = Boolean(currentUser?.data?.stripe_subscription_id);
-  const billing = getBillingDisplay(isSinger, "annual");
+  const billing = getBillingDisplay(isSinger, "annual", pricingData);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    getStripePricing()
+      .then((data) => {
+        if (!cancelled) setPricingData(data);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const freeFeatures = isSinger
     ? ["Profile & availability", "Repertoire search visibility", "Profile views & notifications", "Contacted by organizations"]
@@ -204,6 +217,9 @@ export function PricingPage({ showAlert }) {
               <p className="mt-1 text-sm text-slate-500">
                 billed {billing.annualTotal}/year
               </p>
+              {billing.annualDiscountLabel && (
+                <p className="mt-1 text-xs font-medium text-emerald-700">{billing.annualDiscountLabel}</p>
+              )}
               <p className="mt-2 text-sm font-medium text-emerald-700">{trialNote}</p>
             </div>
 

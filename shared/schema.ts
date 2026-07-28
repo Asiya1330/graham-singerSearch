@@ -53,6 +53,7 @@ export const singers = pgTable("singers", {
   stripe_subscription_id: text("stripe_subscription_id"),
   stripe_subscription_status: text("stripe_subscription_status"),
   stripe_billing_interval: text("stripe_billing_interval"),
+  stripe_last_synced_at: timestamp("stripe_last_synced_at", { mode: "date" }),
   admin_approved: boolean("admin_approved").default(false),
   admin_rejected: boolean("admin_rejected").default(false),
   pro_expires_at: timestamp("pro_expires_at", { mode: "date" }),
@@ -88,6 +89,8 @@ export const singers = pgTable("singers", {
 }, (table) => ({
   approvedIdx: index("singers_admin_approved_idx").on(table.admin_approved),
   subscriptionIdx: index("singers_subscription_status_idx").on(table.subscription_status),
+  stripeCustomerIdx: uniqueIndex("singers_stripe_customer_id_idx").on(table.stripe_customer_id),
+  stripeSubscriptionIdx: uniqueIndex("singers_stripe_subscription_id_idx").on(table.stripe_subscription_id),
   voiceTypeIdx: index("singers_voice_type_idx").on(table.primary_voice_type),
   unionIdx: index("singers_union_status_idx").on(table.union_status),
   representedIdx: index("singers_represented_idx").on(table.represented),
@@ -180,6 +183,8 @@ export const organizations = pgTable("organizations", {
   stripe_subscription_id: text("stripe_subscription_id"),
   stripe_subscription_status: text("stripe_subscription_status"),
   stripe_billing_interval: text("stripe_billing_interval"),
+  stripe_last_synced_at: timestamp("stripe_last_synced_at", { mode: "date" }),
+  stripe_trial_started_at: timestamp("stripe_trial_started_at", { mode: "date" }),
   contact_reveal_limit: integer("contact_reveal_limit").default(3),
   contact_reveals_used_this_month: integer("contact_reveals_used_this_month").default(0),
   login_count: integer("login_count").default(0),
@@ -194,6 +199,8 @@ export const organizations = pgTable("organizations", {
   emailIdx: index("organizations_email_idx").on(table.email),
   subscriptionIdx: index("organizations_subscription_tier_idx").on(table.subscription_tier),
   approvedIdx: index("organizations_admin_approved_idx").on(table.admin_approved),
+  stripeCustomerIdx: uniqueIndex("organizations_stripe_customer_id_idx").on(table.stripe_customer_id),
+  stripeSubscriptionIdx: uniqueIndex("organizations_stripe_subscription_id_idx").on(table.stripe_subscription_id),
 }));
 
 export const insertOrganizationSchema = createInsertSchema(organizations).omit({
