@@ -32,7 +32,7 @@ export function AudienceCards() {
           <a
             href={APP_ROUTES.organizationLogin}
             onClick={navClick(setView, "organizationLogin")}
-            className="text-[14.5px] font-semibold text-[#2563eb] px-1 py-3 no-underline hover:text-[#1d4ed8] transition-colors"
+            className="text-[14.5px] font-semibold text-[#2563eb] px-3 py-2 rounded-md no-underline hover:text-[#1d4ed8] hover:bg-blue-50 transition-colors"
             data-testid="link-org-login"
           >
             Log in
@@ -64,7 +64,7 @@ export function AudienceCards() {
           <a
             href={APP_ROUTES.singerLogin}
             onClick={navClick(setView, "singerLogin")}
-            className="text-[14.5px] font-semibold text-[#2563eb] px-1 py-3 no-underline hover:text-[#1d4ed8] transition-colors"
+            className="text-[14.5px] font-semibold text-[#2563eb] px-3 py-2 rounded-md no-underline hover:text-[#1d4ed8] hover:bg-blue-50 transition-colors"
             data-testid="link-singer-login"
           >
             Log in
