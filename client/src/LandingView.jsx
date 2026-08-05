@@ -47,8 +47,12 @@ export function LandingView({ setAdminMode }) {
 
   return (
     <div className="bg-[#f6f7f9] text-[#1f2733] min-h-screen" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}>
+      <div className="sticky top-0 z-50 bg-[#f6f7f9]/95 backdrop-blur-md border-b border-[#e8eaed]/80">
+        <div className="max-w-[1080px] mx-auto px-6">
+          <Navbar />
+        </div>
+      </div>
       <div className="max-w-[1080px] mx-auto px-6">
-        <Navbar />
         <FoundingBanner />
         <Hero />
         <AudienceCards />

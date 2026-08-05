@@ -34,9 +34,11 @@ export function Navbar() {
   };
 
   const linkClass =
-    "text-sm font-medium text-[#5b6470] no-underline hover:text-[#1f2733] transition-colors bg-transparent border-none cursor-pointer";
+    "text-sm font-medium text-[#5b6470] no-underline hover:text-[#1f2733] hover:bg-black/5 px-2.5 py-1.5 rounded-md transition-colors bg-transparent border-none cursor-pointer";
   const mobileLinkClass =
     "w-full text-left px-1 py-3 text-base font-medium text-[#5b6470] hover:text-[#1f2733] transition-colors bg-transparent border-none cursor-pointer border-b border-[#e8eaed]";
+  const loginClass =
+    "text-sm font-semibold text-[#2563eb] hover:text-[#1d4ed8] hover:bg-blue-50 px-3 py-1.5 rounded-md transition-colors bg-transparent border-none cursor-pointer";
 
   return (
     <>
@@ -46,13 +48,13 @@ export function Navbar() {
             setMobileOpen(false);
             setView("landing");
           }}
-          className="text-xl font-bold tracking-tight text-[#1f2733] bg-transparent border-none cursor-pointer p-0"
+          className="text-xl font-bold tracking-tight text-[#1f2733] bg-transparent border-none cursor-pointer p-0 hover:opacity-80 transition-opacity"
         >
           Singer<span className="text-[#2563eb]">Search</span>
         </button>
 
         {/* Desktop links */}
-        <div className="hidden sm:flex items-center gap-[18px]">
+        <div className="hidden sm:flex items-center gap-2">
           <button onClick={scrollToHow} className={linkClass}>
             How it works
           </button>
@@ -64,7 +66,7 @@ export function Navbar() {
           </button>
           <button
             onClick={() => setShowRolePicker(true)}
-            className="text-sm font-semibold text-[#2563eb] hover:text-[#1d4ed8] transition-colors bg-transparent border-none cursor-pointer"
+            className={loginClass}
             data-testid="link-nav-login"
           >
             Log in
@@ -106,7 +108,7 @@ export function Navbar() {
               setMobileOpen(false);
               setShowRolePicker(true);
             }}
-            className="w-full text-left px-1 py-3 text-base font-semibold text-[#2563eb] hover:text-[#1d4ed8] transition-colors bg-transparent border-none cursor-pointer"
+            className="w-full text-left px-1 py-3 text-base font-semibold text-[#2563eb] hover:text-[#1d4ed8] hover:bg-blue-50 rounded-md transition-colors bg-transparent border-none cursor-pointer"
             data-testid="link-nav-login-mobile"
           >
             Log in

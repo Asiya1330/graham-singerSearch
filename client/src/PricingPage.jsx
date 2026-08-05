@@ -108,8 +108,10 @@ export function PricingPage({ showAlert }) {
           "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
       }}
     >
-      <div className="max-w-[1080px] mx-auto px-6">
-        <Navbar />
+      <div className="sticky top-0 z-50 bg-[#f6f7f9]/95 backdrop-blur-md border-b border-[#e8eaed]/80">
+        <div className="max-w-[1080px] mx-auto px-6">
+          <Navbar />
+        </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

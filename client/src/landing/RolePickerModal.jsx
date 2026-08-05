@@ -1,4 +1,5 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import { Users, Search, X } from "lucide-react";
 import { useAppContext } from "../AppContext";
 import { navigateToView } from "../lib/nav";
@@ -16,11 +17,12 @@ export function RolePickerModal({ open, onClose }) {
   const singer = pick("singerLogin", "singerRegister");
   const org = pick("organizationLogin", "orgRegister");
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={onClose}>
+  // Portal to body so sticky/backdrop-filter ancestors don't break fixed centering
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
       <div
-        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 p-8"
+        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -73,6 +75,7 @@ export function RolePickerModal({ open, onClose }) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

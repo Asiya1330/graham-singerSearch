@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { ArrowDown, ArrowUp, Award, Building2, CreditCard, Edit2, Eye, Flag, Lightbulb, Search, Shield, Trash2, UserCheck, Users, UserX, Zap } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { ArrowDown, ArrowUp, Award, Building2, CreditCard, Edit2, Eye, Flag, Lightbulb, Loader2, Search, Shield, Star, Trash2, UserCheck, Users, UserX, Zap } from "lucide-react";
 import { useAppContext } from "./AppContext";
 import { useCityStateAutofill } from "./hooks/useCityStateAutofill";
 
@@ -34,6 +34,41 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
     const [reseedLoading, setReseedLoading] = useState(false);
     const [reseedResult, setReseedResult] = useState(null);
     const [reseedError, setReseedError] = useState("");
+    const [actionBusy, setActionBusy] = useState(null);
+    const actionBusyRef = useRef(null);
+
+    const withBusy = async (key, fn) => {
+      if (actionBusyRef.current) return;
+      actionBusyRef.current = key;
+      setActionBusy(key);
+      try {
+        await fn();
+      } finally {
+        actionBusyRef.current = null;
+        setActionBusy(null);
+      }
+    };
+
+    const isBusy = (key) => actionBusy === key;
+    const isRowBusy = (prefix) => typeof actionBusy === "string" && actionBusy.startsWith(prefix);
+    const BusyIcon = ({ busy, children }) => (
+      busy ? <Loader2 className="w-4 h-4 animate-spin" /> : children
+    );
+
+    const fetchSingerDetail = async (singerId) => {
+      const res = await fetch(`/api/admin/singers/${singerId}`);
+      if (!res.ok) throw new Error("Failed to load singer");
+      return res.json();
+    };
+
+    const fetchOrgDetail = async (orgId) => {
+      const res = await fetch(`/api/admin/orgs/${orgId}`);
+      if (!res.ok) throw new Error("Failed to load");
+      const orgData = await res.json();
+      const adjRes = await fetch(`/api/admin/orgs/${orgId}/credit-adjustments`);
+      const adjustments = adjRes.ok ? await adjRes.json() : [];
+      return { ...orgData, credit_adjustments: adjustments };
+    };
 
     const handleReseedDemo = async () => {
       if (!confirm("This will delete all demo singers (emails ending in @example.com) and the 7 demo organizations, then re-insert 100 demo singers + 7 demo orgs. Real user accounts will NOT be affected. Continue?")) return;
@@ -94,8 +129,14 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
         setGiftTarget(null);
         setGiftForm({ duration: "1y", customDate: "", reason: "" });
         await loadAdminData();
-        if (giftTarget.type === 'singer' && adminViewSinger && adminViewSinger.id === giftTarget.id) await handleViewSinger(giftTarget.id);
-        if (giftTarget.type === 'org' && adminViewOrg && adminViewOrg.id === giftTarget.id) await handleViewOrg(giftTarget.id);
+        if (giftTarget.type === 'singer' && adminViewSinger && adminViewSinger.id === giftTarget.id) {
+          const singer = await fetchSingerDetail(giftTarget.id);
+          if (singer) setAdminViewSinger(singer);
+        }
+        if (giftTarget.type === 'org' && adminViewOrg && adminViewOrg.id === giftTarget.id) {
+          const org = await fetchOrgDetail(giftTarget.id);
+          if (org) setAdminViewOrg(org);
+        }
       } catch (err) {
         setGiftError("Failed to gift Pro");
       } finally {
@@ -104,21 +145,29 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
     };
 
     const handleFoundingToggle = async (type, id, name, grant) => {
-      try {
-        const base = type === 'singer' ? `/api/admin/singers/${id}` : `/api/admin/orgs/${id}`;
-        const res = await fetch(`${base}/${grant ? 'grant-founding' : 'revoke-founding'}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        });
-        const data = await res.json();
-        if (!res.ok) { showAlert(data.message || `Failed to ${grant ? 'grant' : 'revoke'} founding status`, "error"); return; }
-        showAlert(`Founding status ${grant ? 'granted to' : 'revoked from'} ${name}`, "success");
-        await loadAdminData();
-        if (type === 'singer' && adminViewSinger && adminViewSinger.id === id) await handleViewSinger(id);
-        if (type === 'org' && adminViewOrg && adminViewOrg.id === id) await handleViewOrg(id);
-      } catch (err) {
-        showAlert(`Failed to ${grant ? 'grant' : 'revoke'} founding status`, "error");
-      }
+      await withBusy(`${type}:${id}:founding`, async () => {
+        try {
+          const base = type === 'singer' ? `/api/admin/singers/${id}` : `/api/admin/orgs/${id}`;
+          const res = await fetch(`${base}/${grant ? 'grant-founding' : 'revoke-founding'}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+          });
+          const data = await res.json();
+          if (!res.ok) { showAlert(data.message || `Failed to ${grant ? 'grant' : 'revoke'} founding status`, "error"); return; }
+          showAlert(`Founding status ${grant ? 'granted to' : 'revoked from'} ${name}`, "success");
+          await loadAdminData();
+          if (type === 'singer' && adminViewSinger && adminViewSinger.id === id) {
+            const singer = await fetchSingerDetail(id);
+            if (singer) setAdminViewSinger(singer);
+          }
+          if (type === 'org' && adminViewOrg && adminViewOrg.id === id) {
+            const org = await fetchOrgDetail(id);
+            if (org) setAdminViewOrg(org);
+          }
+        } catch (err) {
+          showAlert(`Failed to ${grant ? 'grant' : 'revoke'} founding status`, "error");
+        }
+      });
     };
 
     const renderGiftModal = () => {
@@ -198,68 +247,98 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
     useEffect(() => { loadAdminData(); }, []);
 
     const handleAdminAction = async (singerId, action) => {
-      try {
-        let url, method;
-        if (action === "approve") { url = `/api/admin/singers/${singerId}/approve`; method = "PUT"; }
-        else if (action === "reject") { url = `/api/admin/singers/${singerId}/reject`; method = "PUT"; }
-        else if (action === "deactivate") {
-          const singer = allSingers.find(s => s.id === singerId);
-          const name = singer ? `${singer.first_name} ${singer.last_name}` : "this singer";
-          if (!window.confirm(`Are you sure you want to deactivate ${name}? They will no longer appear in search results.`)) return;
-          url = `/api/admin/singers/${singerId}/deactivate`; method = "PUT";
-        }
-        else if (action === "activate") { url = `/api/admin/singers/${singerId}/activate`; method = "PUT"; }
-        else if (action === "delete") {
-          if (!confirm("Permanently delete this singer and all their data?")) return;
-          url = `/api/admin/singers/${singerId}`; method = "DELETE";
-        }
-        const res = await fetch(url, { method });
-        if (!res.ok) throw new Error("Action failed");
-        showAlert(`Singer ${action}d successfully`, "success");
-        await loadAdminData();
-      } catch (err) {
-        showAlert(`Failed to ${action} singer`, "error");
+      if (action === "deactivate") {
+        const singer = allSingers.find(s => s.id === singerId) || (adminViewSinger?.id === singerId ? adminViewSinger : null);
+        const name = singer ? `${singer.first_name} ${singer.last_name}` : "this singer";
+        if (!window.confirm(`Are you sure you want to deactivate ${name}? They will no longer appear in search results.`)) return;
+      } else if (action === "delete") {
+        if (!confirm("Permanently delete this singer and all their data?")) return;
       }
+
+      await withBusy(`singer:${singerId}:${action}`, async () => {
+        try {
+          let url, method;
+          if (action === "approve") { url = `/api/admin/singers/${singerId}/approve`; method = "PUT"; }
+          else if (action === "reject") { url = `/api/admin/singers/${singerId}/reject`; method = "PUT"; }
+          else if (action === "deactivate") { url = `/api/admin/singers/${singerId}/deactivate`; method = "PUT"; }
+          else if (action === "activate") { url = `/api/admin/singers/${singerId}/activate`; method = "PUT"; }
+          else if (action === "delete") { url = `/api/admin/singers/${singerId}`; method = "DELETE"; }
+          const res = await fetch(url, { method });
+          if (!res.ok) throw new Error("Action failed");
+          showAlert(`Singer ${action}d successfully`, "success");
+          await loadAdminData();
+        } catch (err) {
+          showAlert(`Failed to ${action} singer`, "error");
+        }
+      });
     };
 
     const handleBadgeToggle = async (singerId, field, currentValue) => {
-      try {
-        const res = await fetch(`/api/admin/singers/${singerId}/badges`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ field, value: !currentValue }),
-        });
-        if (!res.ok) throw new Error("Badge update failed");
-        await loadAdminData();
-      } catch (err) {
-        showAlert("Failed to update badge", "error");
-      }
+      await withBusy(`singer:${singerId}:badge:${field}`, async () => {
+        try {
+          const res = await fetch(`/api/admin/singers/${singerId}/badges`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ field, value: !currentValue }),
+          });
+          if (!res.ok) throw new Error("Badge update failed");
+          await loadAdminData();
+        } catch (err) {
+          showAlert("Failed to update badge", "error");
+        }
+      });
     };
 
     const handleViewSinger = async (singerId) => {
-      try {
-        const res = await fetch(`/api/admin/singers/${singerId}`);
-        if (!res.ok) throw new Error("Failed to load singer");
-        setAdminViewSinger(await res.json());
-      } catch (err) {
-        showAlert("Failed to load singer profile", "error");
-      }
+      await withBusy(`singer:${singerId}:view`, async () => {
+        try {
+          setAdminViewSinger(await fetchSingerDetail(singerId));
+        } catch (err) {
+          showAlert("Failed to load singer profile", "error");
+        }
+      });
+    };
+
+    const handleStartEditSinger = async (singerId) => {
+      await withBusy(`singer:${singerId}:edit`, async () => {
+        try {
+          const singer = await fetchSingerDetail(singerId);
+          setEditingSinger(singer);
+          setEditForm({
+            first_name: singer.first_name || "",
+            last_name: singer.last_name || "",
+            email: singer.email || "",
+            primary_voice_type: singer.primary_voice_type || "",
+            primary_fach: singer.primary_fach || "",
+            city: singer.city || "",
+            state: singer.state || "",
+            union_status: singer.union_status || "",
+            subscription_tier: singer.subscription_tier || "free",
+            short_bio: singer.short_bio || "",
+            admin_notes: singer.admin_notes || "",
+          });
+        } catch (err) {
+          showAlert("Failed to load singer for editing", "error");
+        }
+      });
     };
 
     const handleEditSinger = async () => {
-      try {
-        const res = await fetch(`/api/admin/singers/${editingSinger.id}/edit`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(editForm),
-        });
-        if (!res.ok) throw new Error("Failed to save");
-        showAlert("Singer profile updated", "success");
-        setEditingSinger(null);
-        await loadAdminData();
-      } catch (err) {
-        showAlert("Failed to update singer", "error");
-      }
+      await withBusy(`singer:${editingSinger.id}:save`, async () => {
+        try {
+          const res = await fetch(`/api/admin/singers/${editingSinger.id}/edit`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(editForm),
+          });
+          if (!res.ok) throw new Error("Failed to save");
+          showAlert("Singer profile updated", "success");
+          setEditingSinger(null);
+          await loadAdminData();
+        } catch (err) {
+          showAlert("Failed to update singer", "error");
+        }
+      });
     };
 
     const getStatusBadge = (singer) => {
@@ -270,64 +349,70 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
     };
 
     const handleViewOrg = async (orgId) => {
-      try {
-        const res = await fetch(`/api/admin/orgs/${orgId}`);
-        if (!res.ok) throw new Error("Failed to load");
-        const orgData = await res.json();
-        const adjRes = await fetch(`/api/admin/orgs/${orgId}/credit-adjustments`);
-        const adjustments = adjRes.ok ? await adjRes.json() : [];
-        setAdminViewOrg({ ...orgData, credit_adjustments: adjustments });
-      } catch (err) {
-        showAlert("Failed to load organization profile", "error");
-      }
+      await withBusy(`org:${orgId}:view`, async () => {
+        try {
+          setAdminViewOrg(await fetchOrgDetail(orgId));
+        } catch (err) {
+          showAlert("Failed to load organization profile", "error");
+        }
+      });
     };
 
     const handleEditOrg = async () => {
-      try {
-        const orgId = editingOrg.id;
-        const res = await fetch(`/api/admin/orgs/${orgId}/edit`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(orgEditForm),
-        });
-        if (!res.ok) throw new Error("Failed to save");
-        showAlert("Organization updated", "success");
-        setEditingOrg(null);
-        await loadAdminData();
-        // Return admin to the org profile view for the same org
-        await handleViewOrg(orgId);
-      } catch (err) {
-        showAlert("Failed to update organization", "error");
-      }
+      await withBusy(`org:${editingOrg.id}:save`, async () => {
+        try {
+          const orgId = editingOrg.id;
+          const res = await fetch(`/api/admin/orgs/${orgId}/edit`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(orgEditForm),
+          });
+          if (!res.ok) throw new Error("Failed to save");
+          showAlert("Organization updated", "success");
+          setEditingOrg(null);
+          await loadAdminData();
+          const org = await fetchOrgDetail(orgId);
+          if (org) setAdminViewOrg(org);
+        } catch (err) {
+          showAlert("Failed to update organization", "error");
+        }
+      });
     };
 
     const handleToggleOrgSubscription = async (orgId, currentTier) => {
-      try {
-        const tier = currentTier === "pro" ? "free" : "pro";
-        const res = await fetch(`/api/admin/orgs/${orgId}/subscription`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tier }),
-        });
-        if (!res.ok) throw new Error("Failed");
-        showAlert(`Organization set to ${tier === "pro" ? "Pro" : "Free"}`, "success");
-        await loadAdminData();
-        if (adminViewOrg && adminViewOrg.id === orgId) await handleViewOrg(orgId);
-      } catch (err) {
-        showAlert("Failed to update subscription", "error");
-      }
+      await withBusy(`org:${orgId}:tier`, async () => {
+        try {
+          const tier = currentTier === "pro" ? "free" : "pro";
+          const res = await fetch(`/api/admin/orgs/${orgId}/subscription`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ tier }),
+          });
+          if (!res.ok) throw new Error("Failed");
+          showAlert(`Organization set to ${tier === "pro" ? "Pro" : "Free"}`, "success");
+          await loadAdminData();
+          if (adminViewOrg && adminViewOrg.id === orgId) {
+            const org = await fetchOrgDetail(orgId);
+            if (org) setAdminViewOrg(org);
+          }
+        } catch (err) {
+          showAlert("Failed to update subscription", "error");
+        }
+      });
     };
 
     const handleDeleteOrg = async (orgId) => {
       if (!confirm("Permanently delete this organization and all its reveal/search/feedback history?")) return;
-      try {
-        const res = await fetch(`/api/admin/orgs/${orgId}`, { method: "DELETE" });
-        if (!res.ok) throw new Error("Failed");
-        showAlert("Organization deleted", "success");
-        await loadAdminData();
-      } catch (err) {
-        showAlert("Failed to delete organization", "error");
-      }
+      await withBusy(`org:${orgId}:delete`, async () => {
+        try {
+          const res = await fetch(`/api/admin/orgs/${orgId}`, { method: "DELETE" });
+          if (!res.ok) throw new Error("Failed");
+          showAlert("Organization deleted", "success");
+          await loadAdminData();
+        } catch (err) {
+          showAlert("Failed to delete organization", "error");
+        }
+      });
     };
 
     const handleAdjustCredits = async (orgId) => {
@@ -337,39 +422,42 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
         setCreditAdjustError("Enter a non-zero amount.");
         return;
       }
-      try {
-        const res = await fetch(`/api/admin/orgs/${orgId}/credits`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ amount: amt, reason: creditAdjustForm.reason }),
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          // Inline error — keep panel open so admin can correct the amount
-          const targetOrg = adminViewOrg && adminViewOrg.id === orgId
-            ? adminViewOrg
-            : allOrgs.find(o => o.id === orgId);
-          const balance = targetOrg
-            ? ((targetOrg.contact_reveal_limit ?? 0) - (targetOrg.contact_reveals_used_this_month ?? 0))
-            : null;
-          const lower = (data.message || "").toLowerCase();
-          if (res.status === 400 && (lower.includes("negative") || lower.includes("below already-used")) && balance !== null) {
-            setCreditAdjustError(`Cannot reduce credits below zero. Current balance is ${balance}.`);
-          } else {
-            setCreditAdjustError(data.message || "Adjustment failed.");
+      await withBusy(`org:${orgId}:credits`, async () => {
+        try {
+          const res = await fetch(`/api/admin/orgs/${orgId}/credits`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ amount: amt, reason: creditAdjustForm.reason }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            const targetOrg = adminViewOrg && adminViewOrg.id === orgId
+              ? adminViewOrg
+              : allOrgs.find(o => o.id === orgId);
+            const balance = targetOrg
+              ? ((targetOrg.contact_reveal_limit ?? 0) - (targetOrg.contact_reveals_used_this_month ?? 0))
+              : null;
+            const lower = (data.message || "").toLowerCase();
+            if (res.status === 400 && (lower.includes("negative") || lower.includes("below already-used")) && balance !== null) {
+              setCreditAdjustError(`Cannot reduce credits below zero. Current balance is ${balance}.`);
+            } else {
+              setCreditAdjustError(data.message || "Adjustment failed.");
+            }
+            return;
           }
-          return;
+          showAlert(`Credits adjusted (${amt > 0 ? "+" : ""}${amt}). New balance: ${data.new_balance}`, "success");
+          setCreditAdjustOrgId(null);
+          setCreditAdjustForm({ amount: "", reason: "Promotional Grant" });
+          setCreditAdjustError("");
+          await loadAdminData();
+          if (adminViewOrg && adminViewOrg.id === orgId) {
+            const org = await fetchOrgDetail(orgId);
+            if (org) setAdminViewOrg(org);
+          }
+        } catch (err) {
+          setCreditAdjustError(err.message || "Network error. Please try again.");
         }
-        showAlert(`Credits adjusted (${amt > 0 ? "+" : ""}${amt}). New balance: ${data.new_balance}`, "success");
-        setCreditAdjustOrgId(null);
-        setCreditAdjustForm({ amount: "", reason: "Promotional Grant" });
-        setCreditAdjustError("");
-        await loadAdminData();
-        // Stay in the same context: refresh detail view if currently viewing this org
-        if (adminViewOrg && adminViewOrg.id === orgId) await handleViewOrg(orgId);
-      } catch (err) {
-        setCreditAdjustError(err.message || "Network error. Please try again.");
-      }
+      });
     };
 
     const filteredSingers = allSingers.filter(s => {
@@ -439,7 +527,10 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
             )}
             <div className="mt-5 flex justify-end gap-2">
               <button onClick={close} className="h-9 px-4 rounded-md text-sm text-slate-700 bg-slate-100 hover:bg-slate-200" data-testid="button-cancel-credit">Cancel</button>
-              <button onClick={() => handleAdjustCredits(creditAdjustOrgId)} className="h-9 px-4 rounded-md text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700" data-testid={`button-confirm-credit-${creditAdjustOrgId}`}>Confirm</button>
+              <button onClick={() => handleAdjustCredits(creditAdjustOrgId)} disabled={isBusy(`org:${creditAdjustOrgId}:credits`)} className="h-9 px-4 rounded-md text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 inline-flex items-center gap-1.5" data-testid={`button-confirm-credit-${creditAdjustOrgId}`}>
+                {isBusy(`org:${creditAdjustOrgId}:credits`) && <Loader2 className="w-4 h-4 animate-spin" />}
+                {isBusy(`org:${creditAdjustOrgId}:credits`) ? "Saving…" : "Confirm"}
+              </button>
             </div>
           </div>
         </div>
@@ -451,7 +542,7 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
       const balance = (o.contact_reveal_limit ?? 0) - (o.contact_reveals_used_this_month ?? 0);
       return (
         <div className="min-h-screen bg-slate-50">
-          <nav className="bg-white border-b border-slate-200">
+          <nav className="bg-white border-b border-slate-200 sticky top-0 z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex justify-between h-16 items-center">
                 <div className="flex items-center cursor-pointer" onClick={() => setView("landing")}>
@@ -483,7 +574,15 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
                     <p className="text-xs text-slate-500 mt-1">Joined {o.created_at ? new Date(o.created_at).toLocaleDateString() : "—"}</p>
                   </div>
                   <div className="flex items-center gap-2 ml-auto">
-                    <button onClick={() => handleFoundingToggle('org', o.id, o.organization_name, !o.founding_org)} className="px-3 py-1.5 text-sm rounded-md bg-amber-500 text-white hover:bg-amber-600 flex items-center gap-1" data-testid="button-founding-org-detail">🌟 {o.founding_org ? 'Revoke Founding' : 'Grant Founding'}</button>
+                    <button
+                      onClick={() => handleFoundingToggle('org', o.id, o.organization_name, !o.founding_org)}
+                      disabled={isBusy(`org:${o.id}:founding`)}
+                      className="px-3 py-1.5 text-sm rounded-md bg-amber-500 text-white hover:bg-amber-600 flex items-center gap-1 disabled:opacity-50"
+                      data-testid="button-founding-org-detail"
+                    >
+                      {isBusy(`org:${o.id}:founding`) ? <Loader2 className="w-4 h-4 animate-spin" /> : "🌟"}
+                      {o.founding_org ? 'Revoke Founding' : 'Grant Founding'}
+                    </button>
                     <button onClick={() => setGiftTarget({ type: 'org', id: o.id, name: o.organization_name })} className="px-3 py-1.5 text-sm rounded-md bg-violet-600 text-white hover:bg-violet-700 flex items-center gap-1" data-testid="button-gift-org-detail">🎁 Gift Pro</button>
                   </div>
                 </div>
@@ -594,7 +693,13 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
             </div>
 
             <div className="flex gap-3 justify-end">
-              <button onClick={() => handleToggleOrgSubscription(o.id, o.subscription_tier)} className="px-4 py-2 rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700" data-testid="button-toggle-org-tier-detail">
+              <button
+                onClick={() => handleToggleOrgSubscription(o.id, o.subscription_tier)}
+                disabled={isBusy(`org:${o.id}:tier`)}
+                className="px-4 py-2 rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 inline-flex items-center gap-1.5"
+                data-testid="button-toggle-org-tier-detail"
+              >
+                {isBusy(`org:${o.id}:tier`) && <Loader2 className="w-4 h-4 animate-spin" />}
                 {o.subscription_tier === "pro" ? "Downgrade to Free" : "Upgrade to Pro"}
               </button>
               <button onClick={() => { setEditingOrg(o); setOrgEditForm({ organization_name: o.organization_name || "", email: o.email || "", city: o.city || "", contact_person_name: o.contact_person_name || "", contact_person_email: o.contact_person_email || "", subscription_tier: o.subscription_tier || "free", admin_notes: o.admin_notes || "" }); setAdminViewOrg(null); }} className="px-4 py-2 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700" data-testid="button-edit-org-detail">
@@ -613,7 +718,7 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
     if (editingOrg) {
       return (
         <div className="min-h-screen bg-slate-50">
-          <nav className="bg-white border-b border-slate-200">
+          <nav className="bg-white border-b border-slate-200 sticky top-0 z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex justify-between h-16 items-center">
                 <div className="flex items-center cursor-pointer" onClick={() => setView("landing")}>
@@ -667,7 +772,10 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button onClick={() => setEditingOrg(null)} className="px-4 py-2 border border-slate-300 rounded-md text-sm font-medium text-slate-700 bg-white hover:bg-slate-50">Cancel</button>
-                  <button onClick={handleEditOrg} className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700" data-testid="button-save-org-edit">Save Changes</button>
+                  <button onClick={handleEditOrg} disabled={isBusy(`org:${editingOrg.id}:save`)} className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 inline-flex items-center gap-1.5" data-testid="button-save-org-edit">
+                    {isBusy(`org:${editingOrg.id}:save`) && <Loader2 className="w-4 h-4 animate-spin" />}
+                    {isBusy(`org:${editingOrg.id}:save`) ? "Saving…" : "Save Changes"}
+                  </button>
                 </div>
               </div>
             </div>
@@ -680,7 +788,7 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
       const s = adminViewSinger;
       return (
         <div className="min-h-screen bg-slate-50">
-          <nav className="bg-white border-b border-slate-200">
+          <nav className="bg-white border-b border-slate-200 sticky top-0 z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex justify-between h-16 items-center">
                 <div className="flex items-center cursor-pointer" onClick={() => setView("landing")}>
@@ -707,7 +815,15 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
                     )}
                   </div>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => handleFoundingToggle('singer', s.id, `${s.first_name} ${s.last_name}`, !s.founding_artist)} className="px-3 py-1.5 text-sm rounded-md bg-amber-500 text-white hover:bg-amber-600 flex items-center gap-1" data-testid="button-founding-singer-detail">🌟 {s.founding_artist ? 'Revoke Founding' : 'Grant Founding'}</button>
+                    <button
+                      onClick={() => handleFoundingToggle('singer', s.id, `${s.first_name} ${s.last_name}`, !s.founding_artist)}
+                      disabled={isBusy(`singer:${s.id}:founding`)}
+                      className="px-3 py-1.5 text-sm rounded-md bg-amber-500 text-white hover:bg-amber-600 flex items-center gap-1 disabled:opacity-50"
+                      data-testid="button-founding-singer-detail"
+                    >
+                      {isBusy(`singer:${s.id}:founding`) ? <Loader2 className="w-4 h-4 animate-spin" /> : "🌟"}
+                      {s.founding_artist ? 'Revoke Founding' : 'Grant Founding'}
+                    </button>
                     <button onClick={() => setGiftTarget({ type: 'singer', id: s.id, name: `${s.first_name} ${s.last_name}` })} className="px-3 py-1.5 text-sm rounded-md bg-violet-600 text-white hover:bg-violet-700 flex items-center gap-1" data-testid="button-gift-singer-detail">🎁 Gift Pro</button>
                   </div>
                 </div>
@@ -755,10 +871,27 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
                   </div>
                 )}
                 <div className="flex gap-3 pt-4 border-t border-slate-200">
-                  <button onClick={() => { handleAdminAction(s.id, s.admin_approved ? "reject" : "approve"); setAdminViewSinger(null); }} className={`px-4 py-2 rounded-md text-sm font-medium text-white ${s.admin_approved ? 'bg-amber-600 hover:bg-amber-700' : 'bg-emerald-600 hover:bg-emerald-700'}`}>
+                  <button
+                    onClick={async () => {
+                      const action = s.admin_approved ? "reject" : "approve";
+                      await handleAdminAction(s.id, action);
+                      setAdminViewSinger(null);
+                    }}
+                    disabled={isBusy(`singer:${s.id}:approve`) || isBusy(`singer:${s.id}:reject`)}
+                    className={`px-4 py-2 rounded-md text-sm font-medium text-white disabled:opacity-50 inline-flex items-center gap-1.5 ${s.admin_approved ? 'bg-amber-600 hover:bg-amber-700' : 'bg-emerald-600 hover:bg-emerald-700'}`}
+                  >
+                    {(isBusy(`singer:${s.id}:approve`) || isBusy(`singer:${s.id}:reject`)) && <Loader2 className="w-4 h-4 animate-spin" />}
                     {s.admin_approved ? "Reject" : "Approve"}
                   </button>
-                  <button onClick={() => { handleAdminAction(s.id, "deactivate"); setAdminViewSinger(null); }} className="px-4 py-2 rounded-md text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200">
+                  <button
+                    onClick={async () => {
+                      await handleAdminAction(s.id, "deactivate");
+                      setAdminViewSinger(null);
+                    }}
+                    disabled={isBusy(`singer:${s.id}:deactivate`)}
+                    className="px-4 py-2 rounded-md text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 disabled:opacity-50 inline-flex items-center gap-1.5"
+                  >
+                    {isBusy(`singer:${s.id}:deactivate`) && <Loader2 className="w-4 h-4 animate-spin" />}
                     Deactivate
                   </button>
                 </div>
@@ -770,9 +903,10 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
     }
 
     if (editingSinger) {
+      const editStatus = getStatusBadge(editingSinger);
       return (
         <div className="min-h-screen bg-slate-50">
-          <nav className="bg-white border-b border-slate-200">
+          <nav className="bg-white border-b border-slate-200 sticky top-0 z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex justify-between h-16 items-center">
                 <div className="flex items-center cursor-pointer" onClick={() => setView("landing")}>
@@ -789,6 +923,84 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
                 <h2 className="text-xl font-bold text-slate-900">Edit Singer: {editingSinger.first_name} {editingSinger.last_name}</h2>
               </div>
               <div className="p-6 space-y-4">
+                <div className="flex flex-col sm:flex-row gap-5 p-4 rounded-xl border border-slate-200 bg-slate-50" data-testid="edit-singer-profile-summary">
+                  <div className="shrink-0">
+                    {editingSinger.headshot_url ? (
+                      <img
+                        src={editingSinger.headshot_url}
+                        alt={`${editingSinger.first_name} ${editingSinger.last_name}`}
+                        className="w-28 h-28 rounded-xl object-cover border border-slate-200 bg-white"
+                        data-testid="img-edit-singer-headshot"
+                      />
+                    ) : (
+                      <div className="w-28 h-28 rounded-xl border border-dashed border-slate-300 bg-white flex items-center justify-center text-xs text-slate-400 text-center px-2" data-testid="img-edit-singer-headshot-empty">
+                        No photo on file
+                      </div>
+                    )}
+                    <p className="text-[10px] text-slate-400 mt-1.5 text-center">Photo (read-only)</p>
+                  </div>
+                  <div className="flex-1 min-w-0 space-y-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${editStatus.color}`}>{editStatus.label}</span>
+                      {editingSinger.founding_artist && (
+                        <span className="text-[10px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-full inline-flex items-center gap-1">
+                          <Star className="w-3 h-3 fill-amber-500 text-amber-500" /> FOUNDING
+                        </span>
+                      )}
+                      {editingSinger.is_gifted && (
+                        <span className="text-[10px] font-bold bg-violet-100 text-violet-800 px-1.5 py-0.5 rounded-full">GIFTED</span>
+                      )}
+                      {editingSinger.is_pro_verified && (
+                        <span className="text-[10px] font-bold bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded-full">VERIFIED PRO</span>
+                      )}
+                      {editingSinger.is_emergency_ready && (
+                        <span className="text-[10px] font-bold bg-red-100 text-red-800 px-1.5 py-0.5 rounded-full">URGENT READY</span>
+                      )}
+                    </div>
+                    <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                      <div>
+                        <dt className="text-xs text-slate-500">Subscription</dt>
+                        <dd className="font-medium text-slate-900 capitalize">{editingSinger.subscription_tier || "free"} · {editingSinger.subscription_status || "—"}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs text-slate-500">Registered</dt>
+                        <dd className="font-medium text-slate-900">{editingSinger.created_at ? new Date(editingSinger.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs text-slate-500">Voice / Fach</dt>
+                        <dd className="font-medium text-slate-900">{editingSinger.primary_voice_type || "—"}{editingSinger.primary_fach ? ` · ${editingSinger.primary_fach}` : ""}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs text-slate-500">Location</dt>
+                        <dd className="font-medium text-slate-900">{[editingSinger.city, editingSinger.state].filter(Boolean).join(", ") || "—"}</dd>
+                      </div>
+                      {editingSinger.website_url && (
+                        <div className="sm:col-span-2">
+                          <dt className="text-xs text-slate-500">Website</dt>
+                          <dd className="font-medium text-slate-900 truncate">
+                            <a href={editingSinger.website_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline">{editingSinger.website_url}</a>
+                          </dd>
+                        </div>
+                      )}
+                      {(editingSinger.represented || editingSinger.agent_name) && (
+                        <div className="sm:col-span-2">
+                          <dt className="text-xs text-slate-500">Representation</dt>
+                          <dd className="font-medium text-slate-900">
+                            {editingSinger.represented ? "Represented" : "Not represented"}
+                            {editingSinger.agent_name ? ` · ${editingSinger.agent_name}` : ""}
+                            {editingSinger.agent_email ? ` (${editingSinger.agent_email})` : ""}
+                          </dd>
+                        </div>
+                      )}
+                      {editingSinger.pro_expires_at && (
+                        <div className="sm:col-span-2">
+                          <dt className="text-xs text-slate-500">Pro expires</dt>
+                          <dd className="font-medium text-slate-900">{new Date(editingSinger.pro_expires_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</dd>
+                        </div>
+                      )}
+                    </dl>
+                  </div>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">First Name</label>
@@ -870,7 +1082,10 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button onClick={() => setEditingSinger(null)} className="px-4 py-2 border border-slate-300 rounded-md text-sm font-medium text-slate-700 bg-white hover:bg-slate-50">Cancel</button>
-                  <button onClick={handleEditSinger} className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700" data-testid="button-save-singer-edit">Save Changes</button>
+                  <button onClick={handleEditSinger} disabled={isBusy(`singer:${editingSinger.id}:save`)} className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 inline-flex items-center gap-1.5" data-testid="button-save-singer-edit">
+                    {isBusy(`singer:${editingSinger.id}:save`) && <Loader2 className="w-4 h-4 animate-spin" />}
+                    {isBusy(`singer:${editingSinger.id}:save`) ? "Saving…" : "Save Changes"}
+                  </button>
                 </div>
               </div>
             </div>
@@ -881,7 +1096,7 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
 
     return (
       <div className="min-h-screen bg-slate-50">
-        <nav className="bg-white border-b border-slate-200">
+        <nav className="bg-white border-b border-slate-200 sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between h-16 items-center">
               <div className="flex items-center cursor-pointer" onClick={() => setView("adminDashboard")}>
@@ -1096,16 +1311,26 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
                                   <td className="px-4 py-3 text-right text-slate-600">{org.reveal_count}</td>
                                   <td className="px-4 py-3 text-slate-500">{org.created_at ? new Date(org.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}</td>
                                   <td className="px-4 py-3">
-                                    <div className="flex items-center justify-end gap-1">
-                                      <button onClick={() => handleViewOrg(org.id)} className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50" title="View" data-testid={`button-view-org-${org.id}`}><Eye className="w-4 h-4" /></button>
-                                      <button onClick={() => { setEditingOrg(org); setOrgEditForm({ organization_name: org.organization_name || "", email: org.email || "", city: org.city || "", contact_person_name: org.contact_person_name || "", contact_person_email: org.contact_person_email || "", subscription_tier: org.subscription_tier || "free", admin_notes: org.admin_notes || "" }); }} className="text-slate-500 hover:text-slate-700 p-1 rounded hover:bg-slate-100" title="Edit" data-testid={`button-edit-org-${org.id}`}><Edit2 className="w-4 h-4" /></button>
-                                      <button onClick={() => { setCreditAdjustOrgId(org.id); setCreditAdjustForm({ amount: "", reason: "Promotional Grant" }); setCreditAdjustError(""); }} className="text-emerald-600 hover:text-emerald-800 p-1 rounded hover:bg-emerald-50" title="Adjust Credits" data-testid={`button-adjust-org-${org.id}`}><CreditCard className="w-4 h-4" /></button>
-                                      <button onClick={() => handleToggleOrgSubscription(org.id, org.subscription_tier)} className={`p-1 rounded ${isPro ? "text-amber-600 hover:bg-amber-50" : "text-indigo-600 hover:bg-indigo-50"}`} title={isPro ? "Downgrade to Free" : "Upgrade to Pro"} data-testid={`button-toggle-org-tier-${org.id}`}>
-                                        {isPro ? <ArrowDown className="w-4 h-4" /> : <ArrowUp className="w-4 h-4" />}
+                                    <div className={`flex items-center justify-end gap-1 ${isRowBusy(`org:${org.id}:`) ? "opacity-70" : ""}`}>
+                                      <button onClick={() => handleViewOrg(org.id)} disabled={isRowBusy(`org:${org.id}:`)} className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 disabled:opacity-50" title="View" data-testid={`button-view-org-${org.id}`}>
+                                        <BusyIcon busy={isBusy(`org:${org.id}:view`)}><Eye className="w-4 h-4" /></BusyIcon>
                                       </button>
-                                      <button onClick={() => handleFoundingToggle('org', org.id, org.organization_name, !org.founding_org)} className="text-amber-600 hover:text-amber-800 p-1 rounded hover:bg-amber-50 text-base leading-none" title={org.founding_org ? "Revoke Founding" : "Grant Founding"} data-testid={`button-founding-org-${org.id}`}>🌟</button>
-                                      <button onClick={() => setGiftTarget({ type: 'org', id: org.id, name: org.organization_name })} className="text-violet-600 hover:text-violet-800 p-1 rounded hover:bg-violet-50 text-base leading-none" title="Gift Pro Access" data-testid={`button-gift-org-${org.id}`}>🎁</button>
-                                      <button onClick={() => handleDeleteOrg(org.id)} className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50" title="Delete" data-testid={`button-delete-org-${org.id}`}><Trash2 className="w-4 h-4" /></button>
+                                      <button onClick={() => { setEditingOrg(org); setOrgEditForm({ organization_name: org.organization_name || "", email: org.email || "", city: org.city || "", contact_person_name: org.contact_person_name || "", contact_person_email: org.contact_person_email || "", subscription_tier: org.subscription_tier || "free", admin_notes: org.admin_notes || "" }); }} disabled={isRowBusy(`org:${org.id}:`)} className="text-slate-500 hover:text-slate-700 p-1 rounded hover:bg-slate-100 disabled:opacity-50" title="Edit" data-testid={`button-edit-org-${org.id}`}><Edit2 className="w-4 h-4" /></button>
+                                      <button onClick={() => { setCreditAdjustOrgId(org.id); setCreditAdjustForm({ amount: "", reason: "Promotional Grant" }); setCreditAdjustError(""); }} disabled={isRowBusy(`org:${org.id}:`)} className="text-emerald-600 hover:text-emerald-800 p-1 rounded hover:bg-emerald-50 disabled:opacity-50" title="Adjust Credits" data-testid={`button-adjust-org-${org.id}`}><CreditCard className="w-4 h-4" /></button>
+                                      <button onClick={() => handleToggleOrgSubscription(org.id, org.subscription_tier)} disabled={isRowBusy(`org:${org.id}:`)} className={`p-1 rounded disabled:opacity-50 ${isPro ? "text-amber-600 hover:bg-amber-50" : "text-indigo-600 hover:bg-indigo-50"}`} title={isPro ? "Downgrade to Free" : "Upgrade to Pro"} data-testid={`button-toggle-org-tier-${org.id}`}>
+                                        <BusyIcon busy={isBusy(`org:${org.id}:tier`)}>
+                                          {isPro ? <ArrowDown className="w-4 h-4" /> : <ArrowUp className="w-4 h-4" />}
+                                        </BusyIcon>
+                                      </button>
+                                      <button onClick={() => handleFoundingToggle('org', org.id, org.organization_name, !org.founding_org)} disabled={isRowBusy(`org:${org.id}:`)} className={`p-1 rounded transition-colors disabled:opacity-50 ${org.founding_org ? "text-amber-500 hover:text-amber-600 hover:bg-amber-50" : "text-slate-300 hover:text-slate-400 hover:bg-slate-100"}`} title={org.founding_org ? "Revoke Founding" : "Grant Founding"} data-testid={`button-founding-org-${org.id}`}>
+                                        <BusyIcon busy={isBusy(`org:${org.id}:founding`)}>
+                                          <Star className={`w-4 h-4 ${org.founding_org ? "fill-amber-500" : ""}`} />
+                                        </BusyIcon>
+                                      </button>
+                                      <button onClick={() => setGiftTarget({ type: 'org', id: org.id, name: org.organization_name })} disabled={isRowBusy(`org:${org.id}:`)} className="text-violet-600 hover:text-violet-800 p-1 rounded hover:bg-violet-50 text-base leading-none disabled:opacity-50" title="Gift Pro Access" data-testid={`button-gift-org-${org.id}`}>🎁</button>
+                                      <button onClick={() => handleDeleteOrg(org.id)} disabled={isRowBusy(`org:${org.id}:`)} className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 disabled:opacity-50" title="Delete" data-testid={`button-delete-org-${org.id}`}>
+                                        <BusyIcon busy={isBusy(`org:${org.id}:delete`)}><Trash2 className="w-4 h-4" /></BusyIcon>
+                                      </button>
                                     </div>
                                   </td>
                                 </tr>
@@ -1199,73 +1424,81 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
                                 <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${status.color}`}>{status.label}</span>
                               </td>
                               <td className="px-4 py-3">
-                                <div className="flex items-center justify-end gap-1">
+                                <div className={`flex items-center justify-end gap-1 ${isRowBusy(`singer:${singer.id}:`) ? "opacity-70" : ""}`}>
                                   {!singer.admin_approved && singer.subscription_status !== "inactive" && (
-                                    <button onClick={() => handleAdminAction(singer.id, "approve")} className="text-emerald-600 hover:text-emerald-800 p-1 rounded hover:bg-emerald-50" title="Approve" data-testid={`button-approve-${singer.id}`}>
-                                      <UserCheck className="w-4 h-4" />
+                                    <button onClick={() => handleAdminAction(singer.id, "approve")} disabled={isRowBusy(`singer:${singer.id}:`)} className="text-emerald-600 hover:text-emerald-800 p-1 rounded hover:bg-emerald-50 disabled:opacity-50" title="Approve" data-testid={`button-approve-${singer.id}`}>
+                                      <BusyIcon busy={isBusy(`singer:${singer.id}:approve`)}><UserCheck className="w-4 h-4" /></BusyIcon>
                                     </button>
                                   )}
                                   {singer.admin_approved && singer.subscription_status !== "inactive" && (
-                                    <button onClick={() => handleAdminAction(singer.id, "reject")} className="text-amber-600 hover:text-amber-800 p-1 rounded hover:bg-amber-50" title="Reject (Unapprove)" data-testid={`button-reject-${singer.id}`}>
-                                      <UserX className="w-4 h-4" />
+                                    <button onClick={() => handleAdminAction(singer.id, "reject")} disabled={isRowBusy(`singer:${singer.id}:`)} className="text-amber-600 hover:text-amber-800 p-1 rounded hover:bg-amber-50 disabled:opacity-50" title="Reject (Unapprove)" data-testid={`button-reject-${singer.id}`}>
+                                      <BusyIcon busy={isBusy(`singer:${singer.id}:reject`)}><UserX className="w-4 h-4" /></BusyIcon>
                                     </button>
                                   )}
-                                  <button onClick={() => handleViewSinger(singer.id)} className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50" title="View Profile" data-testid={`button-view-${singer.id}`}>
-                                    <Eye className="w-4 h-4" />
+                                  <button onClick={() => handleViewSinger(singer.id)} disabled={isRowBusy(`singer:${singer.id}:`)} className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 disabled:opacity-50" title="View Profile" data-testid={`button-view-${singer.id}`}>
+                                    <BusyIcon busy={isBusy(`singer:${singer.id}:view`)}><Eye className="w-4 h-4" /></BusyIcon>
                                   </button>
-                                  <button onClick={() => { setEditingSinger(singer); setEditForm({ first_name: singer.first_name, last_name: singer.last_name, email: singer.email, primary_voice_type: singer.primary_voice_type || "", primary_fach: singer.primary_fach || "", city: singer.city || "", state: singer.state || "", union_status: singer.union_status || "", subscription_tier: singer.subscription_tier || "free", short_bio: singer.short_bio || "", admin_notes: singer.admin_notes || "" }); }} className="text-slate-500 hover:text-slate-700 p-1 rounded hover:bg-slate-100" title="Edit" data-testid={`button-edit-singer-${singer.id}`}>
-                                    <Edit2 className="w-4 h-4" />
+                                  <button onClick={() => handleStartEditSinger(singer.id)} disabled={isRowBusy(`singer:${singer.id}:`)} className="text-slate-500 hover:text-slate-700 p-1 rounded hover:bg-slate-100 disabled:opacity-50" title="Edit" data-testid={`button-edit-singer-${singer.id}`}>
+                                    <BusyIcon busy={isBusy(`singer:${singer.id}:edit`)}><Edit2 className="w-4 h-4" /></BusyIcon>
                                   </button>
                                   {singer.subscription_status !== "inactive" ? (
-                                    <button onClick={() => handleAdminAction(singer.id, "deactivate")} className="text-slate-500 hover:text-slate-700 p-1 rounded hover:bg-slate-100" title="Deactivate" data-testid={`button-deactivate-${singer.id}`}>
-                                      <Shield className="w-4 h-4" />
+                                    <button onClick={() => handleAdminAction(singer.id, "deactivate")} disabled={isRowBusy(`singer:${singer.id}:`)} className="text-slate-500 hover:text-slate-700 p-1 rounded hover:bg-slate-100 disabled:opacity-50" title="Deactivate" data-testid={`button-deactivate-${singer.id}`}>
+                                      <BusyIcon busy={isBusy(`singer:${singer.id}:deactivate`)}><Shield className="w-4 h-4" /></BusyIcon>
                                     </button>
                                   ) : (
-                                    <button onClick={() => handleAdminAction(singer.id, "activate")} className="text-emerald-600 hover:text-emerald-800 p-1 rounded hover:bg-emerald-50" title="Reactivate" data-testid={`button-activate-${singer.id}`}>
-                                      <UserCheck className="w-4 h-4" />
+                                    <button onClick={() => handleAdminAction(singer.id, "activate")} disabled={isRowBusy(`singer:${singer.id}:`)} className="text-emerald-600 hover:text-emerald-800 p-1 rounded hover:bg-emerald-50 disabled:opacity-50" title="Reactivate" data-testid={`button-activate-${singer.id}`}>
+                                      <BusyIcon busy={isBusy(`singer:${singer.id}:activate`)}><UserCheck className="w-4 h-4" /></BusyIcon>
                                     </button>
                                   )}
-                                  <button onClick={() => handleFoundingToggle('singer', singer.id, `${singer.first_name} ${singer.last_name}`, !singer.founding_artist)} className="text-amber-600 hover:text-amber-800 p-1 rounded hover:bg-amber-50 text-base leading-none" title={singer.founding_artist ? "Revoke Founding" : "Grant Founding"} data-testid={`button-founding-singer-${singer.id}`}>🌟</button>
-                                  <button onClick={() => setGiftTarget({ type: 'singer', id: singer.id, name: `${singer.first_name} ${singer.last_name}` })} className="text-violet-600 hover:text-violet-800 p-1 rounded hover:bg-violet-50 text-base leading-none" title="Gift Pro Access" data-testid={`button-gift-singer-${singer.id}`}>🎁</button>
-                                  <button onClick={() => handleAdminAction(singer.id, "delete")} className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50" title="Delete" data-testid={`button-delete-singer-${singer.id}`}>
-                                    <Trash2 className="w-4 h-4" />
+                                  <button onClick={() => handleFoundingToggle('singer', singer.id, `${singer.first_name} ${singer.last_name}`, !singer.founding_artist)} disabled={isRowBusy(`singer:${singer.id}:`)} className={`p-1 rounded transition-colors disabled:opacity-50 ${singer.founding_artist ? "text-amber-500 hover:text-amber-600 hover:bg-amber-50" : "text-slate-300 hover:text-slate-400 hover:bg-slate-100"}`} title={singer.founding_artist ? "Revoke Founding" : "Grant Founding"} data-testid={`button-founding-singer-${singer.id}`}>
+                                    <BusyIcon busy={isBusy(`singer:${singer.id}:founding`)}>
+                                      <Star className={`w-4 h-4 ${singer.founding_artist ? "fill-amber-500" : ""}`} />
+                                    </BusyIcon>
+                                  </button>
+                                  <button onClick={() => setGiftTarget({ type: 'singer', id: singer.id, name: `${singer.first_name} ${singer.last_name}` })} disabled={isRowBusy(`singer:${singer.id}:`)} className="text-violet-600 hover:text-violet-800 p-1 rounded hover:bg-violet-50 text-base leading-none disabled:opacity-50" title="Gift Pro Access" data-testid={`button-gift-singer-${singer.id}`}>🎁</button>
+                                  <button onClick={() => handleAdminAction(singer.id, "delete")} disabled={isRowBusy(`singer:${singer.id}:`)} className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 disabled:opacity-50" title="Delete" data-testid={`button-delete-singer-${singer.id}`}>
+                                    <BusyIcon busy={isBusy(`singer:${singer.id}:delete`)}><Trash2 className="w-4 h-4" /></BusyIcon>
                                   </button>
                                   <span className="w-px h-4 bg-slate-200 mx-0.5" />
                                   <button
                                     onClick={() => handleBadgeToggle(singer.id, "is_pro_verified", singer.is_pro_verified)}
-                                    className={`p-1 rounded text-xs font-bold ${singer.is_pro_verified ? 'text-indigo-600 bg-indigo-50 hover:bg-indigo-100' : 'text-slate-400 hover:text-indigo-600 hover:bg-indigo-50'}`}
+                                    disabled={isRowBusy(`singer:${singer.id}:`)}
+                                    className={`p-1 rounded text-xs font-bold disabled:opacity-50 ${singer.is_pro_verified ? 'text-indigo-600 bg-indigo-50 hover:bg-indigo-100' : 'text-slate-400 hover:text-indigo-600 hover:bg-indigo-50'}`}
                                     title={singer.is_pro_verified ? "Remove Verified Pro" : "Grant Verified Pro"}
                                     data-testid={`button-toggle-pro-${singer.id}`}
                                   >
-                                    <Award className="w-4 h-4" />
+                                    <BusyIcon busy={isBusy(`singer:${singer.id}:badge:is_pro_verified`)}><Award className="w-4 h-4" /></BusyIcon>
                                   </button>
                                   <button
                                     onClick={() => handleBadgeToggle(singer.id, "is_emergency_ready", singer.is_emergency_ready)}
-                                    className={`p-1 rounded text-xs font-bold relative ${singer.is_emergency_ready ? 'text-red-600 bg-red-50 hover:bg-red-100' : singer.emergency_status_requested ? 'text-amber-600 bg-amber-50 hover:bg-red-50 hover:text-red-600 ring-1 ring-amber-400' : 'text-slate-400 hover:text-red-600 hover:bg-red-50'}`}
+                                    disabled={isRowBusy(`singer:${singer.id}:`)}
+                                    className={`p-1 rounded text-xs font-bold relative disabled:opacity-50 ${singer.is_emergency_ready ? 'text-red-600 bg-red-50 hover:bg-red-100' : singer.emergency_status_requested ? 'text-amber-600 bg-amber-50 hover:bg-red-50 hover:text-red-600 ring-1 ring-amber-400' : 'text-slate-400 hover:text-red-600 hover:bg-red-50'}`}
                                     title={singer.is_emergency_ready ? "Remove Urgent Ready" : singer.emergency_status_requested ? "Approve Urgent Request" : "Grant Urgent Ready"}
                                     data-testid={`button-toggle-emergency-${singer.id}`}
                                   >
-                                    <Zap className="w-4 h-4" />
-                                    {singer.emergency_status_requested && !singer.is_emergency_ready && (
+                                    <BusyIcon busy={isBusy(`singer:${singer.id}:badge:is_emergency_ready`)}><Zap className="w-4 h-4" /></BusyIcon>
+                                    {singer.emergency_status_requested && !singer.is_emergency_ready && !isBusy(`singer:${singer.id}:badge:is_emergency_ready`) && (
                                       <span className="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full" />
                                     )}
                                   </button>
                                   <button
                                     onClick={() => handleBadgeToggle(singer.id, "is_management_verified", singer.is_management_verified)}
-                                    className={`p-1 rounded text-xs font-bold ${singer.is_management_verified ? 'text-violet-600 bg-violet-50 hover:bg-violet-100' : 'text-slate-400 hover:text-violet-600 hover:bg-violet-50'}`}
+                                    disabled={isRowBusy(`singer:${singer.id}:`)}
+                                    className={`p-1 rounded text-xs font-bold disabled:opacity-50 ${singer.is_management_verified ? 'text-violet-600 bg-violet-50 hover:bg-violet-100' : 'text-slate-400 hover:text-violet-600 hover:bg-violet-50'}`}
                                     title={singer.is_management_verified ? "Remove Management Verified" : "Grant Management Verified"}
                                     data-testid={`button-toggle-mgmt-${singer.id}`}
                                   >
-                                    <Shield className="w-4 h-4" />
+                                    <BusyIcon busy={isBusy(`singer:${singer.id}:badge:is_management_verified`)}><Shield className="w-4 h-4" /></BusyIcon>
                                   </button>
                                   {singer.flagged_for_review && (
                                     <button
                                       onClick={() => handleBadgeToggle(singer.id, "flagged_for_review", true)}
-                                      className="p-1 rounded text-orange-600 bg-orange-50 hover:bg-orange-100 ring-1 ring-orange-300"
+                                      disabled={isRowBusy(`singer:${singer.id}:`)}
+                                      className="p-1 rounded text-orange-600 bg-orange-50 hover:bg-orange-100 ring-1 ring-orange-300 disabled:opacity-50"
                                       title="Flagged for review — click to clear"
                                       data-testid={`button-clear-flag-${singer.id}`}
                                     >
-                                      <Flag className="w-4 h-4" />
+                                      <BusyIcon busy={isBusy(`singer:${singer.id}:badge:flagged_for_review`)}><Flag className="w-4 h-4" /></BusyIcon>
                                     </button>
                                   )}
                                 </div>
