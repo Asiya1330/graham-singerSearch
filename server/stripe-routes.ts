@@ -21,6 +21,7 @@ import {
   syncSubscriptionForUser,
 } from "./lib/stripe";
 import { storage } from "./storage";
+import { currentUserType } from "./lib/auth-user";
 
 type AuthMiddleware = (req: Request, res: Response, next: () => void) => void;
 
@@ -63,8 +64,8 @@ export function registerStripeRoutes(
         return res.status(503).json({ message: stripeNotReadyMessage() });
       }
 
-      const userType = req.session.userType;
-      const userId = req.session.userId;
+      const userType = currentUserType(req);
+      const userId = req.authUser?.id;
       if (!userType || !userId) {
         return res.status(401).json({ message: "Not authenticated" });
       }
@@ -119,8 +120,8 @@ export function registerStripeRoutes(
         return res.status(503).json({ message: stripeNotReadyMessage() });
       }
 
-      const userType = req.session.userType;
-      const userId = req.session.userId;
+      const userType = currentUserType(req);
+      const userId = req.authUser?.id;
       if (!userType || !userId) {
         return res.status(401).json({ message: "Not authenticated" });
       }
@@ -152,8 +153,8 @@ export function registerStripeRoutes(
         return res.status(503).json({ message: stripeNotReadyMessage() });
       }
 
-      const userType = req.session.userType;
-      const userId = req.session.userId;
+      const userType = currentUserType(req);
+      const userId = req.authUser?.id;
       if (!userType || !userId) {
         return res.status(401).json({ message: "Not authenticated" });
       }
@@ -177,8 +178,8 @@ export function registerStripeRoutes(
         return res.status(503).json({ message: stripeNotReadyMessage() });
       }
 
-      const userType = req.session.userType;
-      const userId = req.session.userId;
+      const userType = currentUserType(req);
+      const userId = req.authUser?.id;
       if (!userType || !userId) {
         return res.status(401).json({ message: "Not authenticated" });
       }
@@ -212,8 +213,8 @@ export function registerStripeRoutes(
         return res.status(503).json({ message: stripeNotReadyMessage() });
       }
 
-      const userType = req.session.userType;
-      const userId = req.session.userId;
+      const userType = currentUserType(req);
+      const userId = req.authUser?.id;
       if (!userType || !userId) {
         return res.status(401).json({ message: "Not authenticated" });
       }

@@ -2,6 +2,10 @@ import React, { useState, useEffect, useRef } from "react";
 import { ArrowDown, ArrowUp, Award, Building2, CreditCard, Edit2, Eye, Flag, Lightbulb, Loader2, Search, Shield, Star, Trash2, UserCheck, Users, UserX, Zap } from "lucide-react";
 import { useAppContext } from "./AppContext";
 import { useCityStateAutofill } from "./hooks/useCityStateAutofill";
+import { adminFetch } from "./lib/adminApi";
+import { getSupabaseBrowser } from "./lib/supabase";
+import { apiFetch } from "./lib/api";
+import { AdminsPanel } from "./admin/AdminsPanel";
 
 export function AdminDashboard({ setAdminMode, showAlert }) {
   const { setView } = useAppContext();
@@ -12,7 +16,8 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [adminTab, setAdminTab] = useState("pending");
-    const [adminMainTab, setAdminMainTab] = useState("singers"); // 'singers' | 'orgs'
+    const [adminMainTab, setAdminMainTab] = useState("singers"); // 'singers' | 'orgs' | 'admins'
+    const [adminMe, setAdminMe] = useState(null);
     const [adminViewSinger, setAdminViewSinger] = useState(null);
     const [editingSinger, setEditingSinger] = useState(null);
     const [editForm, setEditForm] = useState({});
@@ -56,16 +61,16 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
     );
 
     const fetchSingerDetail = async (singerId) => {
-      const res = await fetch(`/api/admin/singers/${singerId}`);
+      const res = await adminFetch(`/api/admin/singers/${singerId}`);
       if (!res.ok) throw new Error("Failed to load singer");
       return res.json();
     };
 
     const fetchOrgDetail = async (orgId) => {
-      const res = await fetch(`/api/admin/orgs/${orgId}`);
+      const res = await adminFetch(`/api/admin/orgs/${orgId}`);
       if (!res.ok) throw new Error("Failed to load");
       const orgData = await res.json();
-      const adjRes = await fetch(`/api/admin/orgs/${orgId}/credit-adjustments`);
+      const adjRes = await adminFetch(`/api/admin/orgs/${orgId}/credit-adjustments`);
       const adjustments = adjRes.ok ? await adjRes.json() : [];
       return { ...orgData, credit_adjustments: adjustments };
     };
@@ -76,7 +81,7 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
       setReseedError("");
       setReseedResult(null);
       try {
-        const res = await fetch("/api/admin/seed-demo", { method: "POST", credentials: "include" });
+        const res = await adminFetch("/api/admin/seed-demo", { method: "POST", credentials: "include" });
         const data = await res.json();
         if (!res.ok) {
           setReseedError(data.message || "Reseed failed");
@@ -97,7 +102,7 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
         setSuggestionsLoading(true);
         setSuggestionsError("");
         try {
-          const res = await fetch("/api/admin/repertoire-suggestions", { credentials: "include" });
+          const res = await adminFetch("/api/admin/repertoire-suggestions", { credentials: "include" });
           if (!res.ok) throw new Error("Failed to load suggestions");
           const data = await res.json();
           if (!cancelled) setRepertoireSuggestions(Array.isArray(data) ? data : []);
@@ -118,7 +123,7 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
         const url = giftTarget.type === 'singer'
           ? `/api/admin/singers/${giftTarget.id}/gift-pro`
           : `/api/admin/orgs/${giftTarget.id}/gift-pro`;
-        const res = await fetch(url, {
+        const res = await adminFetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(giftForm),
@@ -148,7 +153,7 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
       await withBusy(`${type}:${id}:founding`, async () => {
         try {
           const base = type === 'singer' ? `/api/admin/singers/${id}` : `/api/admin/orgs/${id}`;
-          const res = await fetch(`${base}/${grant ? 'grant-founding' : 'revoke-founding'}`, {
+          const res = await adminFetch(`${base}/${grant ? 'grant-founding' : 'revoke-founding'}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
           });
@@ -224,11 +229,12 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
 
     const loadAdminData = async () => {
       try {
-        const [statsRes, extStatsRes, singersRes, orgsRes] = await Promise.all([
-          fetch("/api/admin/stats"),
-          fetch("/api/admin/stats-extended"),
-          fetch("/api/admin/singers"),
-          fetch("/api/admin/orgs"),
+        const [statsRes, extStatsRes, singersRes, orgsRes, meResult] = await Promise.all([
+          adminFetch("/api/admin/stats"),
+          adminFetch("/api/admin/stats-extended"),
+          adminFetch("/api/admin/singers"),
+          adminFetch("/api/admin/orgs"),
+          apiFetch("/api/admin/auth/me").catch(() => null),
         ]);
         if (!statsRes.ok) throw new Error("Failed to fetch stats");
         if (!singersRes.ok) throw new Error("Failed to fetch singers");
@@ -237,6 +243,7 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
         if (extStatsRes.ok) setExtStats(await extStatsRes.json());
         setAllSingers(await singersRes.json());
         setAllOrgs(await orgsRes.json());
+        if (meResult?.data?.admin) setAdminMe(meResult.data.admin);
         setLoading(false);
       } catch (err) {
         setError(err.message);
@@ -263,7 +270,7 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
           else if (action === "deactivate") { url = `/api/admin/singers/${singerId}/deactivate`; method = "PUT"; }
           else if (action === "activate") { url = `/api/admin/singers/${singerId}/activate`; method = "PUT"; }
           else if (action === "delete") { url = `/api/admin/singers/${singerId}`; method = "DELETE"; }
-          const res = await fetch(url, { method });
+          const res = await adminFetch(url, { method });
           if (!res.ok) throw new Error("Action failed");
           showAlert(`Singer ${action}d successfully`, "success");
           await loadAdminData();
@@ -276,7 +283,7 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
     const handleBadgeToggle = async (singerId, field, currentValue) => {
       await withBusy(`singer:${singerId}:badge:${field}`, async () => {
         try {
-          const res = await fetch(`/api/admin/singers/${singerId}/badges`, {
+          const res = await adminFetch(`/api/admin/singers/${singerId}/badges`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ field, value: !currentValue }),
@@ -326,7 +333,7 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
     const handleEditSinger = async () => {
       await withBusy(`singer:${editingSinger.id}:save`, async () => {
         try {
-          const res = await fetch(`/api/admin/singers/${editingSinger.id}/edit`, {
+          const res = await adminFetch(`/api/admin/singers/${editingSinger.id}/edit`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(editForm),
@@ -362,7 +369,7 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
       await withBusy(`org:${editingOrg.id}:save`, async () => {
         try {
           const orgId = editingOrg.id;
-          const res = await fetch(`/api/admin/orgs/${orgId}/edit`, {
+          const res = await adminFetch(`/api/admin/orgs/${orgId}/edit`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(orgEditForm),
@@ -383,7 +390,7 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
       await withBusy(`org:${orgId}:tier`, async () => {
         try {
           const tier = currentTier === "pro" ? "free" : "pro";
-          const res = await fetch(`/api/admin/orgs/${orgId}/subscription`, {
+          const res = await adminFetch(`/api/admin/orgs/${orgId}/subscription`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ tier }),
@@ -405,7 +412,7 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
       if (!confirm("Permanently delete this organization and all its reveal/search/feedback history?")) return;
       await withBusy(`org:${orgId}:delete`, async () => {
         try {
-          const res = await fetch(`/api/admin/orgs/${orgId}`, { method: "DELETE" });
+          const res = await adminFetch(`/api/admin/orgs/${orgId}`, { method: "DELETE" });
           if (!res.ok) throw new Error("Failed");
           showAlert("Organization deleted", "success");
           await loadAdminData();
@@ -424,7 +431,7 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
       }
       await withBusy(`org:${orgId}:credits`, async () => {
         try {
-          const res = await fetch(`/api/admin/orgs/${orgId}/credits`, {
+          const res = await adminFetch(`/api/admin/orgs/${orgId}/credits`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ amount: amt, reason: creditAdjustForm.reason }),
@@ -1106,7 +1113,10 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
               <button
                 data-testid="button-admin-logout"
                 onClick={async () => {
-                  await fetch("/api/admin/auth/logout", { method: "POST", credentials: "include" });
+                  try {
+                    await getSupabaseBrowser().auth.signOut();
+                  } catch { /* ignore */ }
+                  await adminFetch("/api/admin/auth/logout", { method: "POST" });
                   setView("landing", { replace: true });
                   setAdminMode(false);
                 }}
@@ -1215,7 +1225,24 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
                 >
                   <Lightbulb className="w-4 h-4 inline mr-1" /> Repertoire Suggestions
                 </button>
+                <button
+                  onClick={() => { setAdminMainTab("admins"); setAdminViewSinger(null); setEditingSinger(null); setAdminViewOrg(null); setEditingOrg(null); setCreditAdjustOrgId(null); }}
+                  className={`px-4 py-2 text-sm font-semibold border-b-2 transition-colors ${adminMainTab === "admins" ? "border-blue-600 text-blue-600" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+                  data-testid="tab-main-admins"
+                >
+                  <Shield className="w-4 h-4 inline mr-1" /> Admins
+                </button>
               </div>
+
+              {adminMainTab === "admins" && (
+                <div className="mb-8" data-testid="section-admins">
+                  <AdminsPanel
+                    currentAdminId={adminMe?.id}
+                    isSuper={!!adminMe?.is_super}
+                    showAlert={showAlert}
+                  />
+                </div>
+              )}
 
               {adminMainTab === "suggestions" && (
                 <div className="bg-white rounded-xl border border-slate-200 overflow-hidden mb-8" data-testid="section-repertoire-suggestions">

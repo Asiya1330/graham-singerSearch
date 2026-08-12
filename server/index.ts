@@ -10,6 +10,7 @@ import { geocodeCityState } from "./lib/geocode";
 import { HttpApiError, sendApiError } from "./lib/api-response";
 import { logEmailConfigStatus } from "./lib/email";
 import { logStripeConfigStatus } from "./lib/env";
+import { registerSupabaseProxy } from "./lib/supabase-proxy";
 const app = express();
 app.set("trust proxy", 1);
 const httpServer = createServer(app);
@@ -19,6 +20,10 @@ declare module "http" {
     rawBody: unknown;
   }
 }
+
+// Mounted ahead of the JSON parser so Supabase Auth bodies pass through
+// untouched (see lib/supabase-proxy.ts).
+registerSupabaseProxy(app);
 
 app.use(
   express.json({

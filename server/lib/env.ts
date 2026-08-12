@@ -47,6 +47,33 @@ export function getSessionSecret(): string {
   return secret;
 }
 
+/** Public anon key. Safe to hold server-side; used to verify a password at the token endpoint. */
+export function getSupabaseAnonKey(): string | null {
+  return (
+    process.env.SUPABASE_ANON_KEY?.trim() ||
+    process.env.VITE_SUPABASE_ANON_KEY?.trim() ||
+    null
+  );
+}
+
+/** HS256 secret from Supabase → Project Settings → API → JWT Secret (optional if JWKS works). */
+export function getSupabaseJwtSecret(): string | null {
+  return (
+    process.env.SUPABASE_JWT_SECRET?.trim() ||
+    process.env.JWT_SECRET?.trim() ||
+    null
+  );
+}
+
+/** One-time seed of the three super admins. Remove from Railway after bootstrap. */
+export function getAdminBootstrapSecret(): string | null {
+  return process.env.ADMIN_BOOTSTRAP_SECRET?.trim() || null;
+}
+
+export function getSiteUrl(): string {
+  return getStripeReturnBaseUrl();
+}
+
 export function getStorageBucket(): string {
   return process.env.SUPABASE_STORAGE_BUCKET || "singer-uploads";
 }
@@ -95,14 +122,45 @@ export function isStripeConfigured(): boolean {
   return isStripeWebhookConfigured();
 }
 
+/**
+ * Origin used for Stripe returns and Supabase auth redirects.
+ *
+ * SITE_URL is sanitised rather than trusted verbatim: dotenv keeps everything
+ * to the right of the "=" sign, including trailing notes. A line such as
+ * "SITE_URL=https://example.com (production)" therefore yields a value that
+ * produces broken confirmation links. Take the first whitespace-delimited
+ * token and require it to parse as a URL.
+ */
 export function getStripeReturnBaseUrl(): string {
   if (process.env.NODE_ENV === "development") {
     const port = process.env.PORT || "5000";
     return `http://localhost:${port}`;
   }
-  const siteUrl = process.env.SITE_URL?.trim();
-  if (siteUrl) return siteUrl.replace(/\/$/, "");
-  return "https://www.singer-search.com";
+
+  const raw = process.env.SITE_URL?.trim();
+  const fallback = "https://www.singer-search.com";
+  if (!raw) return fallback;
+
+  const candidate = raw.split(/\s+/)[0].replace(/\/$/, "");
+  try {
+    const parsed = new URL(candidate);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      throw new Error(`unsupported protocol ${parsed.protocol}`);
+    }
+    if (candidate !== raw.replace(/\/$/, "")) {
+      console.warn(
+        `[env] SITE_URL contained extra text and was trimmed to ${candidate}. ` +
+          "Remove trailing comments from the .env line.",
+      );
+    }
+    return candidate;
+  } catch {
+    console.error(
+      `[env] SITE_URL is not a valid URL (${JSON.stringify(raw)}); falling back to ${fallback}. ` +
+        "Auth confirmation and Stripe return links would otherwise break.",
+    );
+    return fallback;
+  }
 }
 
 export function getStripeConfigStatus(): StripeConfigStatus {

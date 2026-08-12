@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useAppContext } from "../AppContext";
 import { APP_ROUTES, navClick } from "../lib/nav";
-import { RolePickerModal } from "./RolePickerModal";
+import { apiFetch } from "../lib/api";
 
 export function LandingFooter({ setAdminMode }) {
   const { setView } = useAppContext();
@@ -9,8 +9,7 @@ export function LandingFooter({ setAdminMode }) {
 
   const handleAdminClick = async () => {
     try {
-      const res = await fetch("/api/admin/auth/check", { credentials: "include" });
-      const data = await res.json();
+      const { data } = await apiFetch("/api/admin/auth/check");
       if (data.authenticated) {
         setAdminMode(true);
         setView("adminDashboard");
@@ -50,16 +49,8 @@ export function LandingFooter({ setAdminMode }) {
           >
             Privacy
           </a>
-          <button
-            onClick={() => setShowRolePicker(true)}
-            className="text-[#5b6470] hover:text-[#1f2733] transition-colors bg-transparent border-none cursor-pointer text-[13px] ml-[18px]"
-            data-testid="link-footer-login"
-          >
-            Log in
-          </button>
         </div>
       </footer>
-      <RolePickerModal open={showRolePicker} onClose={() => setShowRolePicker(false)} />
     </>
   );
 }
