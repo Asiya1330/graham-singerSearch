@@ -2,30 +2,34 @@ import { test, expect } from "@playwright/test";
 
 const API = "http://localhost:5000/api";
 
-test.describe("API error messaging", () => {
-  test("login with unknown email returns USER_NOT_FOUND", async ({ request }) => {
-    const response = await request.post(`${API}/auth/login`, {
-      data: {
-        email: `missing-user-${Date.now()}@example.com`,
-        password: "wrong-password-123",
-        userType: "singer",
-      },
-    });
+/**
+ * Pre-cutover this file tested POST /api/auth/login with a password body.
+ * That endpoint no longer exists — the browser authenticates against Supabase
+ * directly and sends the resulting JWT as a Bearer token, so credential errors
+ * are now surfaced by Supabase and mapped in client/src/lib/accountAuth.js.
+ *
+ * Token-level behaviour lives in auth-supabase.spec.ts; what remains here is
+ * the API's own unauthenticated error contract.
+ */
 
-    expect(response.status()).toBe(404);
+test.describe("API error messaging", () => {
+  /** The register limiter (10/hour/IP) fires ahead of validation, so a spent
+   *  window turns these into RATE_LIMITED rather than the code under test. */
+  function skipIfRateLimited(body: any) {
+    test.skip(body?.code === "RATE_LIMITED", "register rate limit spent — rerun after the 1h window");
+  }
+
+  test("unauthenticated /api/auth/me returns NOT_AUTHENTICATED", async ({ request }) => {
+    const response = await request.get(`${API}/auth/me`);
+    expect(response.status()).toBe(401);
     const body = await response.json();
-    expect(body.code).toBe("USER_NOT_FOUND");
-    expect(body.message).toMatch(/No account found/i);
+    expect(body.code).toBe("NOT_AUTHENTICATED");
   });
 
-  test("login with wrong password returns INVALID_PASSWORD", async ({ request }) => {
-    const email = `pw-test-${Date.now()}@example.com`;
-    const password = "correct-password-123";
-
-    const register = await request.post(`${API}/auth/register/singer`, {
+  test("registration rejects a malformed email", async ({ request }) => {
+    const response = await request.post(`${API}/auth/register/singer`, {
       data: {
-        email,
-        password,
+        email: "not-an-email",
         first_name: "Test",
         last_name: "Singer",
         primary_voice_type: "Soprano",
@@ -33,26 +37,21 @@ test.describe("API error messaging", () => {
         state: "NY",
       },
     });
-    expect(register.ok()).toBeTruthy();
 
-    const response = await request.post(`${API}/auth/login`, {
-      data: {
-        email,
-        password: "wrong-password-123",
-        userType: "singer",
-      },
-    });
-
-    expect(response.status()).toBe(400);
     const body = await response.json();
-    expect(body.code).toBe("INVALID_PASSWORD");
-    expect(body.message).toMatch(/Incorrect password/i);
+    skipIfRateLimited(body);
+    expect(response.status()).toBeGreaterThanOrEqual(400);
+    expect(body.code).toBe("INVALID_EMAIL");
   });
 
-  test("unauthenticated /api/auth/me returns NOT_AUTHENTICATED", async ({ request }) => {
-    const response = await request.get(`${API}/auth/me`);
-    expect(response.status()).toBe(401);
+  test("registration requires an email", async ({ request }) => {
+    const response = await request.post(`${API}/auth/register/singer`, {
+      data: { first_name: "Test", last_name: "Singer" },
+    });
+
     const body = await response.json();
-    expect(body.code).toBe("NOT_AUTHENTICATED");
+    skipIfRateLimited(body);
+    expect(response.status()).toBeGreaterThanOrEqual(400);
+    expect(body.code).toBe("EMAIL_PASSWORD_REQUIRED");
   });
 });

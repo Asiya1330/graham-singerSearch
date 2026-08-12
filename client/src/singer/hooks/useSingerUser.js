@@ -1,4 +1,5 @@
 import { useAppContext } from "../../AppContext";
+import { userFromProfile } from "../../lib/accountAuth";
 
 /**
  * Shared access to the authenticated singer for dashboard section components.
@@ -13,7 +14,10 @@ export function useSingerUser() {
   const refreshUser = async () => {
     const profileRes = await fetch("/api/auth/me", { credentials: "include" });
     const profile = await profileRes.json();
-    setCurrentUser({ type: "singer", data: profile });
+    if (!profileRes.ok || profile?.userType !== "singer") {
+      throw new Error(profile?.message || "Failed to refresh singer profile");
+    }
+    setCurrentUser(userFromProfile(profile));
     return profile;
   };
 

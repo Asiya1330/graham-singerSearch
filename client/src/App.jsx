@@ -43,6 +43,7 @@ import SingerCard from "./singer/components/SingerCard";
 import RepertoireAutocomplete, { VOICE_TYPE_DB_TO_LABEL, CATEGORY_DB_TO_PERFTYPE } from "./RepertoireAutocomplete";
 import { AppProvider } from "./AppContext";
 import { AdminDashboard } from "./AdminDashboard";
+import { AdminLoginFlow, AdminSetPasswordPage } from "./admin/AdminLoginFlow";
 import { SingerDashboard } from "./singer/pages/SingerDashboard";
 import { SingerSettings } from "./singer/pages/SingerSettings";
 import { OrgSettings } from "./organization/pages/OrgSettings";
@@ -58,7 +59,8 @@ import { SingerLogin, OrganizationLogin, SingerRegistration, OrgRegistration, Re
 import { BLANK_FILTERS, AlertBanner, AppFooter } from "./AppShared";
 import { navigateToView, viewFromPath, pathFromView, requiredAccessForView } from "./lib/nav";
 import { apiFetch, getErrorMessageFromBody, API_ERRORS } from "./lib/api";
-import { ApiErrorText } from "./components/ApiErrorText";
+import { getAccessToken, onAuthChange } from "./lib/supabase";
+import { userFromProfile } from "./lib/accountAuth";
 import { syncStripeSubscription } from "./lib/stripe";
 // Assets
 import heroVideo from "./assets/hero-opera.mp4";
@@ -72,69 +74,7 @@ import logo4 from "./assets/logos/logo_4.png";
 const RESULTS_PER_PAGE = 20;
 
 function AdminLogin({ onSuccess }) {
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!password.trim()) return;
-    setLoading(true);
-    setError("");
-    try {
-      await apiFetch("/api/admin/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
-      }, "ADMIN_INVALID_PASSWORD");
-      onSuccess();
-    } catch (err) {
-      setError(err.message || API_ERRORS.ADMIN_INVALID_PASSWORD.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 w-full max-w-sm p-8">
-        <div className="mb-6 text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-100 mb-3">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-          </div>
-          <h1 className="text-xl font-bold text-slate-900">Admin Access</h1>
-          <p className="text-sm text-slate-500 mt-1">Enter the admin password to continue</p>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-              placeholder="Enter admin password"
-              autoFocus
-              data-testid="input-admin-password"
-            />
-          </div>
-          {error && (
-            <ApiErrorText message={error} testId="admin-login-error" />
-          )}
-          <button
-            type="submit"
-            disabled={loading || !password.trim()}
-            className="w-full h-10 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-            data-testid="button-admin-login"
-          >
-            {loading ? "Verifying…" : "Log In"}
-          </button>
-        </form>
-      </div>
-    </div>
-  );
+  return <AdminLoginFlow onSuccess={onSuccess} />;
 }
 
 export default function App() {
@@ -183,20 +123,21 @@ export default function App() {
     let cancelled = false;
     (async () => {
       try {
-        const [meRes, adminRes] = await Promise.all([
-          fetch("/api/auth/me", { credentials: "include" }),
-          fetch("/api/admin/auth/check", { credentials: "include" }),
+        // Wait for the Supabase client to restore/refresh its persisted session
+        // before asking the API who we are — otherwise the first /api/auth/me
+        // races the token restore and a logged-in user lands as a guest.
+        await getAccessToken();
+        if (cancelled) return;
+
+        const [meData, adminRes] = await Promise.all([
+          apiFetch("/api/auth/me").then(({ data }) => data).catch(() => null),
+          apiFetch("/api/admin/auth/check").then(({ data }) => data).catch(() => null),
         ]);
         if (cancelled) return;
-        if (meRes.ok) {
-          const data = await meRes.json().catch(() => null);
-          if (data?.userType === "singer") setCurrentUser({ type: "singer", data });
-          else if (data?.userType === "organization") setCurrentUser({ type: "organization", data });
+        if (meData?.userType === "singer" || meData?.userType === "organization") {
+          setCurrentUser(userFromProfile(meData));
         }
-        if (adminRes.ok) {
-          const adminData = await adminRes.json().catch(() => null);
-          if (adminData?.authenticated) setAdminMode(true);
-        }
+        if (adminRes?.authenticated) setAdminMode(true);
 
         // Handle Stripe checkout redirect after auth is established
         const params = new URLSearchParams(window.location.search);
@@ -209,7 +150,7 @@ export default function App() {
             if (!cancelled && syncData) {
               const ut = syncData.userType;
               if (ut === "singer" || ut === "organization") {
-                setCurrentUser({ type: ut, data: syncData });
+                setCurrentUser(userFromProfile(syncData));
               }
               if (syncData.subscription_tier === "pro") {
                 showAlert("Pro subscription active!", "success");
@@ -241,6 +182,17 @@ export default function App() {
     return () => {
       cancelled = true;
     };
+  }, []);
+
+  // Keep React state in step with the Supabase session: a sign-out in another
+  // tab, or a refresh token that finally expires, must drop the user here too.
+  useEffect(() => {
+    return onAuthChange((event) => {
+      if (event === "SIGNED_OUT") {
+        setCurrentUser(null);
+        setAdminMode(false);
+      }
+    });
   }, []);
 
   // Route guards: protect singer/organization/admin-only routes.
@@ -413,8 +365,10 @@ export default function App() {
       showAlert("Contact information revealed.", "success");
       
       const { data: profile } = await apiFetch("/api/auth/me", {}, "PROFILE_LOAD_FAILED");
-      setCurrentUser({ type: "organization", data: profile });
-      
+      if (profile?.userType === "organization") {
+        setCurrentUser(userFromProfile(profile));
+      }
+
       setSearchResults(prev => prev.map(s => s.id === singerId ? { ...s, revealed: true, email: data.email, agent_name: data.agent_name, agent_email: data.agent_email, website_url: data.website_url } : s));
       if (selectedSinger && selectedSinger.id === singerId) {
         setSelectedSinger(prev => ({ ...prev, revealed: true, email: data.email, agent_name: data.agent_name, agent_email: data.agent_email, website_url: data.website_url }));
@@ -553,6 +507,15 @@ export default function App() {
         />;
       case "adminLogin":
         return <AdminLogin onSuccess={() => { setAdminMode(true); setView("adminDashboard"); }} />;
+      case "adminSetPassword":
+        return (
+          <AdminSetPasswordPage
+            onDone={() => {
+              showAlert("Password saved. Sign in and enroll MFA.", "success");
+              setView("adminLogin");
+            }}
+          />
+        );
       case "adminDashboard":
         return <><AdminDashboard setAdminMode={setAdminMode} showAlert={showAlert} /><AppFooter /></>;
       case "emergencySearch":

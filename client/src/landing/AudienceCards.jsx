@@ -1,9 +1,24 @@
 import React from "react";
 import { useAppContext } from "../AppContext";
 import { APP_ROUTES, navClick } from "../lib/nav";
+import { dashboardViewFor } from "./AccountMenu";
 
 export function AudienceCards() {
-  const { setView } = useAppContext();
+  const { setView, currentUser } = useAppContext();
+  // Signed-in visitors get a direct route into their own side of the product;
+  // the other card keeps its guest CTAs (a singer may still be curious about
+  // what organizations see).
+  const isOrg = currentUser?.type === "organization";
+  const isSinger = currentUser?.type === "singer";
+  const dashboardCta = (label, testId) => (
+    <button
+      onClick={() => setView(dashboardViewFor(currentUser))}
+      className="text-[14.5px] font-semibold rounded-[9px] bg-[#2563eb] text-white px-[22px] py-3 hover:bg-[#1d4ed8] transition-colors inline-flex items-center justify-center border-none cursor-pointer"
+      data-testid={testId}
+    >
+      {label}
+    </button>
+  );
 
   return (
     <section className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-[14px] pb-2" id="how">
@@ -21,22 +36,30 @@ export function AudienceCards() {
           is needed.
         </p>
         <div className="flex items-center gap-[14px]">
-          <a
-            href={APP_ROUTES.orgRegister}
-            onClick={navClick(setView, "orgRegister")}
-            className="text-[14.5px] font-semibold rounded-[9px] bg-[#2563eb] text-white px-[22px] py-3 no-underline hover:bg-[#1d4ed8] transition-colors inline-flex items-center justify-center"
-            data-testid="link-org-signup"
-          >
-            Find singers
-          </a>
-          <a
-            href={APP_ROUTES.organizationLogin}
-            onClick={navClick(setView, "organizationLogin")}
-            className="text-[14.5px] font-semibold text-[#2563eb] px-3 py-2 rounded-md no-underline hover:text-[#1d4ed8] hover:bg-blue-50 transition-colors"
-            data-testid="link-org-login"
-          >
-            Log in
-          </a>
+          {isOrg ? (
+            dashboardCta("Go to your dashboard", "link-org-dashboard")
+          ) : (
+            <>
+              <a
+                href={APP_ROUTES.orgRegister}
+                onClick={navClick(setView, "orgRegister")}
+                className="text-[14.5px] font-semibold rounded-[9px] bg-[#2563eb] text-white px-[22px] py-3 no-underline hover:bg-[#1d4ed8] transition-colors inline-flex items-center justify-center"
+                data-testid="link-org-signup"
+              >
+                Find singers
+              </a>
+              {!isSinger && (
+                <a
+                  href={APP_ROUTES.organizationLogin}
+                  onClick={navClick(setView, "organizationLogin")}
+                  className="text-[14.5px] font-semibold text-[#2563eb] px-3 py-2 rounded-md no-underline hover:text-[#1d4ed8] hover:bg-blue-50 transition-colors"
+                  data-testid="link-org-login"
+                >
+                  Log in
+                </a>
+              )}
+            </>
+          )}
         </div>
       </div>
 
@@ -53,22 +76,30 @@ export function AudienceCards() {
           and become discoverable to the organizations casting your voice type.
         </p>
         <div className="flex items-center gap-[14px]">
-          <a
-            href={APP_ROUTES.singerRegister}
-            onClick={navClick(setView, "singerRegister")}
-            className="text-[14.5px] font-semibold rounded-[9px] bg-[#2563eb] text-white px-[22px] py-3 no-underline hover:bg-[#1d4ed8] transition-colors inline-flex items-center justify-center"
-            data-testid="link-singer-signup"
-          >
-            Create your profile
-          </a>
-          <a
-            href={APP_ROUTES.singerLogin}
-            onClick={navClick(setView, "singerLogin")}
-            className="text-[14.5px] font-semibold text-[#2563eb] px-3 py-2 rounded-md no-underline hover:text-[#1d4ed8] hover:bg-blue-50 transition-colors"
-            data-testid="link-singer-login"
-          >
-            Log in
-          </a>
+          {isSinger ? (
+            dashboardCta("Go to your profile", "link-singer-dashboard")
+          ) : (
+            <>
+              <a
+                href={APP_ROUTES.singerRegister}
+                onClick={navClick(setView, "singerRegister")}
+                className="text-[14.5px] font-semibold rounded-[9px] bg-[#2563eb] text-white px-[22px] py-3 no-underline hover:bg-[#1d4ed8] transition-colors inline-flex items-center justify-center"
+                data-testid="link-singer-signup"
+              >
+                Create your profile
+              </a>
+              {!isOrg && (
+                <a
+                  href={APP_ROUTES.singerLogin}
+                  onClick={navClick(setView, "singerLogin")}
+                  className="text-[14.5px] font-semibold text-[#2563eb] px-3 py-2 rounded-md no-underline hover:text-[#1d4ed8] hover:bg-blue-50 transition-colors"
+                  data-testid="link-singer-login"
+                >
+                  Log in
+                </a>
+              )}
+            </>
+          )}
         </div>
       </div>
     </section>

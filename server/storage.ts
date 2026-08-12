@@ -22,10 +22,23 @@ import { eq, and, gte, lte, ilike, or, sql, desc, count, inArray, isNull } from 
 import { Pool } from "pg";
 import { getSupabaseDatabaseUrl } from "./lib/env";
 
+/**
+ * Insert payloads for the two account tables. `auth_user_id` and `password` are
+ * stripped from the zod insert schemas so a client body can never set them, so
+ * the server re-attaches them here explicitly.
+ */
+type ServerSetAuthFields = {
+  auth_user_id?: string | null;
+  password?: string | null;
+};
+export type NewSingerRecord = InsertSinger & ServerSetAuthFields;
+export type NewOrganizationRecord = InsertOrganization & ServerSetAuthFields;
+
 export interface IStorage {
   getSinger(id: number): Promise<Singer | undefined>;
   getSingerByEmail(email: string): Promise<Singer | undefined>;
-  createSinger(singer: InsertSinger): Promise<Singer>;
+  createSinger(singer: NewSingerRecord): Promise<Singer>;
+  getSingerByAuthUserId(authUserId: string): Promise<Singer | undefined>;
   updateSinger(id: number, data: Partial<Singer>): Promise<Singer | undefined>;
   deleteSinger(id: number): Promise<void>;
   getApprovedSingers(): Promise<Singer[]>;
@@ -43,7 +56,8 @@ export interface IStorage {
 
   getOrganization(id: number): Promise<Organization | undefined>;
   getOrganizationByEmail(email: string): Promise<Organization | undefined>;
-  createOrganization(org: InsertOrganization): Promise<Organization>;
+  createOrganization(org: NewOrganizationRecord): Promise<Organization>;
+  getOrganizationByAuthUserId(authUserId: string): Promise<Organization | undefined>;
   updateOrganization(id: number, data: Partial<Organization>): Promise<Organization | undefined>;
 
   getAvailabilities(singerId: number): Promise<Availability[]>;
@@ -170,7 +184,12 @@ export class DatabaseStorage implements IStorage {
     return singer;
   }
 
-  async createSinger(singer: InsertSinger): Promise<Singer> {
+  async getSingerByAuthUserId(authUserId: string): Promise<Singer | undefined> {
+    const [singer] = await db.select().from(singers).where(eq(singers.auth_user_id, authUserId));
+    return singer;
+  }
+
+  async createSinger(singer: NewSingerRecord): Promise<Singer> {
     const [created] = await db.insert(singers).values(singer).returning();
     return created;
   }
@@ -238,7 +257,12 @@ export class DatabaseStorage implements IStorage {
     return org;
   }
 
-  async createOrganization(org: InsertOrganization): Promise<Organization> {
+  async getOrganizationByAuthUserId(authUserId: string): Promise<Organization | undefined> {
+    const [org] = await db.select().from(organizations).where(eq(organizations.auth_user_id, authUserId));
+    return org;
+  }
+
+  async createOrganization(org: NewOrganizationRecord): Promise<Organization> {
     const [created] = await db.insert(organizations).values(org).returning();
     return created;
   }

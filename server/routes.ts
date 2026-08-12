@@ -20,17 +20,62 @@ import {
 } from "@shared/schema";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
-import { scrypt, randomBytes, timingSafeEqual, createHmac } from "crypto";
+import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import multer from "multer";
 import express from "express";
 import { uploadToSupabaseStorage, signStoragePath, signSingerFiles, signSingerFilesBatch } from "./lib/file-upload";
 import { getSessionSecret } from "./lib/env";
 import {
+  requireAdminAuth,
+  requireSuperAdmin,
+  extractBearerToken,
+  peekAdminSession,
+  normalizeAdminEmail,
+} from "./lib/auth-admin";
+import {
+  listAdmins,
+  listAdminAuditLogs,
+  invitePendingAdmin,
+  approvePendingAdmin,
+  rejectPendingAdmin,
+  revokeAdmin,
+  clearAdminMfa,
+  bootstrapSeedAdmins,
+  getAdminById,
+  publicAdminDto,
+  publicAuditDto,
+} from "./lib/admin-roster";
+import { getAdminBootstrapSecret } from "./lib/env";
+import {
+  requireAuth,
+  requireSinger,
+  requireOrg,
+  attachUser,
+  currentUserId,
+  currentUserType,
+} from "./lib/auth-user";
+import {
+  normalizeEmail,
+  isValidEmail,
+  linkNewAuthUser,
+  linkLegacyAccount,
+  sendPasswordRecovery,
+  verifyAccountPassword,
+  changeAccountPassword,
+  changeAccountEmail,
+} from "./lib/auth-accounts";
+import rateLimit from "express-rate-limit";
+import {
+  registerLimiter,
+  legacyLoginLimiter,
+  forgotPasswordLimiter,
+  sessionLimiter,
+} from "./lib/rate-limit";
+import {
   notifyNewRegistration,
   notifyRegistrationConfirmation,
   notifySingerApproved,
-  notifyPasswordReset,
   getEmailConfigStatus,
   sendTestEmail,
 } from "./lib/email";
@@ -46,16 +91,15 @@ declare module "express-session" {
   interface SessionData {
     userId?: number;
     userType?: "singer" | "organization";
-    adminAuthenticated?: boolean;
   }
 }
 
-async function hashPassword(password: string): Promise<string> {
-  const salt = randomBytes(16);
-  const hash = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${salt.toString("hex")}.${hash.toString("hex")}`;
-}
-
+/**
+ * Verifies a pre-Supabase scrypt hash. The only remaining caller is
+ * /api/auth/legacy-login, which uses it once per account to authorise the
+ * migration to Supabase Auth. Delete this along with the `password` columns
+ * once every account has a non-null auth_user_id.
+ */
 async function comparePasswords(supplied: string, stored: string): Promise<boolean> {
   if (!supplied || !stored || !stored.includes(".")) return false;
   const [saltHex, hashHex] = stored.split(".");
@@ -75,41 +119,12 @@ async function comparePasswords(supplied: string, stored: string): Promise<boole
   }
 }
 
-function hashResetToken(token: string): string {
-  const secret = getSessionSecret();
-  return createHmac("sha256", secret).update(token).digest("hex");
-}
-
 const PASSWORD_RESET_GENERIC_MESSAGE =
   "If an account exists for that email, password reset instructions have been sent.";
 
-function requireAdminAuth(req: Request, res: Response, next: NextFunction) {
-  if (!req.session.adminAuthenticated) {
-    return sendApiError(res, "ADMIN_AUTH_REQUIRED");
-  }
-  next();
-}
-
-function requireAuth(req: Request, res: Response, next: NextFunction) {
-  if (!req.session.userId) {
-    return sendApiError(res, "NOT_AUTHENTICATED");
-  }
-  next();
-}
-
-function requireSinger(req: Request, res: Response, next: NextFunction) {
-  if (req.session.userType !== "singer") {
-    return sendApiError(res, "SINGER_ACCESS_REQUIRED");
-  }
-  next();
-}
-
-function requireOrg(req: Request, res: Response, next: NextFunction) {
-  if (req.session.userType !== "organization") {
-    return sendApiError(res, "ORG_ACCESS_REQUIRED");
-  }
-  next();
-}
+// requireAuth/requireSinger/requireOrg now live in lib/auth-user.ts and verify
+// a Supabase Bearer token, falling back to the legacy session cookie during the
+// cutover window.
 
 // Keep under the Vercel edge proxy body limit (~4.5MB) so prod uploads through
 // middleware.ts are not rejected before reaching the API.
@@ -188,18 +203,22 @@ export async function registerRoutes(
 
   // Auth Routes
 
-  app.post("/api/auth/register/singer", async (req: Request, res: Response) => {
+  // --- Auth Routes (Supabase Auth: email + password, no MFA for singers/orgs) ---
+  //
+  // Registration is a two-step handshake: the client calls supabase.auth.signUp()
+  // first (so Supabase sends the real confirmation email when that setting is on),
+  // then posts the profile fields here. We look the new Auth user up by email,
+  // create the profile row linked to it, and grant the role in app_metadata.
+
+  app.post("/api/auth/register/singer", registerLimiter, async (req: Request, res: Response) => {
     try {
-      const { email: emailRaw, password, ...rest } = req.body;
-      if (!emailRaw || !password) {
+      const { email: emailRaw, password: _ignored, ...rest } = req.body;
+      const email = normalizeEmail(emailRaw);
+      if (!email) {
         return sendApiError(res, "EMAIL_PASSWORD_REQUIRED");
       }
-      const email = typeof emailRaw === "string" ? emailRaw.trim().toLowerCase() : emailRaw;
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      if (!isValidEmail(email)) {
         return sendApiError(res, "INVALID_EMAIL", "Please enter a valid email address.");
-      }
-      if (typeof password !== "string" || password.length < 8) {
-        return res.status(400).json({ code: "WEAK_PASSWORD", message: "Password must be at least 8 characters." });
       }
 
       const existing = await storage.getSingerByEmail(email);
@@ -207,10 +226,11 @@ export async function registerRoutes(
         return sendApiError(res, "EMAIL_ALREADY_REGISTERED");
       }
 
-      const hashedPassword = await hashPassword(password);
+      // Supabase owns the credential; the auth user must already exist.
+      const { authUserId, confirmationRequired } = await linkNewAuthUser(email, "singer");
+
       const parsed = insertSingerSchema.parse({
         email,
-        password: hashedPassword,
         ...rest,
         // Enforce location invariant: never trust client-supplied coords on create
         latitude: null,
@@ -218,10 +238,7 @@ export async function registerRoutes(
         subscription_tier: 'free',
         subscription_status: 'active',
       });
-      const singer = await storage.createSinger(parsed);
-
-      req.session.userId = singer.id;
-      req.session.userType = "singer";
+      const singer = await storage.createSinger({ ...parsed, auth_user_id: authUserId });
 
       // Auto-geocode singer location on registration (best-effort, requires both city + state)
       if (singer.city && singer.state) {
@@ -256,24 +273,21 @@ export async function registerRoutes(
       });
 
       const { password: _, ...safe } = updated!;
-      res.status(201).json(safe);
+      res.status(201).json({ ...safe, userType: "singer", confirmationRequired });
     } catch (error: any) {
-      sendRouteError(res, error, "REGISTRATION_FAILED");
+      sendRouteError(res, error, error?.code || "REGISTRATION_FAILED");
     }
   });
 
-  app.post("/api/auth/register/organization", async (req: Request, res: Response) => {
+  app.post("/api/auth/register/organization", registerLimiter, async (req: Request, res: Response) => {
     try {
-      const { email: emailRaw, password, ...rest } = req.body;
-      if (!emailRaw || !password) {
+      const { email: emailRaw, password: _ignored, ...rest } = req.body;
+      const email = normalizeEmail(emailRaw);
+      if (!email) {
         return sendApiError(res, "EMAIL_PASSWORD_REQUIRED");
       }
-      const email = typeof emailRaw === "string" ? emailRaw.trim().toLowerCase() : emailRaw;
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      if (!isValidEmail(email)) {
         return sendApiError(res, "INVALID_EMAIL", "Please enter a valid email address.");
-      }
-      if (typeof password !== "string" || password.length < 8) {
-        return res.status(400).json({ code: "WEAK_PASSWORD", message: "Password must be at least 8 characters." });
       }
 
       const existing = await storage.getOrganizationByEmail(email);
@@ -281,17 +295,14 @@ export async function registerRoutes(
         return sendApiError(res, "EMAIL_ALREADY_REGISTERED");
       }
 
-      const hashedPassword = await hashPassword(password);
+      const { authUserId, confirmationRequired } = await linkNewAuthUser(email, "organization");
+
       const parsed = insertOrganizationSchema.parse({
         email,
-        password: hashedPassword,
         ...rest,
         subscription_tier: 'free',
       });
-      const org = await storage.createOrganization(parsed);
-
-      req.session.userId = org.id;
-      req.session.userType = "organization";
+      const org = await storage.createOrganization({ ...parsed, auth_user_id: authUserId });
 
       void notifyNewRegistration({
         userType: "organization",
@@ -312,116 +323,99 @@ export async function registerRoutes(
       });
 
       const { password: _, ...safe } = org;
-      res.status(201).json(safe);
+      res.status(201).json({ ...safe, userType: "organization", confirmationRequired });
     } catch (error: any) {
-      sendRouteError(res, error, "REGISTRATION_FAILED");
+      sendRouteError(res, error, error?.code || "REGISTRATION_FAILED");
     }
   });
 
-  app.post("/api/auth/login", async (req: Request, res: Response) => {
+  /**
+   * Cutover endpoint for accounts created before Supabase Auth.
+   *
+   * The client calls this only after supabase.auth.signInWithPassword() has
+   * failed. We verify the legacy scrypt hash and, if it matches, mint the Auth
+   * user with that same password so the client's retry succeeds. Runs once per
+   * account: the local hash is cleared on success.
+   */
+  app.post("/api/auth/legacy-login", legacyLoginLimiter, async (req: Request, res: Response) => {
     try {
       const { email: emailRaw, password, userType } = req.body;
-      if (!emailRaw || !password || !userType) {
+      const email = normalizeEmail(emailRaw);
+      if (!email || !password || (userType !== "singer" && userType !== "organization")) {
         return sendApiError(res, "EMAIL_USER_TYPE_REQUIRED", "Email, password, and account type are required.");
       }
-      const email = typeof emailRaw === "string" ? emailRaw.trim().toLowerCase() : emailRaw;
-      console.log("[LOGIN DEBUG] Raw email:", emailRaw);
-      console.log("[LOGIN DEBUG] Normalized email:", email);
-      console.log("[LOGIN DEBUG] userType:", userType);
 
-      let user: any;
-      if (userType === "singer") {
-        user = await storage.getSingerByEmail(email);
-        console.log("[LOGIN DEBUG] Singer lookup result:", user ? `Found (id=${user.id}, db_email="${user.email}")` : "NOT FOUND");
-      } else if (userType === "organization") {
-        user = await storage.getOrganizationByEmail(email);
-        console.log("[LOGIN DEBUG] Org lookup result:", user ? `Found (id=${user.id}, db_email="${user.email}")` : "NOT FOUND");
-      } else {
-        return sendApiError(res, "INVALID_USER_TYPE");
+      const user =
+        userType === "singer"
+          ? await storage.getSingerByEmail(email)
+          : await storage.getOrganizationByEmail(email);
+
+      // Same generic answer whether the account is missing, already migrated,
+      // or the password is wrong — this endpoint must not be an oracle.
+      if (!user || !user.password || user.auth_user_id) {
+        return sendApiError(res, "INVALID_PASSWORD");
       }
 
-      if (!user) {
-        console.log("[LOGIN DEBUG] User not found — case mismatch likely. Raw:", emailRaw, "→ Queried:", email);
-        return sendApiError(res, "USER_NOT_FOUND");
-      }
-
-      const valid = await comparePasswords(password, user.password);
+      const valid = await comparePasswords(String(password), user.password);
       if (!valid) {
         return sendApiError(res, "INVALID_PASSWORD");
       }
 
-      req.session.userId = user.id;
-      req.session.userType = userType;
+      await linkLegacyAccount(userType, user, String(password));
+      res.json({ migrated: true });
+    } catch (error: any) {
+      sendRouteError(res, error, error?.code || "LOGIN_FAILED");
+    }
+  });
 
-      if (userType === "organization") {
-        await storage.updateOrganization(user.id, { login_count: (user.login_count || 0) + 1 });
-        user = { ...user, login_count: (user.login_count || 0) + 1 };
+  /**
+   * Bump login_count and return the profile type. Called after a successful
+   * client-side sign-in; the Bearer token is the proof of identity.
+   */
+  app.post("/api/auth/session", sessionLimiter, requireAuth, async (req: Request, res: Response) => {
+    try {
+      const ctx = req.authUser!;
+      if (ctx.type === "organization") {
+        const org = ctx.profile as typeof organizations.$inferSelect;
+        await storage.updateOrganization(ctx.id, {
+          login_count: (org.login_count || 0) + 1,
+        });
       }
-
-      const { password: _, ...safe } = user;
-      res.json(safe);
+      res.json({ userType: ctx.type, id: ctx.id });
     } catch (error: any) {
       sendRouteError(res, error, "LOGIN_FAILED");
     }
   });
 
-  app.post("/api/auth/forgot-password", async (req: Request, res: Response) => {
+  /**
+   * Supabase sends the recovery mail. Always returns the same message so the
+   * endpoint cannot be used to enumerate registered addresses.
+   */
+  app.post("/api/auth/forgot-password", forgotPasswordLimiter, async (req: Request, res: Response) => {
     try {
-      const { email, userType } = req.body;
-      if (!email || !userType) {
-        return res.status(400).json({ message: "Email and userType are required" });
-      }
-      if (userType !== "singer" && userType !== "organization") {
+      const { email: emailRaw, userType } = req.body;
+      const email = normalizeEmail(emailRaw);
+      if (!email || (userType !== "singer" && userType !== "organization")) {
         return sendApiError(res, "INVALID_USER_TYPE");
       }
 
-      const normalizedEmail = String(email).trim().toLowerCase();
-      let user: { id: number; email: string; displayName: string } | undefined;
+      const user =
+        userType === "singer"
+          ? await storage.getSingerByEmail(email)
+          : await storage.getOrganizationByEmail(email);
 
-      if (userType === "singer") {
-        const singer = await storage.getSingerByEmail(normalizedEmail);
-        if (singer) {
-          user = {
-            id: singer.id,
-            email: singer.email,
-            displayName: `${singer.first_name} ${singer.last_name}`.trim(),
-          };
+      if (user && !email.endsWith("@example.com")) {
+        // Legacy accounts have no Auth user yet, so recovery would silently do
+        // nothing. Create and link one first (random password — the recovery
+        // link is what lets them back in).
+        if (!user.auth_user_id) {
+          try {
+            await linkLegacyAccount(userType, user, randomBytes(24).toString("hex"));
+          } catch (e) {
+            console.warn("[forgot-password] link failed for", userType, user.id, (e as Error).message);
+          }
         }
-      } else {
-        const org = await storage.getOrganizationByEmail(normalizedEmail);
-        if (org) {
-          user = {
-            id: org.id,
-            email: org.email,
-            displayName: org.organization_name,
-          };
-        }
-      }
-
-      if (user && !normalizedEmail.toLowerCase().endsWith("@example.com")) {
-        const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-        const recentRequests = await storage.countRecentPasswordResetRequests(
-          userType,
-          user.id,
-          oneHourAgo,
-        );
-        if (recentRequests < 3) {
-          await storage.invalidatePasswordResetTokensForUser(userType, user.id);
-          const rawToken = randomBytes(32).toString("hex");
-          const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
-          await storage.createPasswordResetToken({
-            tokenHash: hashResetToken(rawToken),
-            userType,
-            userId: user.id,
-            expiresAt,
-          });
-          void notifyPasswordReset({
-            userType,
-            email: user.email,
-            displayName: user.displayName,
-            resetToken: rawToken,
-          });
-        }
+        await sendPasswordRecovery(email);
       }
 
       res.json({ message: PASSWORD_RESET_GENERIC_MESSAGE });
@@ -430,78 +424,25 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/auth/reset-password/validate", async (req: Request, res: Response) => {
-    try {
-      const token = String(req.query.token || "");
-      const userType = String(req.query.userType || req.query.type || "");
-      if (!token || (userType !== "singer" && userType !== "organization")) {
-        return res.json({ valid: false });
-      }
-
-      const record = await storage.findValidPasswordResetToken(hashResetToken(token));
-      if (!record || record.user_type !== userType) {
-        return res.json({ valid: false });
-      }
-
-      res.json({ valid: true });
-    } catch (error: any) {
-      sendRouteError(res, error, "VALIDATION_FAILED");
-    }
-  });
-
-  app.post("/api/auth/reset-password", async (req: Request, res: Response) => {
-    try {
-      const { token, password, userType } = req.body;
-      if (!token || !password || !userType) {
-        return res.status(400).json({ message: "Token, password, and userType are required" });
-      }
-      if (userType !== "singer" && userType !== "organization") {
-        return sendApiError(res, "INVALID_USER_TYPE");
-      }
-      if (String(password).length < 8) {
-        return sendApiError(res, "PASSWORD_TOO_SHORT");
-      }
-
-      const record = await storage.findValidPasswordResetToken(hashResetToken(String(token)));
-      if (!record || record.user_type !== userType) {
-        return sendApiError(res, "RESET_LINK_INVALID");
-      }
-
-      const hashedPassword = await hashPassword(String(password));
-      if (userType === "singer") {
-        const updated = await storage.updateSinger(record.user_id, { password: hashedPassword });
-        if (!updated) return sendApiError(res, "ACCOUNT_NOT_FOUND");
-      } else {
-        const updated = await storage.updateOrganization(record.user_id, { password: hashedPassword });
-        if (!updated) return sendApiError(res, "ACCOUNT_NOT_FOUND");
-      }
-
-      await storage.markPasswordResetTokenUsed(record.id);
-      await storage.invalidatePasswordResetTokensForUser(userType, record.user_id);
-
-      res.json({ message: "Password updated successfully" });
-    } catch (error: any) {
-      sendRouteError(res, error, "PASSWORD_RESET_FAILED");
-    }
-  });
-
   app.post("/api/auth/logout", (req: Request, res: Response) => {
-    req.session.destroy((err) => {
-      if (err) {
-        return sendApiError(res, "LOGOUT_FAILED");
-      }
+    // The Supabase session is cleared client-side; this only tears down any
+    // leftover legacy cookie from before the cutover.
+    if (!req.session) return res.json({ message: "Logged out" });
+    req.session.destroy(() => {
       res.json({ message: "Logged out" });
     });
   });
 
   app.get("/api/auth/me", async (req: Request, res: Response) => {
     try {
-      if (!req.session.userId) {
+      await attachUser(req, res, () => {});
+      const ctx = req.authUser;
+      if (!ctx) {
         return sendApiError(res, "NOT_AUTHENTICATED");
       }
 
-      if (req.session.userType === "singer") {
-        let singer = await storage.getSinger(req.session.userId);
+      if (ctx.type === "singer") {
+        let singer = await storage.getSinger(ctx.id);
         if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
 
         if (isStripeCheckoutConfigured() && shouldSyncStripeState(singer)) {
@@ -527,8 +468,8 @@ export async function registerRoutes(
         return res.json(await signSingerFiles({ ...safe, roles, works, availabilities, userType: "singer" }));
       }
 
-      if (req.session.userType === "organization") {
-        let org = await storage.getOrganization(req.session.userId);
+      if (ctx.type === "organization") {
+        let org = await storage.getOrganization(ctx.id);
         if (!org) return sendApiError(res, "ORG_NOT_FOUND");
 
         if (isStripeCheckoutConfigured() && shouldSyncStripeState(org)) {
@@ -558,7 +499,7 @@ export async function registerRoutes(
 
   app.get("/api/singer/profile", requireAuth, requireSinger, async (req: Request, res: Response) => {
     try {
-      const singer = await storage.getSinger(req.session.userId!);
+      const singer = await storage.getSinger(currentUserId(req));
       if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
 
       const [roles, works, availabilities] = await Promise.all([
@@ -597,12 +538,12 @@ export async function registerRoutes(
           return res.status(400).json({ message: `${field} must start with http:// or https://` });
         }
       }
-      const existing = await storage.getSinger(req.session.userId!);
+      const existing = await storage.getSinger(currentUserId(req));
       const cityChanged = existing && (
         (updates.city ?? existing.city) !== existing.city ||
         (updates.state ?? existing.state) !== existing.state
       );
-      let singer = await storage.updateSinger(req.session.userId!, { ...updates, last_updated: new Date() });
+      let singer = await storage.updateSinger(currentUserId(req), { ...updates, last_updated: new Date() });
       if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
 
       if (cityChanged) {
@@ -635,7 +576,7 @@ export async function registerRoutes(
 
   app.post("/api/singer/emergency/opt-out", requireAuth, requireSinger, async (req: Request, res: Response) => {
     try {
-      const singer = await storage.updateSinger(req.session.userId!, {
+      const singer = await storage.updateSinger(currentUserId(req), {
         is_emergency_ready: false,
         emergency_status_requested: false,
       });
@@ -649,7 +590,7 @@ export async function registerRoutes(
 
   app.post("/api/singer/downgrade", requireAuth, requireSinger, async (req: Request, res: Response) => {
     try {
-      const singer = await storage.getSinger(req.session.userId!);
+      const singer = await storage.getSinger(currentUserId(req));
       if (!singer) return res.status(404).json({ message: "Singer not found" });
 
       if (singer.stripe_subscription_id) {
@@ -659,7 +600,7 @@ export async function registerRoutes(
         });
       }
 
-      const updated = await storage.updateSinger(req.session.userId!, {
+      const updated = await storage.updateSinger(currentUserId(req), {
         subscription_tier: 'free',
         pro_expires_at: null,
         founding_artist: false,
@@ -675,7 +616,7 @@ export async function registerRoutes(
 
   app.post("/api/org/downgrade", requireAuth, requireOrg, async (req: Request, res: Response) => {
     try {
-      const org = await storage.getOrganization(req.session.userId!);
+      const org = await storage.getOrganization(currentUserId(req));
       if (!org) return res.status(404).json({ message: "Organization not found" });
 
       if (org.stripe_subscription_id) {
@@ -685,7 +626,7 @@ export async function registerRoutes(
         });
       }
 
-      const updated = await storage.updateOrganization(req.session.userId!, {
+      const updated = await storage.updateOrganization(currentUserId(req), {
         subscription_tier: 'free',
         pro_expires_at: null,
         founding_org: false,
@@ -702,7 +643,7 @@ export async function registerRoutes(
 
   app.put("/api/singer/approval-seen", requireAuth, requireSinger, async (req: Request, res: Response) => {
     try {
-      const singer = await storage.updateSinger(req.session.userId!, { approval_seen: true });
+      const singer = await storage.updateSinger(currentUserId(req), { approval_seen: true });
       if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
       const { password: _, ...safe } = singer;
       res.json(await signSingerFiles(safe));
@@ -713,7 +654,7 @@ export async function registerRoutes(
 
   app.post("/api/singer/roles", requireAuth, requireSinger, async (req: Request, res: Response) => {
     try {
-      const singerId = req.session.userId!;
+      const singerId = currentUserId(req);
       const { role_name, work_title, last_performed_date, experience_depth, status } = req.body;
       const VALID_DEPTHS = ['1-2', '3-5', '6-10', '10+'];
       const VALID_STATUSES = ['performed', 'in_preparation'];
@@ -759,7 +700,7 @@ export async function registerRoutes(
   app.delete("/api/singer/roles/:id", requireAuth, requireSinger, async (req: Request, res: Response) => {
     try {
       const roleId = parseInt(req.params.id as string);
-      const roles = await storage.getSingerRoles(req.session.userId!);
+      const roles = await storage.getSingerRoles(currentUserId(req));
       const ownsRole = roles.some((r) => r.id === roleId);
       if (!ownsRole) return res.status(403).json({ message: "Not your role" });
 
@@ -772,7 +713,7 @@ export async function registerRoutes(
 
   app.put("/api/singer/roles", requireAuth, requireSinger, async (req: Request, res: Response) => {
     try {
-      const singerId = req.session.userId!;
+      const singerId = currentUserId(req);
       await storage.deleteSingerRoles(singerId);
 
       const rolesData = req.body as any[];
@@ -797,7 +738,7 @@ export async function registerRoutes(
 
   app.post("/api/singer/works", requireAuth, requireSinger, async (req: Request, res: Response) => {
     try {
-      const singerId = req.session.userId!;
+      const singerId = currentUserId(req);
       const { work_title, last_performed_date, experience_depth, notable_ensembles, status } = req.body;
       const VALID_DEPTHS = ['1-2', '3-5', '6-10', '10+'];
       const VALID_STATUSES = ['performed', 'in_preparation'];
@@ -853,7 +794,7 @@ export async function registerRoutes(
   app.put("/api/singer/works/:id", requireAuth, requireSinger, async (req: Request, res: Response) => {
     try {
       const workId = parseInt(req.params.id as string);
-      const singerId = req.session.userId!;
+      const singerId = currentUserId(req);
       const VALID_DEPTHS = ['1-2', '3-5', '6-10', '10+'];
       const VALID_STATUSES = ['performed', 'in_preparation'];
       const works = await storage.getSingerWorks(singerId);
@@ -923,7 +864,7 @@ export async function registerRoutes(
   app.delete("/api/singer/works/:id", requireAuth, requireSinger, async (req: Request, res: Response) => {
     try {
       const workId = parseInt(req.params.id as string);
-      const works = await storage.getSingerWorks(req.session.userId!);
+      const works = await storage.getSingerWorks(currentUserId(req));
       const ownsWork = works.some((w) => w.id === workId);
       if (!ownsWork) return res.status(403).json({ message: "Not your work" });
 
@@ -936,7 +877,7 @@ export async function registerRoutes(
 
   app.put("/api/singer/works", requireAuth, requireSinger, async (req: Request, res: Response) => {
     try {
-      const singerId = req.session.userId!;
+      const singerId = currentUserId(req);
       await storage.deleteSingerWorks(singerId);
 
       const worksData = req.body as any[];
@@ -965,7 +906,7 @@ export async function registerRoutes(
       if (start_date && end_date && start_date > end_date) {
         return res.status(400).json({ message: "End date must be on or after start date." });
       }
-      const parsed = insertAvailabilitySchema.parse({ ...req.body, singer_id: req.session.userId! });
+      const parsed = insertAvailabilitySchema.parse({ ...req.body, singer_id: currentUserId(req) });
       const avail = await storage.createAvailability(parsed);
       res.status(201).json(avail);
     } catch (error: any) {
@@ -976,7 +917,7 @@ export async function registerRoutes(
   app.delete("/api/singer/availability/:id", requireAuth, requireSinger, async (req: Request, res: Response) => {
     try {
       const availId = parseInt(req.params.id as string);
-      const avails = await storage.getAvailabilities(req.session.userId!);
+      const avails = await storage.getAvailabilities(currentUserId(req));
       const ownsAvail = avails.some((a) => a.id === availId);
       if (!ownsAvail) return res.status(403).json({ message: "Not your availability" });
 
@@ -990,7 +931,7 @@ export async function registerRoutes(
   app.put("/api/singer/emergency", requireAuth, requireSinger, async (req: Request, res: Response) => {
     try {
       const { opt_in, lead_time, radius, modes, notes } = req.body;
-      const singer = await storage.updateSinger(req.session.userId!, {
+      const singer = await storage.updateSinger(currentUserId(req), {
         emergency_opt_in: opt_in,
         emergency_lead_time_hours: lead_time,
         emergency_travel_radius_miles: radius,
@@ -1201,18 +1142,18 @@ export async function registerRoutes(
         }
       }
 
-      await storage.createSearchLog(req.session.userId!, filters);
+      await storage.createSearchLog(currentUserId(req), filters);
 
       let results = await storage.searchSingers(filters);
       const cityFallback = false;
       const searchedCity = resolvedCity || null;
 
-      const org = await storage.getOrganization(req.session.userId!);
+      const org = await storage.getOrganization(currentUserId(req));
       if (filters.emergencyMode && org && org.subscription_tier !== 'pro') {
         results = results.slice(0, 5);
       }
 
-      const revealedIds = await storage.getRevealedSingerIds(req.session.userId!);
+      const revealedIds = await storage.getRevealedSingerIds(currentUserId(req));
       const revealedSet = new Set(revealedIds);
 
       const sanitized = await signSingerFilesBatch(
@@ -1270,7 +1211,7 @@ export async function registerRoutes(
   app.post("/api/contact-reveal", requireAuth, requireOrg, async (req: Request, res: Response) => {
     try {
       const { singerId, isEmergency } = req.body;
-      const orgId = req.session.userId!;
+      const orgId = currentUserId(req);
 
       const org = await storage.getOrganization(orgId);
       if (!org) return sendApiError(res, "ORG_NOT_FOUND");
@@ -1317,7 +1258,7 @@ export async function registerRoutes(
 
   app.get("/api/org/profile", requireAuth, requireOrg, async (req: Request, res: Response) => {
     try {
-      const org = await storage.getOrganization(req.session.userId!);
+      const org = await storage.getOrganization(currentUserId(req));
       if (!org) return sendApiError(res, "ORG_NOT_FOUND");
 
       const revealsResult = await pool.query(
@@ -1347,7 +1288,7 @@ export async function registerRoutes(
         stripe_customer_id, stripe_subscription_id, stripe_subscription_status,
         ...updates
       } = req.body;
-      const org = await storage.updateOrganization(req.session.userId!, updates);
+      const org = await storage.updateOrganization(currentUserId(req), updates);
       if (!org) return sendApiError(res, "ORG_NOT_FOUND");
 
       const { password: _, ...safe } = org;
@@ -1367,7 +1308,7 @@ export async function registerRoutes(
         });
       }
 
-      const org = await storage.getOrganization(req.session.userId!);
+      const org = await storage.getOrganization(currentUserId(req));
       if (!org) return res.status(404).json({ message: "Organization not found" });
 
       if (tier === "free" && org.stripe_subscription_id) {
@@ -1378,7 +1319,7 @@ export async function registerRoutes(
       }
 
       const revealLimit = tier === "pro" ? 50 : 3;
-      const updated = await storage.updateOrganization(req.session.userId!, {
+      const updated = await storage.updateOrganization(currentUserId(req), {
         subscription_tier: tier,
         contact_reveal_limit: revealLimit,
       });
@@ -1391,28 +1332,190 @@ export async function registerRoutes(
     }
   });
 
-  // Admin Auth Routes
-  app.post("/api/admin/auth/login", (req: Request, res: Response) => {
-    const { password } = req.body;
-    const adminPassword = process.env.ADMIN_PASSWORD;
-    if (!adminPassword) {
-      return sendApiError(res, "ADMIN_PASSWORD_NOT_CONFIGURED");
-    }
-    if (password === adminPassword) {
-      req.session.adminAuthenticated = true;
-      return res.json({ success: true });
-    }
-    return sendApiError(res, "ADMIN_INVALID_PASSWORD");
+  // Admin Auth Routes (Supabase Auth + MFA; business routes keep requireAdminAuth)
+  const adminAuthLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 60,
+    standardHeaders: true,
+    legacyHeaders: false,
   });
 
-  app.post("/api/admin/auth/logout", (req: Request, res: Response) => {
-    req.session.adminAuthenticated = false;
+  const bootstrapLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
+  app.post(
+    "/api/admin/auth/bootstrap",
+    bootstrapLimiter,
+    async (req: Request, res: Response) => {
+      try {
+        const configured = getAdminBootstrapSecret();
+        if (!configured) {
+          return sendApiError(res, "ADMIN_BOOTSTRAP_UNAUTHORIZED");
+        }
+        const header = req.headers.authorization || "";
+        const provided = header.startsWith("Bearer ")
+          ? header.slice(7).trim()
+          : String(req.headers["x-admin-bootstrap-secret"] || "").trim();
+        if (!provided || provided !== configured) {
+          return sendApiError(res, "ADMIN_BOOTSTRAP_UNAUTHORIZED");
+        }
+        const result = await bootstrapSeedAdmins();
+        res.json(result);
+      } catch (error: any) {
+        sendRouteError(res, error, error?.code || "OPERATION_FAILED");
+      }
+    },
+  );
+
+  app.post("/api/admin/auth/login", (_req: Request, res: Response) => {
+    return sendApiError(
+      res,
+      "ADMIN_AUTH_REQUIRED",
+      "Admin password login is disabled. Sign in with your admin email at /admin/login.",
+    );
+  });
+
+  app.post("/api/admin/auth/logout", (_req: Request, res: Response) => {
     res.json({ success: true });
   });
 
-  app.get("/api/admin/auth/check", (req: Request, res: Response) => {
-    res.json({ authenticated: !!req.session.adminAuthenticated });
+  app.get(
+    "/api/admin/auth/check",
+    adminAuthLimiter,
+    async (req: Request, res: Response) => {
+      try {
+        const token = extractBearerToken(req);
+        const state = await peekAdminSession(token);
+        res.json(state);
+      } catch {
+        res.json({ authenticated: false, mfaRequired: false });
+      }
+    },
+  );
+
+  app.get("/api/admin/auth/me", requireAdminAuth, (req: Request, res: Response) => {
+    res.json({
+      authenticated: true,
+      admin: publicAdminDto(req.adminAuth!.admin),
+    });
   });
+
+  app.get("/api/admin/auth/admins", requireAdminAuth, async (_req: Request, res: Response) => {
+    try {
+      const rows = await listAdmins();
+      res.json(rows.map(publicAdminDto));
+    } catch (error: any) {
+      sendRouteError(res, error, "OPERATION_FAILED");
+    }
+  });
+
+  app.get(
+    "/api/admin/auth/audit-log",
+    requireAdminAuth,
+    requireSuperAdmin,
+    async (req: Request, res: Response) => {
+      try {
+        const limit = Number(req.query.limit) || 100;
+        const rows = await listAdminAuditLogs(limit);
+        res.json(rows.map(publicAuditDto));
+      } catch (error: any) {
+        sendRouteError(res, error, "OPERATION_FAILED");
+      }
+    },
+  );
+
+  app.post(
+    "/api/admin/auth/invite",
+    requireAdminAuth,
+    requireSuperAdmin,
+    adminAuthLimiter,
+    async (req: Request, res: Response) => {
+      try {
+        const email = normalizeAdminEmail(req.body?.email);
+        const created = await invitePendingAdmin(email, req.adminAuth!.admin);
+        res.status(201).json(publicAdminDto(created));
+      } catch (error: any) {
+        sendRouteError(res, error, error?.code || "OPERATION_FAILED");
+      }
+    },
+  );
+
+  app.post(
+    "/api/admin/auth/admins/:id/approve",
+    requireAdminAuth,
+    requireSuperAdmin,
+    async (req: Request, res: Response) => {
+      try {
+        const id = Number(req.params.id);
+        const pending = await getAdminById(id);
+        if (!pending) return sendApiError(res, "ADMIN_INVITE_INVALID");
+        const updated = await approvePendingAdmin(pending, req.adminAuth!.admin);
+        res.json(publicAdminDto(updated));
+      } catch (error: any) {
+        sendRouteError(res, error, error?.code || "OPERATION_FAILED");
+      }
+    },
+  );
+
+  app.post(
+    "/api/admin/auth/admins/:id/reject",
+    requireAdminAuth,
+    requireSuperAdmin,
+    async (req: Request, res: Response) => {
+      try {
+        const id = Number(req.params.id);
+        const pending = await getAdminById(id);
+        if (!pending) return sendApiError(res, "ADMIN_INVITE_INVALID");
+        const updated = await rejectPendingAdmin(pending, req.adminAuth!.admin);
+        res.json(publicAdminDto(updated));
+      } catch (error: any) {
+        sendRouteError(res, error, error?.code || "OPERATION_FAILED");
+      }
+    },
+  );
+
+  app.delete(
+    "/api/admin/auth/admins/:id",
+    requireAdminAuth,
+    requireSuperAdmin,
+    async (req: Request, res: Response) => {
+      try {
+        const id = Number(req.params.id);
+        const target = await getAdminById(id);
+        if (!target) return sendApiError(res, "ADMIN_INVITE_INVALID");
+        const updated = await revokeAdmin(target, req.adminAuth!.admin);
+        res.json(publicAdminDto(updated));
+      } catch (error: any) {
+        sendRouteError(res, error, error?.code || "OPERATION_FAILED");
+      }
+    },
+  );
+
+  app.post(
+    "/api/admin/auth/clear-mfa",
+    requireAdminAuth,
+    requireSuperAdmin,
+    async (req: Request, res: Response) => {
+      try {
+        const adminId = req.body?.adminId != null ? Number(req.body.adminId) : undefined;
+        const email = typeof req.body?.email === "string" ? req.body.email : undefined;
+        if (adminId == null && !email) {
+          return sendApiError(res, "VALIDATION_FAILED", "adminId or email is required.");
+        }
+        const result = await clearAdminMfa(
+          { adminId, email },
+          req.adminAuth!.admin,
+        );
+        res.json(result);
+      } catch (error: any) {
+        sendRouteError(res, error, "OPERATION_FAILED");
+      }
+    },
+  );
 
   app.get("/api/admin/email/status", requireAdminAuth, (_req: Request, res: Response) => {
     res.json(getEmailConfigStatus());
@@ -1800,7 +1903,7 @@ export async function registerRoutes(
     try {
       if (!req.file) return res.status(400).json({ message: "No file uploaded" });
       const resumePath = await uploadToSupabaseStorage("resumes", req.file);
-      const singer = await storage.updateSinger(req.session.userId!, { resume_url: resumePath });
+      const singer = await storage.updateSinger(currentUserId(req), { resume_url: resumePath });
       if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
       const signedResumeUrl = await signStoragePath(resumePath);
       res.json({ resume_url: signedResumeUrl, message: "Resume uploaded successfully" });
@@ -1815,7 +1918,7 @@ export async function registerRoutes(
   app.put("/api/singer/roles/:id", requireAuth, requireSinger, async (req: Request, res: Response) => {
     try {
       const roleId = parseInt(req.params.id as string);
-      const singerId = req.session.userId!;
+      const singerId = currentUserId(req);
       const VALID_DEPTHS = ['1-2', '3-5', '6-10', '10+'];
       const VALID_STATUSES = ['performed', 'in_preparation'];
       const roles = await storage.getSingerRoles(singerId);
@@ -1853,7 +1956,7 @@ export async function registerRoutes(
     try {
       if (!req.file) return res.status(400).json({ message: "No file uploaded" });
       const headshotPath = await uploadToSupabaseStorage("headshots", req.file);
-      const singer = await storage.updateSinger(req.session.userId!, { headshot_url: headshotPath });
+      const singer = await storage.updateSinger(currentUserId(req), { headshot_url: headshotPath });
       if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
       const { password: _, ...safe } = singer;
       const signed = await signSingerFiles(safe);
@@ -1872,12 +1975,12 @@ export async function registerRoutes(
       if (newPassword.length < 8) {
         return res.status(400).json({ message: "New password must be at least 8 characters" });
       }
-      const singer = await storage.getSinger(req.session.userId!);
+      const singer = await storage.getSinger(currentUserId(req));
       if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
-      const valid = await comparePasswords(currentPassword, singer.password);
+      if (!singer.auth_user_id) return sendApiError(res, "CURRENT_PASSWORD_INCORRECT");
+      const valid = await verifyAccountPassword(singer.email, currentPassword);
       if (!valid) return sendApiError(res, "CURRENT_PASSWORD_INCORRECT");
-      const hashed = await hashPassword(newPassword);
-      await storage.updateSinger(req.session.userId!, { password: hashed });
+      await changeAccountPassword(singer.auth_user_id, newPassword);
       res.json({ message: "Password updated successfully" });
     } catch (error: any) {
       sendRouteError(res, error, "OPERATION_FAILED");
@@ -1893,12 +1996,12 @@ export async function registerRoutes(
       if (newPassword.length < 8) {
         return res.status(400).json({ message: "New password must be at least 8 characters" });
       }
-      const org = await storage.getOrganization(req.session.userId!);
+      const org = await storage.getOrganization(currentUserId(req));
       if (!org) return sendApiError(res, "ORG_NOT_FOUND");
-      const valid = await comparePasswords(currentPassword, org.password);
+      if (!org.auth_user_id) return sendApiError(res, "CURRENT_PASSWORD_INCORRECT");
+      const valid = await verifyAccountPassword(org.email, currentPassword);
       if (!valid) return sendApiError(res, "CURRENT_PASSWORD_INCORRECT");
-      const hashed = await hashPassword(newPassword);
-      await storage.updateOrganization(req.session.userId!, { password: hashed });
+      await changeAccountPassword(org.auth_user_id, newPassword);
       res.json({ message: "Password updated successfully" });
     } catch (error: any) {
       sendRouteError(res, error, "OPERATION_FAILED");
@@ -1915,9 +2018,9 @@ export async function registerRoutes(
       if (!email || !EMAIL_REGEX.test(email)) {
         return sendApiError(res, "INVALID_EMAIL");
       }
-      const singer = await storage.getSinger(req.session.userId!);
+      const singer = await storage.getSinger(currentUserId(req));
       if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
-      if (!currentPassword || !(await comparePasswords(currentPassword, singer.password))) {
+      if (!singer.auth_user_id || !currentPassword || !(await verifyAccountPassword(singer.email, currentPassword))) {
         return sendApiError(res, "CURRENT_PASSWORD_INCORRECT");
       }
       if (email !== singer.email) {
@@ -1926,6 +2029,7 @@ export async function registerRoutes(
           return sendApiError(res, "EMAIL_ALREADY_REGISTERED");
         }
       }
+      await changeAccountEmail(singer.auth_user_id, email);
       const updated = await storage.updateSinger(singer.id, { email });
       if (!updated) return sendApiError(res, "SINGER_NOT_FOUND");
       const { password: _, ...safe } = updated;
@@ -1943,9 +2047,9 @@ export async function registerRoutes(
       if (!email || !EMAIL_REGEX.test(email)) {
         return sendApiError(res, "INVALID_EMAIL");
       }
-      const org = await storage.getOrganization(req.session.userId!);
+      const org = await storage.getOrganization(currentUserId(req));
       if (!org) return sendApiError(res, "ORG_NOT_FOUND");
-      if (!currentPassword || !(await comparePasswords(currentPassword, org.password))) {
+      if (!org.auth_user_id || !currentPassword || !(await verifyAccountPassword(org.email, currentPassword))) {
         return sendApiError(res, "CURRENT_PASSWORD_INCORRECT");
       }
       if (email !== org.email) {
@@ -1954,6 +2058,7 @@ export async function registerRoutes(
           return sendApiError(res, "EMAIL_ALREADY_REGISTERED");
         }
       }
+      await changeAccountEmail(org.auth_user_id, email);
       const updated = await storage.updateOrganization(org.id, { email });
       if (!updated) return sendApiError(res, "ORG_NOT_FOUND");
       const { password: _, ...safe } = updated;
@@ -1975,7 +2080,7 @@ export async function registerRoutes(
       if (!singer || !singer.admin_approved) {
         return sendApiError(res, "SINGER_NOT_FOUND");
       }
-      const result = await storage.toggleShortlist(req.session.userId!, singerId);
+      const result = await storage.toggleShortlist(currentUserId(req), singerId);
       res.json(result);
     } catch (error: any) {
       sendRouteError(res, error, "OPERATION_FAILED");
@@ -1984,7 +2089,7 @@ export async function registerRoutes(
 
   app.get("/api/shortlist", requireAuth, requireOrg, async (req: Request, res: Response) => {
     try {
-      const orgId = req.session.userId!;
+      const orgId = currentUserId(req);
       const [singersList, ids] = await Promise.all([
         storage.getShortlistedSingersWithData(orgId),
         storage.getRevealedSingerIds(orgId),
@@ -2010,7 +2115,7 @@ export async function registerRoutes(
   // ── Org: Revealed Singers History ───────────────────────────────────────
   app.get("/api/org/revealed-singers", requireAuth, requireOrg, async (req: Request, res: Response) => {
     try {
-      const singers = await storage.getRevealedSingersWithData(req.session.userId!);
+      const singers = await storage.getRevealedSingersWithData(currentUserId(req));
       const safeSingers = await signSingerFilesBatch(singers.map(({ password, ...s }: any) => s));
       res.json(safeSingers);
     } catch (error: any) {
@@ -2025,7 +2130,7 @@ export async function registerRoutes(
       if (!singer_id || !role_name || !engagement_date) {
         return res.status(400).json({ message: "singer_id, role_name, and engagement_date are required" });
       }
-      const orgId = req.session.userId!;
+      const orgId = currentUserId(req);
 
       const isDuplicate = await storage.checkDuplicateFeedback(Number(singer_id), orgId, engagement_date);
       if (isDuplicate) {
@@ -2086,7 +2191,7 @@ export async function registerRoutes(
   // ── Singer: Search Appearances (last 30 days) ───────────────────────────
   app.get("/api/singer/search-appearances", requireAuth, requireSinger, async (req: Request, res: Response) => {
     try {
-      const count = await storage.countSearchAppearances(req.session.userId!, 30);
+      const count = await storage.countSearchAppearances(currentUserId(req), 30);
       res.json({ count, days: 30 });
     } catch (error: any) {
       sendRouteError(res, error, "OPERATION_FAILED");
@@ -2096,7 +2201,7 @@ export async function registerRoutes(
   // ── Singer: Request Emergency Status ────────────────────────────────────
   app.post("/api/singer/request-emergency", requireAuth, requireSinger, async (req: Request, res: Response) => {
     try {
-      const singer = await storage.updateSinger(req.session.userId!, { emergency_status_requested: true });
+      const singer = await storage.updateSinger(currentUserId(req), { emergency_status_requested: true });
       if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
       res.json({ message: "Emergency status request submitted. An admin will review your request." });
     } catch (error: any) {
@@ -2113,7 +2218,7 @@ export async function registerRoutes(
       }
       const created = await storage.createRepertoireSuggestion({
         ...parsed,
-        singer_id: req.session.userId!,
+        singer_id: currentUserId(req),
       });
       res.json(created);
     } catch (error: any) {

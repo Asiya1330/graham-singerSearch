@@ -9,6 +9,20 @@ import {
   stripeStatusLabel,
 } from "../lib/stripe";
 import { getBillingDisplay } from "./BillingIntervalPicker";
+import { userFromProfile } from "../lib/accountAuth";
+
+function mergeSyncedUser(prev, data, fallbackType) {
+  const { userType: ut, ...userData } = data;
+  const type = ut === "singer" || ut === "organization" ? ut : fallbackType;
+  if (type !== "singer" && type !== "organization") {
+    return prev;
+  }
+  const next = userFromProfile({ ...userData, userType: type });
+  if (prev?.data) {
+    return { ...next, data: { ...prev.data, ...next.data } };
+  }
+  return next;
+}
 
 export function SubscriptionSection({ user, setCurrentUser, setProfileMsg, userType }) {
   const [stripeLoading, setStripeLoading] = React.useState(null);
@@ -32,10 +46,7 @@ export function SubscriptionSection({ user, setCurrentUser, setProfileMsg, userT
     syncStripeSubscription()
       .then((data) => {
         if (cancelled) return;
-        const { userType: ut, ...userData } = data;
-        setCurrentUser(prev => prev?.data
-          ? { ...prev, data: { ...prev.data, ...userData } }
-          : { type: ut || userType, data: userData });
+        setCurrentUser((prev) => mergeSyncedUser(prev, data, userType));
       })
       .catch(() => {});
     return () => { cancelled = true; };
@@ -96,10 +107,7 @@ export function SubscriptionSection({ user, setCurrentUser, setProfileMsg, userT
     setStripeLoading("cancel");
     try {
       const data = await cancelStripeSubscription();
-      const { userType: ut, ...userData } = data;
-      setCurrentUser(prev => prev?.data
-        ? { ...prev, data: { ...prev.data, ...userData } }
-        : { type: ut || userType, data: userData });
+      setCurrentUser((prev) => mergeSyncedUser(prev, data, userType));
       setProfileMsg({ type: "success", text: `Subscription canceled. Pro access continues until ${data.cancelAt || "end of period"}.` });
     } catch (e) {
       setProfileMsg({ type: "error", text: e.message || "Failed to cancel subscription." });
@@ -110,10 +118,7 @@ export function SubscriptionSection({ user, setCurrentUser, setProfileMsg, userT
 
   const handleResume = withLoading("resume", async () => {
     const data = await resumeStripeSubscription();
-    const { userType: ut, ...userData } = data;
-    setCurrentUser(prev => prev?.data
-      ? { ...prev, data: { ...prev.data, ...userData } }
-      : { type: ut || userType, data: userData });
+    setCurrentUser((prev) => mergeSyncedUser(prev, data, userType));
     setProfileMsg({ type: "success", text: "Subscription resumed!" });
   });
 

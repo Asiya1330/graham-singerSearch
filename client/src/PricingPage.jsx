@@ -3,6 +3,7 @@ import { CheckCircle, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAppContext } from "./AppContext";
 import { navigateToView } from "./lib/nav";
+import { logoutAccount } from "./lib/accountAuth";
 import { getStripePricing, startStripeCheckout, openStripeBillingPortal } from "./lib/stripe";
 import { Navbar } from "./landing/Navbar";
 import { AppFooter } from "./AppShared";
@@ -19,16 +20,68 @@ function FeatureItem({ children, accent = "emerald" }) {
   );
 }
 
+/** Browse-only CTA when the signed-in role does not match the pricing tab. */
+function AudienceMismatchNotice({ pricingType, onLogoutAndGo, busy }) {
+  const forSingers = pricingType === "singer";
+  const planAudience = forSingers ? "singers" : "organizations";
+  const accountNoun = forSingers ? "singer" : "organization";
+  const signedInAs = forSingers ? "an organization" : "a singer";
+  const registerView = forSingers ? "singerRegister" : "orgRegister";
+  const loginView = forSingers ? "singerLogin" : "organizationLogin";
+
+  return (
+    <div
+      className="mt-8 mx-auto max-w-2xl rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 text-left"
+      role="status"
+      data-testid="pricing-audience-mismatch"
+    >
+      <p className="text-sm font-semibold text-amber-950">
+        This plan is for {planAudience}
+      </p>
+      <p className="mt-1 text-sm text-amber-900/90 leading-relaxed">
+        You&apos;re signed in as {signedInAs}. To subscribe here, log out and create{" "}
+        {forSingers ? "a singer" : "an organization"} account, or sign in to an existing{" "}
+        {accountNoun} account.
+      </p>
+      <div className="mt-4 flex flex-col sm:flex-row gap-2 sm:gap-3">
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => onLogoutAndGo(registerView)}
+          className="px-4 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          data-testid="button-pricing-mismatch-register"
+        >
+          {busy ? "Logging out…" : `Log out & create ${forSingers ? "a singer" : "an organization"} account`}
+        </button>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => onLogoutAndGo(loginView)}
+          className="px-4 py-2.5 rounded-lg border border-amber-300 bg-white text-amber-950 text-sm font-bold hover:bg-amber-100/60 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          data-testid="button-pricing-mismatch-login"
+        >
+          {busy ? "Logging out…" : `Log out & sign in as ${forSingers ? "a singer" : "an organization"}`}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function PricingPage({ showAlert }) {
-  const { currentUser, setView } = useAppContext();
+  const { currentUser, setCurrentUser, setView } = useAppContext();
 
   const [pricingType, setPricingType] = useState(currentUser?.type || "singer");
   const [checkoutLoading, setCheckoutLoading] = useState(null);
+  const [accountSwitchLoading, setAccountSwitchLoading] = useState(false);
   const [pricingData, setPricingData] = useState(null);
+
   const isSinger = pricingType === "singer";
-  const isPro = currentUser?.data?.subscription_tier === "pro";
-  const isFree = currentUser?.data?.subscription_tier === "free";
-  const hasStripeSub = Boolean(currentUser?.data?.stripe_subscription_id);
+  // Only reflect subscription state on the tab that matches the signed-in role.
+  const isOwnAudience = Boolean(currentUser) && currentUser.type === pricingType;
+  const isWrongAudience = Boolean(currentUser) && currentUser.type !== pricingType;
+  const isPro = isOwnAudience && currentUser?.data?.subscription_tier === "pro";
+  const isFree = isOwnAudience && currentUser?.data?.subscription_tier === "free";
+  const hasStripeSub = isOwnAudience && Boolean(currentUser?.data?.stripe_subscription_id);
   const billing = getBillingDisplay(isSinger, "annual", pricingData);
 
   React.useEffect(() => {
@@ -65,8 +118,24 @@ export function PricingPage({ showAlert }) {
 
   const trialNote = isSinger ? "No contract · cancel anytime" : "7-day free trial · card required";
   const proTitle = isSinger ? "Singer Pro" : "Organization Pro";
+  const wrongAudienceLabel = isSinger
+    ? "Requires a singer account"
+    : "Requires an organization account";
+
+  async function logoutAndGo(view) {
+    setAccountSwitchLoading(true);
+    try {
+      await logoutAccount();
+      setCurrentUser(null);
+      navigateToView(setView, view);
+    } catch (err) {
+      showAlert(err.message || "Failed to log out", "error");
+      setAccountSwitchLoading(false);
+    }
+  }
 
   async function handleCheckout(interval) {
+    if (isWrongAudience) return;
     if (!currentUser) {
       navigateToView(setView, isSinger ? "singerLogin" : "organizationLogin");
       return;
@@ -88,7 +157,14 @@ export function PricingPage({ showAlert }) {
     }
   }
 
+  function freeButtonLabel() {
+    if (isWrongAudience) return wrongAudienceLabel;
+    if (isFree) return "Current plan";
+    return "Downgrade to Free";
+  }
+
   function proButtonLabel(interval) {
+    if (isWrongAudience) return wrongAudienceLabel;
     if (checkoutLoading === interval) return "Redirecting…";
     if (!currentUser) return "Sign in to upgrade";
     if (hasStripeSub) return "Manage billing";
@@ -126,6 +202,7 @@ export function PricingPage({ showAlert }) {
           <div className="flex justify-center">
             <div className="bg-white p-1.5 rounded-xl border border-slate-200 inline-flex shadow-sm relative z-10">
               <button
+                type="button"
                 onClick={() => setPricingType("singer")}
                 className={`px-8 py-2.5 rounded-lg text-sm font-bold transition-all ${
                   isSinger
@@ -136,6 +213,7 @@ export function PricingPage({ showAlert }) {
                 For Singers
               </button>
               <button
+                type="button"
                 onClick={() => setPricingType("organization")}
                 className={`px-8 py-2.5 rounded-lg text-sm font-bold transition-all ${
                   !isSinger
@@ -147,6 +225,14 @@ export function PricingPage({ showAlert }) {
               </button>
             </div>
           </div>
+
+          {isWrongAudience && (
+            <AudienceMismatchNotice
+              pricingType={pricingType}
+              onLogoutAndGo={logoutAndGo}
+              busy={accountSwitchLoading}
+            />
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-4 max-w-6xl mx-auto items-stretch lg:items-center">
@@ -176,10 +262,11 @@ export function PricingPage({ showAlert }) {
             </ul>
 
             <button
-              disabled={isFree}
+              type="button"
+              disabled={isWrongAudience || isFree}
               className="w-full py-3 px-4 border border-slate-300 rounded-xl bg-white text-slate-700 font-bold hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
             >
-              {isFree ? "Current plan" : "Downgrade to Free"}
+              {freeButtonLabel()}
             </button>
           </motion.div>
 
@@ -234,8 +321,14 @@ export function PricingPage({ showAlert }) {
             </ul>
 
             <button
+              type="button"
               onClick={() => handleCheckout("annual")}
-              disabled={(isPro && !hasStripeSub) || checkoutLoading !== null}
+              disabled={
+                isWrongAudience ||
+                (isPro && !hasStripeSub) ||
+                checkoutLoading !== null ||
+                accountSwitchLoading
+              }
               className="w-full py-3.5 px-4 bg-blue-600 border border-transparent rounded-xl text-white font-bold hover:bg-blue-700 hover:scale-[1.01] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 min-h-[52px]"
             >
               {proButtonLabel("annual")}
@@ -279,8 +372,14 @@ export function PricingPage({ showAlert }) {
             </ul>
 
             <button
+              type="button"
               onClick={() => handleCheckout("monthly")}
-              disabled={(isPro && !hasStripeSub) || checkoutLoading !== null}
+              disabled={
+                isWrongAudience ||
+                (isPro && !hasStripeSub) ||
+                checkoutLoading !== null ||
+                accountSwitchLoading
+              }
               className="w-full py-3 px-4 border border-slate-300 rounded-xl bg-white text-slate-800 font-bold hover:bg-slate-50 hover:border-slate-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
             >
               {proButtonLabel("monthly")}

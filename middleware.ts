@@ -31,6 +31,21 @@ function forwardRequestHeaders(request: Request): Headers {
     if (STRIP_REQUEST_HEADERS.has(key.toLowerCase())) return;
     headers.set(key, value);
   });
+
+  // This proxy reaches Railway with a server-side fetch, so the backend would
+  // otherwise see this function's egress address for every visitor and put the
+  // whole userbase in one rate-limit bucket. Pass the real client address on
+  // explicitly (see server/lib/rate-limit.ts).
+  const clientIp =
+    request.headers.get("x-vercel-forwarded-for") ||
+    request.headers.get("x-real-ip") ||
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  if (clientIp) {
+    headers.set("x-client-ip", clientIp);
+  } else {
+    headers.delete("x-client-ip");
+  }
+
   return headers;
 }
 
