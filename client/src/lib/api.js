@@ -2,6 +2,7 @@ import {
   API_ERRORS,
   resolveApiErrorMessage,
 } from "@shared/api-errors";
+import { getAccessToken, getAccountType } from "./supabase";
 
 export { API_ERRORS, resolveApiErrorMessage };
 
@@ -29,12 +30,29 @@ export async function getApiErrorMessage(res, fallbackCode = "OPERATION_FAILED")
 
 /**
  * fetch() wrapper that throws Error with a clean message when !res.ok.
+ * Attaches Supabase Bearer token when a session exists (admin APIs).
  */
 export async function apiFetch(url, options = {}, fallbackCode = "OPERATION_FAILED") {
   try {
+    const headers = new Headers(options.headers || {});
+    const token = await getAccessToken();
+    if (token) headers.set("Authorization", `Bearer ${token}`);
+    const accountType = getAccountType();
+    if (accountType && !headers.has("X-Account-Type")) {
+      headers.set("X-Account-Type", accountType);
+    }
+    if (
+      options.body &&
+      typeof options.body === "string" &&
+      !headers.has("Content-Type")
+    ) {
+      headers.set("Content-Type", "application/json");
+    }
+
     const res = await fetch(url, {
       credentials: "include",
       ...options,
+      headers,
     });
 
     if (!res.ok) {

@@ -7,6 +7,7 @@ import { AudienceCards } from "./landing/AudienceCards";
 import { UrgentStrip } from "./landing/UrgentStrip";
 import { TrustRow } from "./landing/TrustRow";
 import { LandingFooter } from "./landing/LandingFooter";
+import { apiFetch } from "./lib/api";
 
 export function LandingView({ setAdminMode }) {
   const { setView } = useAppContext();
@@ -31,8 +32,7 @@ export function LandingView({ setAdminMode }) {
         reset();
         (async () => {
           try {
-            const res = await fetch("/api/admin/auth/check", { credentials: "include" });
-            const data = await res.json();
+            const { data } = await apiFetch("/api/admin/auth/check");
             if (data.authenticated) { setAdminMode(true); setView("adminDashboard"); }
             else setView("adminLogin");
           } catch {

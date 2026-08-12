@@ -7,9 +7,17 @@ export type ApiErrorCode =
   | "ADMIN_AUTH_REQUIRED"
   | "ADMIN_PASSWORD_NOT_CONFIGURED"
   | "ADMIN_INVALID_PASSWORD"
+  | "ADMIN_MFA_REQUIRED"
+  | "ADMIN_FORBIDDEN"
+  | "ADMIN_SUPER_REQUIRED"
+  | "ADMIN_INVITE_INVALID"
+  | "ADMIN_APPROVE_FORBIDDEN"
+  | "ADMIN_BOOTSTRAP_UNAUTHORIZED"
+  | "RATE_LIMITED"
   | "NOT_AUTHENTICATED"
   | "SINGER_ACCESS_REQUIRED"
   | "ORG_ACCESS_REQUIRED"
+  | "ACCOUNT_TYPE_MISMATCH"
   | "EMAIL_PASSWORD_REQUIRED"
   | "EMAIL_USER_TYPE_REQUIRED"
   | "EMAIL_ALREADY_REGISTERED"
@@ -60,6 +68,35 @@ export const API_ERRORS: Record<ApiErrorCode, ApiErrorDefinition> = {
     status: 401,
     message: "Incorrect admin password. Please try again.",
   },
+  ADMIN_MFA_REQUIRED: {
+    status: 403,
+    message: "Multi-factor authentication is required for admin access.",
+  },
+  ADMIN_FORBIDDEN: {
+    status: 403,
+    message: "You do not have admin access.",
+  },
+  ADMIN_SUPER_REQUIRED: {
+    status: 403,
+    message: "Only super admins can manage the admin roster.",
+  },
+  ADMIN_INVITE_INVALID: {
+    status: 400,
+    message: "That admin invite is invalid or already handled.",
+  },
+  ADMIN_APPROVE_FORBIDDEN: {
+    status: 403,
+    message: "You cannot approve or reject an invite you created.",
+  },
+  ADMIN_BOOTSTRAP_UNAUTHORIZED: {
+    status: 401,
+    message: "Invalid bootstrap secret.",
+  },
+  RATE_LIMITED: {
+    status: 429,
+    message:
+      "Too many attempts. Please wait a few minutes and try again.",
+  },
   NOT_AUTHENTICATED: {
     status: 401,
     message: "Please sign in to continue.",
@@ -71,6 +108,11 @@ export const API_ERRORS: Record<ApiErrorCode, ApiErrorDefinition> = {
   ORG_ACCESS_REQUIRED: {
     status: 403,
     message: "This action requires an organization account.",
+  },
+  ACCOUNT_TYPE_MISMATCH: {
+    status: 403,
+    message:
+      "This email is not linked to that account type. Try the other login, or register for the account you need.",
   },
   EMAIL_PASSWORD_REQUIRED: {
     status: 400,

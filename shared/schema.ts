@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, serial, text, varchar, integer, boolean, timestamp, json, jsonb, index, uniqueIndex, doublePrecision } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, varchar, integer, boolean, timestamp, json, jsonb, index, uniqueIndex, doublePrecision, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -24,7 +24,10 @@ export type RepertoireReference = typeof repertoireReference.$inferSelect;
 export const singers = pgTable("singers", {
   id: serial("id").primaryKey(),
   email: text("email").unique().notNull(),
-  password: text("password").notNull(),
+  /** Supabase Auth user. Null until the account is linked (see auth-migrate.ts). */
+  auth_user_id: uuid("auth_user_id"),
+  /** Legacy scrypt hash. Null for accounts created after the Supabase cutover. */
+  password: text("password"),
   first_name: text("first_name").notNull(),
   last_name: text("last_name").notNull(),
   city: text("city"),
@@ -96,10 +99,16 @@ export const singers = pgTable("singers", {
   representedIdx: index("singers_represented_idx").on(table.represented),
   emergencyIdx: index("singers_emergency_opt_in_idx").on(table.emergency_opt_in),
   createdIdx: index("singers_created_at_idx").on(table.created_at),
+  authUserIdx: uniqueIndex("singers_auth_user_id_idx").on(table.auth_user_id),
 }));
 
+// auth_user_id and password are omitted so a client body can never set them —
+// registration routes spread req.body into this schema. The server attaches
+// both explicitly via storage.createSinger.
 export const insertSingerSchema = createInsertSchema(singers).omit({
   id: true,
+  auth_user_id: true,
+  password: true,
   created_at: true,
   viewed_count: true,
   is_trending: true,
@@ -170,7 +179,10 @@ export type SingerWork = typeof singerWorks.$inferSelect;
 export const organizations = pgTable("organizations", {
   id: serial("id").primaryKey(),
   email: text("email").unique().notNull(),
-  password: text("password").notNull(),
+  /** Supabase Auth user. Null until the account is linked (see auth-migrate.ts). */
+  auth_user_id: uuid("auth_user_id"),
+  /** Legacy scrypt hash. Null for accounts created after the Supabase cutover. */
+  password: text("password"),
   organization_name: text("organization_name").notNull(),
   organization_type: text("organization_type"),
   website_url: text("website_url"),
@@ -201,10 +213,14 @@ export const organizations = pgTable("organizations", {
   approvedIdx: index("organizations_admin_approved_idx").on(table.admin_approved),
   stripeCustomerIdx: uniqueIndex("organizations_stripe_customer_id_idx").on(table.stripe_customer_id),
   stripeSubscriptionIdx: uniqueIndex("organizations_stripe_subscription_id_idx").on(table.stripe_subscription_id),
+  authUserIdx: uniqueIndex("organizations_auth_user_id_idx").on(table.auth_user_id),
 }));
 
+// See the note on insertSingerSchema — auth_user_id/password are server-set only.
 export const insertOrganizationSchema = createInsertSchema(organizations).omit({
   id: true,
+  auth_user_id: true,
+  password: true,
   created_at: true,
   admin_approved: true,
   verified: true,
@@ -383,3 +399,55 @@ export const sessions = pgTable("sessions", {
   sess: json("sess").notNull(),
   expire: timestamp("expire", { withTimezone: true, mode: "date" }).notNull(),
 });
+
+/** Invite-only admin roster (Supabase Auth). Only status=active may call admin APIs. */
+export const admins = pgTable("admins", {
+  id: serial("id").primaryKey(),
+  auth_user_id: uuid("auth_user_id"),
+  email: text("email").unique().notNull(),
+  name: text("name"),
+  status: text("status").notNull().default("pending"),
+  is_super: boolean("is_super").notNull().default(false),
+  invited_by: integer("invited_by"),
+  approved_by: integer("approved_by"),
+  created_at: timestamp("created_at", { mode: "date" }).defaultNow(),
+  updated_at: timestamp("updated_at", { mode: "date" }).defaultNow(),
+}, (table) => ({
+  authUserIdx: uniqueIndex("admins_auth_user_id_idx").on(table.auth_user_id),
+  statusIdx: index("admins_status_idx").on(table.status),
+  emailIdx: index("admins_email_idx").on(table.email),
+}));
+
+export type Admin = typeof admins.$inferSelect;
+export type AdminStatus = "pending" | "active" | "rejected" | "revoked";
+
+export const ADMIN_SEED_EMAILS = [
+  "asiya.batool987@gmail.com",
+  "gfarhan18@gmail.com",
+  "singersearch2026@gmail.com",
+] as const;
+
+/** Privileged admin actions (invite / approve / revoke / clear MFA / bootstrap). */
+export const adminAuditLog = pgTable("admin_audit_log", {
+  id: serial("id").primaryKey(),
+  action: text("action").notNull(),
+  actor_admin_id: integer("actor_admin_id"),
+  actor_email: text("actor_email"),
+  target_admin_id: integer("target_admin_id"),
+  target_email: text("target_email"),
+  metadata: jsonb("metadata").$type<Record<string, unknown>>(),
+  created_at: timestamp("created_at", { mode: "date" }).defaultNow(),
+}, (table) => ({
+  actionIdx: index("admin_audit_log_action_idx").on(table.action),
+  actorIdx: index("admin_audit_log_actor_idx").on(table.actor_admin_id),
+  createdIdx: index("admin_audit_log_created_at_idx").on(table.created_at),
+}));
+
+export type AdminAuditLog = typeof adminAuditLog.$inferSelect;
+export type AdminAuditAction =
+  | "invite"
+  | "approve"
+  | "reject"
+  | "revoke"
+  | "clear_mfa"
+  | "bootstrap";

@@ -18,6 +18,7 @@ export const APP_ROUTES = {
   emergencySearch: "/organization/emergency-search",
   adminLogin: "/admin/login",
   adminDashboard: "/admin/dashboard",
+  adminSetPassword: "/admin/set-password",
 };
 
 const VIEW_BY_PATH = Object.fromEntries(

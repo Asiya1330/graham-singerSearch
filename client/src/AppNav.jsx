@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { CheckCircle, ClipboardList, Heart, Menu, X, Zap } from "lucide-react";
 import singerSearchLogo from "@assets/Singer_Search_Logo_May_2026_1777734809747.png";
 import { useAppContext } from "./AppContext";
+import { logoutAccount } from "./lib/accountAuth";
 
 // Single source of truth for the authenticated navbars. Both the dashboard and
 // settings pages for a given role render the same component, so the logo size,
@@ -18,8 +19,10 @@ const MOBILE_ITEM_BASE =
 const MOBILE_ITEM_ACTIVE = `${MOBILE_ITEM_BASE} text-white`;
 const MOBILE_ITEM_INACTIVE = `${MOBILE_ITEM_BASE} text-white/50 hover:text-white/80`;
 
+// Clears the Supabase session (so no further API call carries a token) and
+// tears down any leftover legacy cookie.
 async function logout() {
-  await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+  await logoutAccount();
 }
 
 function useCloseOnEscape(open, setOpen) {
