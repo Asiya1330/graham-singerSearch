@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { describeError, getApiErrorMessage } from "../../../../lib/api";
 
 export function SuggestRepertoireForm() {
   const [isSuggestingRepertoire, setIsSuggestingRepertoire] = useState(false);
@@ -28,14 +29,13 @@ export function SuggestRepertoireForm() {
         }),
       });
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || "Failed to submit suggestion");
+        throw new Error(await getApiErrorMessage(res, "OPERATION_FAILED"));
       }
       setSuggestForm({ work_title: "", composer: "", role_name: "", notes: "" });
       setSuggestSuccess(true);
       setTimeout(() => setSuggestSuccess(false), 4000);
     } catch (err) {
-      setSuggestError(err.message || "Failed to submit suggestion");
+      setSuggestError(describeError(err));
     } finally {
       setSuggestSubmitting(false);
     }

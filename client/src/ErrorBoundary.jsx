@@ -8,11 +8,11 @@ import React from "react";
 export class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, detail: "" };
   }
 
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error) {
+    return { hasError: true, detail: error?.message || "" };
   }
 
   componentDidCatch(error, info) {
@@ -20,7 +20,7 @@ export class ErrorBoundary extends React.Component {
   }
 
   handleReset = () => {
-    this.setState({ hasError: false });
+    this.setState({ hasError: false, detail: "" });
     window.location.assign("/");
   };
 
@@ -29,10 +29,18 @@ export class ErrorBoundary extends React.Component {
       return (
         <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
           <div className="max-w-md text-center">
-            <h1 className="text-xl font-bold text-slate-900 mb-2">Something went wrong</h1>
-            <p className="text-sm text-slate-500 mb-6">
-              An unexpected error occurred. Return to the home page and try again.
+            <h1 className="text-xl font-bold text-slate-900 mb-2">This page didn't load</h1>
+            <p className="text-sm text-slate-500 mb-2">
+              The page hit an error while rendering and stopped. Your data hasn't been
+              changed — going back to the home page should clear it.
             </p>
+            {this.state.detail ? (
+              <p className="text-xs text-slate-400 mb-6 break-words">
+                Technical detail: {this.state.detail}
+              </p>
+            ) : (
+              <div className="mb-6" />
+            )}
             <button
               onClick={this.handleReset}
               className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700"

@@ -4,6 +4,7 @@ import { SuggestRepertoireForm } from "./SuggestRepertoireForm";
 import { AddRoleForm } from "./AddRoleForm";
 import { AddWorkForm } from "./AddWorkForm";
 import { RepertoireList } from "./RepertoireList";
+import { describeError, getApiErrorMessage } from "../../../../lib/api";
 
 const BLANK_ROLE = {
   role_name: "",
@@ -76,7 +77,7 @@ export function RepertoireSection() {
 
   const handleSaveRole = async () => {
     if (!newRole.role_name || !newRole.work_title) {
-      showAlert("Please fill in role and work title", "error");
+      showAlert("Please enter both the role name and the work it comes from.", "error");
       return;
     }
     const languages = newRole.languages.includes("Other") && newRole.other_language
@@ -100,18 +101,21 @@ export function RepertoireSection() {
           status: newRole.status || "performed",
         }),
       });
-      if (!res.ok) { showAlert("Failed to add role", "error"); return; }
+      if (!res.ok) {
+        showAlert(await getApiErrorMessage(res, "OPERATION_FAILED"), "error");
+        return;
+      }
       await refreshUser();
       setIsAddingRole(false);
       setNewRole(BLANK_ROLE);
       showAlert("Opera role added to your profile", "success");
     } catch (err) {
-      showAlert("Failed to add role", "error");
+      showAlert(describeError(err), "error");
     }
   };
 
   const handleUpdateRole = async () => {
-    if (!newRole.role_name || !newRole.work_title) { showAlert("Please fill in role and work title", "error"); return; }
+    if (!newRole.role_name || !newRole.work_title) { showAlert("Please enter both the role name and the work it comes from.", "error"); return; }
     const languages = newRole.languages.includes("Other") && newRole.other_language
       ? [...newRole.languages.filter(l => l !== "Other"), newRole.other_language]
       : newRole.languages;
@@ -132,14 +136,17 @@ export function RepertoireSection() {
           status: newRole.status || "performed",
         }),
       });
-      if (!res.ok) { showAlert("Failed to update role", "error"); return; }
+      if (!res.ok) {
+        showAlert(await getApiErrorMessage(res, "OPERATION_FAILED"), "error");
+        return;
+      }
       await refreshUser();
       setIsAddingRole(false);
       setEditingRoleId(null);
       setNewRole(BLANK_ROLE);
       showAlert("Role updated successfully", "success");
     } catch (err) {
-      showAlert("Failed to update role", "error");
+      showAlert(describeError(err), "error");
     }
   };
 
@@ -147,11 +154,14 @@ export function RepertoireSection() {
     if (!confirm("Delete this role from your profile?")) return;
     try {
       const res = await fetch(`/api/singer/roles/${roleId}`, { method: "DELETE", credentials: "include" });
-      if (!res.ok) { showAlert("Failed to delete role", "error"); return; }
+      if (!res.ok) {
+        showAlert(await getApiErrorMessage(res, "OPERATION_FAILED"), "error");
+        return;
+      }
       await refreshUser();
       showAlert("Role removed", "success");
     } catch (err) {
-      showAlert("Failed to delete role", "error");
+      showAlert(describeError(err), "error");
     }
   };
 
@@ -183,7 +193,7 @@ export function RepertoireSection() {
 
   const handleSaveWork = async () => {
     if (!newWork.work_title) {
-      showAlert("Please fill in work title", "error");
+      showAlert("Please enter the title of the work.", "error");
       return;
     }
     const languages = newWork.languages.includes("Other") && newWork.other_language
@@ -210,18 +220,21 @@ export function RepertoireSection() {
           status: newWork.status || "performed",
         }),
       });
-      if (!res.ok) { showAlert("Failed to add work", "error"); return; }
+      if (!res.ok) {
+        showAlert(await getApiErrorMessage(res, "OPERATION_FAILED"), "error");
+        return;
+      }
       await refreshUser();
       setIsAddingWork(false);
       setNewWork(BLANK_WORK);
       showAlert("Work added to your profile", "success");
     } catch (err) {
-      showAlert("Failed to add work", "error");
+      showAlert(describeError(err), "error");
     }
   };
 
   const handleUpdateWork = async () => {
-    if (!newWork.work_title) { showAlert("Please fill in work title", "error"); return; }
+    if (!newWork.work_title) { showAlert("Please enter the title of the work.", "error"); return; }
     const languages = newWork.languages.includes("Other") && newWork.other_language
       ? [...newWork.languages.filter(l => l !== "Other"), newWork.other_language]
       : newWork.languages;
@@ -246,8 +259,7 @@ export function RepertoireSection() {
         }),
       });
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        showAlert(err.message || "Failed to update work", "error");
+        showAlert(await getApiErrorMessage(res, "OPERATION_FAILED"), "error");
         return;
       }
       await refreshUser();
@@ -256,7 +268,7 @@ export function RepertoireSection() {
       setNewWork(BLANK_WORK);
       showAlert("Work updated successfully", "success");
     } catch (err) {
-      showAlert("Failed to update work", "error");
+      showAlert(describeError(err), "error");
     }
   };
 
@@ -264,11 +276,14 @@ export function RepertoireSection() {
     if (!confirm("Delete this work from your profile?")) return;
     try {
       const res = await fetch(`/api/singer/works/${workId}`, { method: "DELETE", credentials: "include" });
-      if (!res.ok) { showAlert("Failed to delete work", "error"); return; }
+      if (!res.ok) {
+        showAlert(await getApiErrorMessage(res, "OPERATION_FAILED"), "error");
+        return;
+      }
       await refreshUser();
       showAlert("Work removed", "success");
     } catch (err) {
-      showAlert("Failed to delete work", "error");
+      showAlert(describeError(err), "error");
     }
   };
 
@@ -303,14 +318,13 @@ export function RepertoireSection() {
         body: JSON.stringify({ status: nextStatus }),
       });
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        showAlert(err.message || 'Failed to update status', 'error');
+        showAlert(await getApiErrorMessage(res, 'OPERATION_FAILED'), 'error');
         return;
       }
       await refreshUser();
       showAlert(nextStatus === 'in_preparation' ? 'Moved to In Preparation' : 'Moved to Performed', 'success');
     } catch (e) {
-      showAlert('Failed to update status', 'error');
+      showAlert(describeError(e), 'error');
     }
   };
 

@@ -79,3 +79,39 @@ export async function apiFetch(url, options = {}, fallbackCode = "OPERATION_FAIL
 export function getErrorMessageFromBody(body, fallbackCode = "OPERATION_FAILED") {
   return resolveApiErrorMessage(body, fallbackCode);
 }
+
+/** Browser fetch rejections — these arrive as TypeErrors with terse text. */
+const BROWSER_NETWORK_MESSAGES = new Set([
+  "Failed to fetch", // Chrome
+  "NetworkError when attempting to fetch resource.", // Firefox
+  "Load failed", // Safari
+  "The Internet connection appears to be offline.",
+  "cancelled",
+]);
+
+/**
+ * Turns a caught exception into something worth showing a user.
+ *
+ * Errors thrown by `apiFetch`/`getApiErrorMessage` already carry a resolved
+ * catalog message, so those pass through untouched. Raw browser network
+ * failures get the connection message instead of their terse native text.
+ */
+export function describeError(error, fallbackCode = "OPERATION_FAILED") {
+  if (typeof error === "string" && error.trim()) return error;
+
+  const message = typeof error?.message === "string" ? error.message.trim() : "";
+  if (!message) return API_ERRORS[fallbackCode]?.message ?? API_ERRORS.OPERATION_FAILED.message;
+
+  if (BROWSER_NETWORK_MESSAGES.has(message) || error?.name === "TypeError") {
+    return API_ERRORS.NETWORK_ERROR.message;
+  }
+  if (error?.name === "AbortError") {
+    return "That request was cancelled before it finished. Please try again.";
+  }
+  // A SyntaxError here means res.json() choked on a non-JSON body — typically a
+  // proxy's HTML error page. "Unexpected token '<'" helps nobody.
+  if (error?.name === "SyntaxError") {
+    return API_ERRORS.SERVICE_UNAVAILABLE.message;
+  }
+  return message;
+}

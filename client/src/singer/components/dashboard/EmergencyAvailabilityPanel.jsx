@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSingerUser } from "../../hooks/useSingerUser";
+import { describeError, getApiErrorMessage } from "../../../lib/api";
 
 /**
  * Short-Notice / Emergency settings panel. Rendered inside AvailabilitySection
@@ -118,11 +119,14 @@ export function EmergencyAvailabilityPanel() {
                   notes: emForm.notes,
                 }),
               });
-              if (!res.ok) { showAlert("Failed to save settings", "error"); return; }
+              if (!res.ok) {
+                showAlert(await getApiErrorMessage(res, "PROFILE_UPDATE_FAILED"), "error");
+                return;
+              }
               await refreshUser();
               showAlert("Short-notice settings saved", "success");
             } catch (err) {
-              showAlert("Failed to save settings", "error");
+              showAlert(describeError(err, "PROFILE_UPDATE_FAILED"), "error");
             }
             setEmSaving(false);
           }}

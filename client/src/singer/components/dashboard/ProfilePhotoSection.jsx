@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Camera, UserX } from "lucide-react";
 import { useSingerUser } from "../../hooks/useSingerUser";
+import { describeError } from "../../../lib/api";
 
 export function ProfilePhotoSection() {
   const { user, showAlert, refreshUser } = useSingerUser();
@@ -26,7 +27,12 @@ export function ProfilePhotoSection() {
       await refreshUser();
       showAlert("Profile photo updated!", "success");
     } catch (err) {
-      showAlert(err.name === "AbortError" ? "Upload timed out. Please try again." : "Failed to upload photo", "error");
+      showAlert(
+        err.name === "AbortError"
+          ? "The photo upload timed out. Please check your connection and try again."
+          : describeError(err, "UPLOAD_FAILED"),
+        "error",
+      );
     } finally {
       clearTimeout(timeout);
       setPhotoUploading(false);

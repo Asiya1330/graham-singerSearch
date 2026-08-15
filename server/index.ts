@@ -7,7 +7,13 @@ import { createServer } from "http";
 import { pool } from "./storage";
 import { seedRepertoire } from "./seed-repertoire";
 import { geocodeCityState } from "./lib/geocode";
-import { HttpApiError, sendApiError } from "./lib/api-response";
+import {
+  HttpApiError,
+  classifyError,
+  describeErrorForLog,
+  sendApiError,
+  sendRouteError,
+} from "./lib/api-response";
 import { logEmailConfigStatus } from "./lib/email";
 import { logStripeConfigStatus } from "./lib/env";
 import { registerSupabaseProxy } from "./lib/supabase-proxy";
@@ -247,25 +253,47 @@ async function runStartupMaintenance() {
   logEmailConfigStatus("startup");
   logStripeConfigStatus("startup");
 
-  app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
-    console.error("Internal Server Error:", err);
+  // Unmatched /api paths would otherwise fall through to the SPA catch-all and
+  // return an HTML page, which the client can only report as a JSON parse
+  // error. Answer them as JSON so a stale or mistyped endpoint says so.
+  app.use("/api", (req: Request, res: Response) => {
+    console.warn(`[api] no route for ${req.method} ${req.originalUrl}`);
+    return sendApiError(res, "ENDPOINT_NOT_FOUND");
+  });
 
+  // Last-resort handler for anything a route didn't catch. Classification keeps
+  // recognisable failures (bad input, duplicate rows, DB unreachable) specific
+  // instead of collapsing them all into a generic 500.
+  app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     if (res.headersSent) {
       return next(err);
     }
 
-    if (err instanceof HttpApiError) {
-      return sendApiError(res, err.code, err.message);
-    }
+    const route = `${req.method} ${req.path}`;
 
-    const status = err.status || err.statusCode || 500;
-    if (status >= 400 && status < 500) {
-      return res.status(status).json({
-        code: "VALIDATION_FAILED",
-        message: err.message || "Please check your input and try again.",
+    if (err instanceof HttpApiError) {
+      console.warn(`[api] ${route} ${err.code}: ${err.message}`);
+      return sendApiError(res, err.code, {
+        message: err.message,
+        field: err.field,
+        details: err.details,
       });
     }
 
+    const classified = classifyError(err);
+    if (classified) {
+      return sendRouteError(res, err, "INTERNAL_ERROR", route);
+    }
+
+    // Errors from upstream middleware carry their own status but arbitrary
+    // internal text, so 4xx keeps the status while the copy stays generic.
+    const status = err?.status || err?.statusCode || 500;
+    if (status >= 400 && status < 500) {
+      console.warn(`[api] ${route} ${status}: ${describeErrorForLog(err)}`);
+      return sendApiError(res, "VALIDATION_FAILED");
+    }
+
+    console.error(`[api] ${route} unhandled:`, err);
     return sendApiError(res, "INTERNAL_ERROR");
   });
 

@@ -3,7 +3,7 @@ import { useAppContext } from "../AppContext";
 import { useCityStateAutofill } from "../hooks/useCityStateAutofill";
 import { adminFetch } from "../lib/adminApi";
 import { getSupabaseBrowser } from "../lib/supabase";
-import { apiFetch } from "../lib/api";
+import { apiFetch, describeError, getApiErrorMessage } from "../lib/api";
 import { AdminsPanel } from "./AdminsPanel";
 import { AdminMainTabs } from "./AdminMainTabs";
 import { AdminNav } from "./AdminNav";
@@ -64,9 +64,9 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
         adminFetch("/api/admin/orgs"),
         apiFetch("/api/admin/auth/me").catch(() => null),
       ]);
-      if (!statsRes.ok) throw new Error("Failed to fetch stats");
-      if (!singersRes.ok) throw new Error("Failed to fetch singers");
-      if (!orgsRes.ok) throw new Error("Failed to fetch organizations");
+      if (!statsRes.ok) throw new Error(await getApiErrorMessage(statsRes, "OPERATION_FAILED"));
+      if (!singersRes.ok) throw new Error(await getApiErrorMessage(singersRes, "OPERATION_FAILED"));
+      if (!orgsRes.ok) throw new Error(await getApiErrorMessage(orgsRes, "OPERATION_FAILED"));
       setStats(await statsRes.json());
       if (extStatsRes.ok) setExtStats(await extStatsRes.json());
       setAllSingers(await singersRes.json());
@@ -74,7 +74,7 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
       if (meResult?.data?.admin) setAdminMe(meResult.data.admin);
       setLoading(false);
     } catch (err) {
-      setError(err.message);
+      setError(describeError(err));
       setLoading(false);
     }
   };
@@ -95,8 +95,10 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(giftForm),
       });
-      const data = await res.json();
-      if (!res.ok) { setGiftError(data.message || "Failed to gift Pro"); return; }
+      if (!res.ok) {
+        setGiftError(await getApiErrorMessage(res, "OPERATION_FAILED"));
+        return;
+      }
       showAlert(`Pro access gifted to ${target.name}`, "success");
       setGiftTarget(null);
       setGiftForm(DEFAULT_GIFT_FORM);
@@ -109,8 +111,8 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
         const org = await fetchOrgDetail(target.id);
         if (org) setAdminViewOrg(org);
       }
-    } catch {
-      setGiftError("Failed to gift Pro");
+    } catch (err) {
+      setGiftError(describeError(err));
     } finally {
       setGiftSubmitting(false);
     }
@@ -124,8 +126,10 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
         });
-        const data = await res.json();
-        if (!res.ok) { showAlert(data.message || `Failed to ${grant ? "grant" : "revoke"} founding status`, "error"); return; }
+        if (!res.ok) {
+          showAlert(await getApiErrorMessage(res, "OPERATION_FAILED"), "error");
+          return;
+        }
         showAlert(`Founding status ${grant ? "granted to" : "revoked from"} ${name}`, "success");
         await loadAdminData();
         if (type === "singer" && adminViewSinger && adminViewSinger.id === id) {
@@ -136,8 +140,8 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
           const org = await fetchOrgDetail(id);
           if (org) setAdminViewOrg(org);
         }
-      } catch {
-        showAlert(`Failed to ${grant ? "grant" : "revoke"} founding status`, "error");
+      } catch (err) {
+        showAlert(describeError(err), "error");
       }
     });
   };
@@ -160,11 +164,11 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
         else if (action === "activate") { url = `/api/admin/singers/${singerId}/activate`; method = "PUT"; }
         else if (action === "delete") { url = `/api/admin/singers/${singerId}`; method = "DELETE"; }
         const res = await adminFetch(url, { method });
-        if (!res.ok) throw new Error("Action failed");
+        if (!res.ok) throw new Error(await getApiErrorMessage(res, "OPERATION_FAILED"));
         showAlert(`Singer ${action}d successfully`, "success");
         await loadAdminData();
-      } catch {
-        showAlert(`Failed to ${action} singer`, "error");
+      } catch (err) {
+        showAlert(describeError(err), "error");
       }
     });
   };
@@ -177,10 +181,10 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ field, value: !currentValue }),
         });
-        if (!res.ok) throw new Error("Badge update failed");
+        if (!res.ok) throw new Error(await getApiErrorMessage(res, "OPERATION_FAILED"));
         await loadAdminData();
-      } catch {
-        showAlert("Failed to update badge", "error");
+      } catch (err) {
+        showAlert(describeError(err), "error");
       }
     });
   };
@@ -189,8 +193,8 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
     await withBusy(`singer:${singerId}:view`, async () => {
       try {
         setAdminViewSinger(await fetchSingerDetail(singerId));
-      } catch {
-        showAlert("Failed to load singer profile", "error");
+      } catch (err) {
+        showAlert(describeError(err, "PROFILE_LOAD_FAILED"), "error");
       }
     });
   };
@@ -201,8 +205,8 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
         const singer = await fetchSingerDetail(singerId);
         setEditingSinger(singer);
         setEditForm(buildSingerEditForm(singer));
-      } catch {
-        showAlert("Failed to load singer for editing", "error");
+      } catch (err) {
+        showAlert(describeError(err, "PROFILE_LOAD_FAILED"), "error");
       }
     });
   };
@@ -215,12 +219,12 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(editForm),
         });
-        if (!res.ok) throw new Error("Failed to save");
+        if (!res.ok) throw new Error(await getApiErrorMessage(res, "PROFILE_UPDATE_FAILED"));
         showAlert("Singer profile updated", "success");
         setEditingSinger(null);
         await loadAdminData();
-      } catch {
-        showAlert("Failed to update singer", "error");
+      } catch (err) {
+        showAlert(describeError(err, "PROFILE_UPDATE_FAILED"), "error");
       }
     });
   };
@@ -229,8 +233,8 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
     await withBusy(`org:${orgId}:view`, async () => {
       try {
         setAdminViewOrg(await fetchOrgDetail(orgId));
-      } catch {
-        showAlert("Failed to load organization profile", "error");
+      } catch (err) {
+        showAlert(describeError(err, "PROFILE_LOAD_FAILED"), "error");
       }
     });
   };
@@ -244,14 +248,14 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(orgEditForm),
         });
-        if (!res.ok) throw new Error("Failed to save");
+        if (!res.ok) throw new Error(await getApiErrorMessage(res, "PROFILE_UPDATE_FAILED"));
         showAlert("Organization updated", "success");
         setEditingOrg(null);
         await loadAdminData();
         const org = await fetchOrgDetail(orgId);
         if (org) setAdminViewOrg(org);
-      } catch {
-        showAlert("Failed to update organization", "error");
+      } catch (err) {
+        showAlert(describeError(err, "PROFILE_UPDATE_FAILED"), "error");
       }
     });
   };
@@ -265,15 +269,15 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ tier }),
         });
-        if (!res.ok) throw new Error("Failed");
+        if (!res.ok) throw new Error(await getApiErrorMessage(res, "SUBSCRIPTION_UPDATE_FAILED"));
         showAlert(`Organization set to ${tier === "pro" ? "Pro" : "Free"}`, "success");
         await loadAdminData();
         if (adminViewOrg && adminViewOrg.id === orgId) {
           const org = await fetchOrgDetail(orgId);
           if (org) setAdminViewOrg(org);
         }
-      } catch {
-        showAlert("Failed to update subscription", "error");
+      } catch (err) {
+        showAlert(describeError(err, "SUBSCRIPTION_UPDATE_FAILED"), "error");
       }
     });
   };
@@ -283,11 +287,11 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
     await withBusy(`org:${orgId}:delete`, async () => {
       try {
         const res = await adminFetch(`/api/admin/orgs/${orgId}`, { method: "DELETE" });
-        if (!res.ok) throw new Error("Failed");
+        if (!res.ok) throw new Error(await getApiErrorMessage(res, "OPERATION_FAILED"));
         showAlert("Organization deleted", "success");
         await loadAdminData();
-      } catch {
-        showAlert("Failed to delete organization", "error");
+      } catch (err) {
+        showAlert(describeError(err), "error");
       }
     });
   };

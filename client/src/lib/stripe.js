@@ -1,75 +1,72 @@
-export async function startStripeCheckout(interval = "monthly") {
-  const res = await fetch("/api/stripe/checkout", {
-    method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ interval }),
-  });
-  const data = await res.json();
+import { API_ERRORS, getApiErrorMessage } from "./api";
+
+/**
+ * Shared billing request. Reads the error body only on failure, so a non-JSON
+ * response (a proxy's HTML 502, an empty 504) reports the real problem instead
+ * of failing with a JSON parse error.
+ */
+async function stripeRequest(url, { method = "POST", body, fallbackCode }) {
+  let res;
+  try {
+    res = await fetch(url, {
+      method,
+      credentials: "include",
+      ...(body ? { headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {}),
+    });
+  } catch {
+    throw new Error(API_ERRORS.NETWORK_ERROR.message);
+  }
+
   if (!res.ok) {
-    throw new Error(data.message || "Failed to start checkout");
+    throw new Error(await getApiErrorMessage(res, fallbackCode));
+  }
+
+  try {
+    return await res.json();
+  } catch {
+    throw new Error(API_ERRORS[fallbackCode].message);
+  }
+}
+
+export async function startStripeCheckout(interval = "monthly") {
+  const data = await stripeRequest("/api/stripe/checkout", {
+    body: { interval },
+    fallbackCode: "CHECKOUT_FAILED",
+  });
+  if (!data?.url) {
+    throw new Error(API_ERRORS.CHECKOUT_FAILED.message);
   }
   window.location.href = data.url;
 }
 
 export async function openStripeBillingPortal() {
-  const res = await fetch("/api/stripe/portal", {
-    method: "POST",
-    credentials: "include",
+  const data = await stripeRequest("/api/stripe/portal", {
+    fallbackCode: "BILLING_PORTAL_FAILED",
   });
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.message || "Failed to open billing portal");
+  if (!data?.url) {
+    throw new Error(API_ERRORS.BILLING_PORTAL_FAILED.message);
   }
   window.location.href = data.url;
 }
 
 export async function getStripePricing() {
-  const res = await fetch("/api/stripe/prices", {
-    credentials: "include",
+  return stripeRequest("/api/stripe/prices", {
+    method: "GET",
+    fallbackCode: "PRICING_LOAD_FAILED",
   });
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.message || "Failed to load Stripe pricing");
-  }
-  return data;
 }
 
 /** Pull latest subscription state from Stripe after checkout (local dev fallback). */
 export async function syncStripeSubscription() {
-  const res = await fetch("/api/stripe/sync", {
-    method: "POST",
-    credentials: "include",
-  });
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.message || "Failed to sync subscription");
-  }
-  return data;
+  return stripeRequest("/api/stripe/sync", { fallbackCode: "SUBSCRIPTION_SYNC_FAILED" });
 }
 
 export async function cancelStripeSubscription() {
-  const res = await fetch("/api/stripe/cancel", {
-    method: "POST",
-    credentials: "include",
-  });
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.message || "Failed to cancel subscription");
-  }
-  return data;
+  return stripeRequest("/api/stripe/cancel", { fallbackCode: "SUBSCRIPTION_UPDATE_FAILED" });
 }
 
 export async function resumeStripeSubscription() {
-  const res = await fetch("/api/stripe/resume", {
-    method: "POST",
-    credentials: "include",
-  });
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.message || "Failed to resume subscription");
-  }
-  return data;
+  return stripeRequest("/api/stripe/resume", { fallbackCode: "SUBSCRIPTION_UPDATE_FAILED" });
 }
 
 export function stripeStatusLabel(status) {
