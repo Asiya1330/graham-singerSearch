@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useSingerUser } from "../../hooks/useSingerUser";
+import { describeError, getApiErrorMessage } from "../../../lib/api";
 
 const BIO_MAX_LENGTH = 1700;
 
@@ -18,11 +19,15 @@ export function BioSection() {
         credentials: "include",
         body: JSON.stringify({ short_bio: bioText }),
       });
-      if (!res.ok) { showAlert("Failed to save bio", "error"); setBioSaving(false); return; }
+      if (!res.ok) {
+        showAlert(await getApiErrorMessage(res, "PROFILE_UPDATE_FAILED"), "error");
+        setBioSaving(false);
+        return;
+      }
       await refreshUser();
       showAlert("Bio saved successfully", "success");
     } catch (err) {
-      showAlert("Failed to save bio", "error");
+      showAlert(describeError(err, "PROFILE_UPDATE_FAILED"), "error");
     }
     setBioSaving(false);
   };

@@ -10,6 +10,7 @@ import {
 } from "../lib/stripe";
 import { getBillingDisplay } from "./BillingIntervalPicker";
 import { userFromProfile } from "../lib/accountAuth";
+import { describeError } from "../lib/api";
 
 function mergeSyncedUser(prev, data, fallbackType) {
   const { userType: ut, ...userData } = data;
@@ -91,7 +92,7 @@ export function SubscriptionSection({ user, setCurrentUser, setProfileMsg, userT
     try {
       await fn();
     } catch (e) {
-      setProfileMsg({ type: "error", text: e.message || "Something went wrong." });
+      setProfileMsg({ type: "error", text: describeError(e) });
     } finally {
       setStripeLoading(null);
     }
@@ -110,7 +111,7 @@ export function SubscriptionSection({ user, setCurrentUser, setProfileMsg, userT
       setCurrentUser((prev) => mergeSyncedUser(prev, data, userType));
       setProfileMsg({ type: "success", text: `Subscription canceled. Pro access continues until ${data.cancelAt || "end of period"}.` });
     } catch (e) {
-      setProfileMsg({ type: "error", text: e.message || "Failed to cancel subscription." });
+      setProfileMsg({ type: "error", text: describeError(e, "SUBSCRIPTION_UPDATE_FAILED") });
     } finally {
       setStripeLoading(null);
     }

@@ -80,7 +80,8 @@ import {
   sendTestEmail,
 } from "./lib/email";
 import { eq, desc, and } from "drizzle-orm";
-import { sendApiError, sendRouteError } from "./lib/api-response";
+import { HttpApiError, sendApiError, sendRouteError } from "./lib/api-response";
+import { getApiError } from "@shared/api-errors";
 import { registerStripeRoutes } from "./stripe-routes";
 import { hasActiveStripeSubscription, shouldSyncStripeState, syncSubscriptionForUser } from "./lib/stripe";
 import { isStripeCheckoutConfigured } from "./lib/env";
@@ -130,6 +131,16 @@ const PASSWORD_RESET_GENERIC_MESSAGE =
 // middleware.ts are not rejected before reaching the API.
 const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 
+const MAX_UPLOAD_MB = MAX_UPLOAD_BYTES / (1024 * 1024);
+
+// Column names are not what the singer sees on the form, so validation errors
+// name the field the way the UI labels it.
+const MEDIA_FIELD_LABELS: Record<string, string> = {
+  video_link_1: "first video",
+  video_link_2: "second video",
+  audio_link_1: "audio",
+};
+
 const resumeUpload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: MAX_UPLOAD_BYTES },
@@ -137,7 +148,12 @@ const resumeUpload = multer({
     if (file.mimetype === "application/pdf") {
       cb(null, true);
     } else {
-      cb(new Error("Only PDF files are allowed") as any, false);
+      cb(
+        new HttpApiError("FILE_TYPE_INVALID", {
+          message: "Resumes must be a PDF. Please export your file as PDF and upload it again.",
+        }) as any,
+        false,
+      );
     }
   },
 });
@@ -149,22 +165,29 @@ const headshotUpload = multer({
     if (["image/jpeg", "image/jpg", "image/png", "image/webp"].includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error("Only JPG, PNG, and WebP files are allowed") as any, false);
+      cb(
+        new HttpApiError("FILE_TYPE_INVALID", {
+          message: "Headshots must be a JPG, PNG, or WebP image.",
+        }) as any,
+        false,
+      );
     }
   },
 });
 
 // Multer's middleware errors (size/type) bypass the route try/catch and would
 // otherwise surface as a generic 500 (and a hung client spinner). Wrap it so
-// those become a clean 400 JSON response the client can act on.
+// those become a clean, specific JSON response the client can act on.
 function handleUpload(mw: any) {
   return (req: Request, res: Response, next: NextFunction) => {
     mw(req, res, (err: any) => {
       if (!err) return next();
       if (err.code === "LIMIT_FILE_SIZE") {
-        return res.status(400).json({ message: "File must be under 4MB" });
+        return sendApiError(res, "FILE_TOO_LARGE", {
+          message: `That file is over the ${MAX_UPLOAD_MB}MB limit. Please upload a smaller file.`,
+        });
       }
-      return res.status(400).json({ message: err.message || "Upload failed" });
+      return sendRouteError(res, err, "UPLOAD_FAILED", "file upload");
     });
   };
 }
@@ -218,7 +241,7 @@ export async function registerRoutes(
         return sendApiError(res, "EMAIL_PASSWORD_REQUIRED");
       }
       if (!isValidEmail(email)) {
-        return sendApiError(res, "INVALID_EMAIL", "Please enter a valid email address.");
+        return sendApiError(res, "INVALID_EMAIL");
       }
 
       const existing = await storage.getSingerByEmail(email);
@@ -275,7 +298,7 @@ export async function registerRoutes(
       const { password: _, ...safe } = updated!;
       res.status(201).json({ ...safe, userType: "singer", confirmationRequired });
     } catch (error: any) {
-      sendRouteError(res, error, error?.code || "REGISTRATION_FAILED");
+      sendRouteError(res, error, "REGISTRATION_FAILED");
     }
   });
 
@@ -287,7 +310,7 @@ export async function registerRoutes(
         return sendApiError(res, "EMAIL_PASSWORD_REQUIRED");
       }
       if (!isValidEmail(email)) {
-        return sendApiError(res, "INVALID_EMAIL", "Please enter a valid email address.");
+        return sendApiError(res, "INVALID_EMAIL");
       }
 
       const existing = await storage.getOrganizationByEmail(email);
@@ -325,7 +348,7 @@ export async function registerRoutes(
       const { password: _, ...safe } = org;
       res.status(201).json({ ...safe, userType: "organization", confirmationRequired });
     } catch (error: any) {
-      sendRouteError(res, error, error?.code || "REGISTRATION_FAILED");
+      sendRouteError(res, error, "REGISTRATION_FAILED");
     }
   });
 
@@ -342,7 +365,7 @@ export async function registerRoutes(
       const { email: emailRaw, password, userType } = req.body;
       const email = normalizeEmail(emailRaw);
       if (!email || !password || (userType !== "singer" && userType !== "organization")) {
-        return sendApiError(res, "EMAIL_USER_TYPE_REQUIRED", "Email, password, and account type are required.");
+        return sendApiError(res, "EMAIL_USER_TYPE_REQUIRED", "Please enter your email, your password, and your account type.");
       }
 
       const user =
@@ -364,7 +387,7 @@ export async function registerRoutes(
       await linkLegacyAccount(userType, user, String(password));
       res.json({ migrated: true });
     } catch (error: any) {
-      sendRouteError(res, error, error?.code || "LOGIN_FAILED");
+      sendRouteError(res, error, "LOGIN_FAILED");
     }
   });
 
@@ -528,14 +551,20 @@ export async function registerRoutes(
         ...updates
       } = req.body;
       if (updates.short_bio && updates.short_bio.length > 1700) {
-        return res.status(400).json({ message: "Bio exceeds 1700 character limit" });
+        return sendApiError(res, "BIO_TOO_LONG");
       }
       if (updates.website_url && !/^https?:\/\//i.test(updates.website_url)) {
-        return res.status(400).json({ message: "Website URL must start with http:// or https://" });
+        return sendApiError(res, "INVALID_URL", {
+          message: "Your website link must start with http:// or https://.",
+          field: "website",
+        });
       }
       for (const field of ["video_link_1", "video_link_2", "audio_link_1"]) {
         if (updates[field] && !/^https?:\/\//i.test(updates[field])) {
-          return res.status(400).json({ message: `${field} must start with http:// or https://` });
+          return sendApiError(res, "INVALID_URL", {
+            message: `Your ${MEDIA_FIELD_LABELS[field] ?? field} link must start with http:// or https://.`,
+            field,
+          });
         }
       }
       const existing = await storage.getSinger(currentUserId(req));
@@ -591,11 +620,11 @@ export async function registerRoutes(
   app.post("/api/singer/downgrade", requireAuth, requireSinger, async (req: Request, res: Response) => {
     try {
       const singer = await storage.getSinger(currentUserId(req));
-      if (!singer) return res.status(404).json({ message: "Singer not found" });
+      if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
 
       if (singer.stripe_subscription_id) {
         return res.status(409).json({
-          message: "Manage your subscription in the billing portal to cancel at period end.",
+          ...getApiError("SUBSCRIPTION_MANAGED_BY_PORTAL"),
           usePortal: true,
         });
       }
@@ -617,11 +646,11 @@ export async function registerRoutes(
   app.post("/api/org/downgrade", requireAuth, requireOrg, async (req: Request, res: Response) => {
     try {
       const org = await storage.getOrganization(currentUserId(req));
-      if (!org) return res.status(404).json({ message: "Organization not found" });
+      if (!org) return sendApiError(res, "ORG_NOT_FOUND");
 
       if (org.stripe_subscription_id) {
         return res.status(409).json({
-          message: "Manage your subscription in the billing portal to cancel at period end.",
+          ...getApiError("SUBSCRIPTION_MANAGED_BY_PORTAL"),
           usePortal: true,
         });
       }
@@ -660,26 +689,30 @@ export async function registerRoutes(
       const VALID_STATUSES = ['performed', 'in_preparation'];
 
       if (!role_name || !work_title) {
-        return res.status(400).json({ message: "Role name and work title are required" });
+        return sendApiError(res, "ROLE_FIELDS_REQUIRED");
       }
       const dup = await pool.query(
         `SELECT id FROM singer_roles WHERE singer_id = $1 AND LOWER(role_name) = LOWER($2) AND LOWER(work_title) = LOWER($3) LIMIT 1`,
         [singerId, role_name, work_title]
       );
       if (dup.rows.length > 0) {
-        return res.status(400).json({ message: "You have already added this role. Edit the existing entry instead." });
+        return sendApiError(res, "ROLE_ALREADY_ADDED");
       }
       if (experience_depth && !VALID_DEPTHS.includes(experience_depth)) {
-        return res.status(400).json({ message: `Experience depth must be one of: ${VALID_DEPTHS.join(", ")}` });
+        return sendApiError(res, "INVALID_EXPERIENCE_DEPTH", {
+          message: `Experience level must be one of: ${VALID_DEPTHS.join(", ")}.`,
+        });
       }
       if (status !== undefined && !VALID_STATUSES.includes(status)) {
-        return res.status(400).json({ message: `Status must be one of: ${VALID_STATUSES.join(", ")}` });
+        return sendApiError(res, "INVALID_STATUS", {
+          message: `Status must be one of: ${VALID_STATUSES.join(", ")}.`,
+        });
       }
       if (last_performed_date) {
         const d = new Date(last_performed_date + "-01");
         const now = new Date();
-        if (d > now) return res.status(400).json({ message: "Last performed date cannot be in the future" });
-        if (d < new Date("1900-01-01")) return res.status(400).json({ message: "Last performed date cannot be before 1900" });
+        if (d > now) return sendApiError(res, "DATE_IN_FUTURE");
+        if (d < new Date("1900-01-01")) return sendApiError(res, "DATE_TOO_EARLY");
       }
       let composer = req.body.composer;
       if (work_title) {
@@ -702,7 +735,10 @@ export async function registerRoutes(
       const roleId = parseInt(req.params.id as string);
       const roles = await storage.getSingerRoles(currentUserId(req));
       const ownsRole = roles.some((r) => r.id === roleId);
-      if (!ownsRole) return res.status(403).json({ message: "Not your role" });
+      if (!ownsRole)
+        return sendApiError(res, "NOT_RESOURCE_OWNER", {
+          message: "That role is on another singer's profile, so you can't change it.",
+        });
 
       await storage.deleteSingerRole(roleId);
       res.json({ message: "Role deleted" });
@@ -720,7 +756,9 @@ export async function registerRoutes(
       const VALID_STATUSES = ['performed', 'in_preparation'];
       for (const r of rolesData) {
         if (r.status !== undefined && !VALID_STATUSES.includes(r.status)) {
-          return res.status(400).json({ message: `Status must be one of: ${VALID_STATUSES.join(", ")}` });
+          return sendApiError(res, "INVALID_STATUS", {
+          message: `Status must be one of: ${VALID_STATUSES.join(", ")}.`,
+        });
         }
       }
       const created = await Promise.all(
@@ -744,26 +782,30 @@ export async function registerRoutes(
       const VALID_STATUSES = ['performed', 'in_preparation'];
 
       if (!work_title) {
-        return res.status(400).json({ message: "Work title is required" });
+        return sendApiError(res, "WORK_TITLE_REQUIRED");
       }
       const dup = await pool.query(
         `SELECT id FROM singer_works WHERE singer_id = $1 AND LOWER(work_title) = LOWER($2) LIMIT 1`,
         [singerId, work_title]
       );
       if (dup.rows.length > 0) {
-        return res.status(400).json({ message: "You have already added this work. Edit the existing entry instead." });
+        return sendApiError(res, "WORK_ALREADY_ADDED");
       }
       if (experience_depth && !VALID_DEPTHS.includes(experience_depth)) {
-        return res.status(400).json({ message: `Experience depth must be one of: ${VALID_DEPTHS.join(", ")}` });
+        return sendApiError(res, "INVALID_EXPERIENCE_DEPTH", {
+          message: `Experience level must be one of: ${VALID_DEPTHS.join(", ")}.`,
+        });
       }
       if (status !== undefined && !VALID_STATUSES.includes(status)) {
-        return res.status(400).json({ message: `Status must be one of: ${VALID_STATUSES.join(", ")}` });
+        return sendApiError(res, "INVALID_STATUS", {
+          message: `Status must be one of: ${VALID_STATUSES.join(", ")}.`,
+        });
       }
       if (last_performed_date) {
         const d = new Date(last_performed_date + "-01");
         const now = new Date();
-        if (d > now) return res.status(400).json({ message: "Last performed date cannot be in the future" });
-        if (d < new Date("1900-01-01")) return res.status(400).json({ message: "Last performed date cannot be before 1900" });
+        if (d > now) return sendApiError(res, "DATE_IN_FUTURE");
+        if (d < new Date("1900-01-01")) return sendApiError(res, "DATE_TOO_EARLY");
       }
       let composer = req.body.composer;
       if (work_title) {
@@ -799,19 +841,26 @@ export async function registerRoutes(
       const VALID_STATUSES = ['performed', 'in_preparation'];
       const works = await storage.getSingerWorks(singerId);
       const ownsWork = works.some((w) => w.id === workId);
-      if (!ownsWork) return res.status(403).json({ message: "Not your work" });
+      if (!ownsWork)
+        return sendApiError(res, "NOT_RESOURCE_OWNER", {
+          message: "That work is on another singer's profile, so you can't change it.",
+        });
       const { last_performed_date, experience_depth, work_title, notable_ensembles, status } = req.body;
       if (experience_depth && !VALID_DEPTHS.includes(experience_depth)) {
-        return res.status(400).json({ message: `Experience depth must be one of: ${VALID_DEPTHS.join(", ")}` });
+        return sendApiError(res, "INVALID_EXPERIENCE_DEPTH", {
+          message: `Experience level must be one of: ${VALID_DEPTHS.join(", ")}.`,
+        });
       }
       if (status !== undefined && !VALID_STATUSES.includes(status)) {
-        return res.status(400).json({ message: `Status must be one of: ${VALID_STATUSES.join(", ")}` });
+        return sendApiError(res, "INVALID_STATUS", {
+          message: `Status must be one of: ${VALID_STATUSES.join(", ")}.`,
+        });
       }
       if (last_performed_date) {
         const d = new Date(last_performed_date + "-01");
         const now = new Date();
-        if (d > now) return res.status(400).json({ message: "Last performed date cannot be in the future" });
-        if (d < new Date("1900-01-01")) return res.status(400).json({ message: "Last performed date cannot be before 1900" });
+        if (d > now) return sendApiError(res, "DATE_IN_FUTURE");
+        if (d < new Date("1900-01-01")) return sendApiError(res, "DATE_TOO_EARLY");
       }
       let composer = req.body.composer;
       if (work_title) {
@@ -866,7 +915,10 @@ export async function registerRoutes(
       const workId = parseInt(req.params.id as string);
       const works = await storage.getSingerWorks(currentUserId(req));
       const ownsWork = works.some((w) => w.id === workId);
-      if (!ownsWork) return res.status(403).json({ message: "Not your work" });
+      if (!ownsWork)
+        return sendApiError(res, "NOT_RESOURCE_OWNER", {
+          message: "That work is on another singer's profile, so you can't change it.",
+        });
 
       await storage.deleteSingerWork(workId);
       res.json({ message: "Work deleted" });
@@ -884,7 +936,9 @@ export async function registerRoutes(
       const VALID_STATUSES = ['performed', 'in_preparation'];
       for (const w of worksData) {
         if (w.status !== undefined && !VALID_STATUSES.includes(w.status)) {
-          return res.status(400).json({ message: `Status must be one of: ${VALID_STATUSES.join(", ")}` });
+          return sendApiError(res, "INVALID_STATUS", {
+          message: `Status must be one of: ${VALID_STATUSES.join(", ")}.`,
+        });
         }
       }
       const created = await Promise.all(
@@ -904,7 +958,7 @@ export async function registerRoutes(
     try {
       const { start_date, end_date } = req.body;
       if (start_date && end_date && start_date > end_date) {
-        return res.status(400).json({ message: "End date must be on or after start date." });
+        return sendApiError(res, "DATE_RANGE_INVALID");
       }
       const parsed = insertAvailabilitySchema.parse({ ...req.body, singer_id: currentUserId(req) });
       const avail = await storage.createAvailability(parsed);
@@ -919,7 +973,10 @@ export async function registerRoutes(
       const availId = parseInt(req.params.id as string);
       const avails = await storage.getAvailabilities(currentUserId(req));
       const ownsAvail = avails.some((a) => a.id === availId);
-      if (!ownsAvail) return res.status(403).json({ message: "Not your availability" });
+      if (!ownsAvail)
+        return sendApiError(res, "NOT_RESOURCE_OWNER", {
+          message: "That availability entry is on another singer's profile, so you can't change it.",
+        });
 
       await storage.deleteAvailability(availId);
       res.json({ message: "Availability deleted" });
@@ -962,7 +1019,7 @@ export async function registerRoutes(
         roles: rolesResult.rows.map((r: { role_name: string }) => r.role_name),
       });
     } catch (err) {
-      res.status(500).json({ message: "Failed to load search options" });
+      sendRouteError(res, err, "SEARCH_OPTIONS_FAILED", "load search options");
     }
   });
 
@@ -992,7 +1049,7 @@ export async function registerRoutes(
         }))
       );
     } catch (err: any) {
-      res.status(500).json({ message: err.message || "Failed to search repertoire" });
+      sendRouteError(res, err, "REPERTOIRE_SEARCH_FAILED", "search repertoire");
     }
   });
 
@@ -1040,10 +1097,7 @@ export async function registerRoutes(
 
       // Validate location pair: both city and state required when either is present
       if ((resolvedCity && !trimmedState) || (!resolvedCity && trimmedState)) {
-        return res.status(400).json({
-          message: "Please enter both city and state to search by location.",
-          field: "location",
-        });
+        return sendApiError(res, "LOCATION_INCOMPLETE");
       }
 
       // Radius (miles) — default 50, "any" means no radius cap
@@ -1062,9 +1116,8 @@ export async function registerRoutes(
         try {
           const coords = await geocodeCityState(resolvedCity, trimmedState);
           if (!coords) {
-            return res.status(422).json({
-              message: `Could not find coordinates for "${resolvedCity}, ${trimmedState}". Please check the city and state.`,
-              field: "location",
+            return sendApiError(res, "LOCATION_NOT_FOUND", {
+              message: `We couldn't find "${resolvedCity}, ${trimmedState}". Please check the spelling and try again.`,
             });
           }
           filters.searchLat = coords.lat;
@@ -1076,10 +1129,7 @@ export async function registerRoutes(
           filters.stateFallback = trimmedState;
         } catch (e) {
           console.warn(`[search] Geocode failed for "${resolvedCity}, ${trimmedState}":`, e);
-          return res.status(503).json({
-            message: "Location search is temporarily unavailable. Please try again.",
-            field: "location",
-          });
+          return sendApiError(res, "LOCATION_LOOKUP_UNAVAILABLE");
         }
       }
       if (language && language.toLowerCase() !== "any") filters.language = language;
@@ -1303,17 +1353,15 @@ export async function registerRoutes(
       const { tier } = req.body;
 
       if (tier === "pro") {
-        return res.status(403).json({
-          message: "Pro upgrades require payment. Start checkout from the pricing page.",
-        });
+        return sendApiError(res, "PRO_UPGRADE_REQUIRES_CHECKOUT");
       }
 
       const org = await storage.getOrganization(currentUserId(req));
-      if (!org) return res.status(404).json({ message: "Organization not found" });
+      if (!org) return sendApiError(res, "ORG_NOT_FOUND");
 
       if (tier === "free" && org.stripe_subscription_id) {
         return res.status(409).json({
-          message: "Manage your subscription in the billing portal to cancel at period end.",
+          ...getApiError("SUBSCRIPTION_MANAGED_BY_PORTAL"),
           usePortal: true,
         });
       }
@@ -1366,7 +1414,7 @@ export async function registerRoutes(
         const result = await bootstrapSeedAdmins();
         res.json(result);
       } catch (error: any) {
-        sendRouteError(res, error, error?.code || "OPERATION_FAILED");
+        sendRouteError(res, error, "OPERATION_FAILED");
       }
     },
   );
@@ -1439,7 +1487,7 @@ export async function registerRoutes(
         const created = await invitePendingAdmin(email, req.adminAuth!.admin);
         res.status(201).json(publicAdminDto(created));
       } catch (error: any) {
-        sendRouteError(res, error, error?.code || "OPERATION_FAILED");
+        sendRouteError(res, error, "OPERATION_FAILED");
       }
     },
   );
@@ -1456,7 +1504,7 @@ export async function registerRoutes(
         const updated = await approvePendingAdmin(pending, req.adminAuth!.admin);
         res.json(publicAdminDto(updated));
       } catch (error: any) {
-        sendRouteError(res, error, error?.code || "OPERATION_FAILED");
+        sendRouteError(res, error, "OPERATION_FAILED");
       }
     },
   );
@@ -1473,7 +1521,7 @@ export async function registerRoutes(
         const updated = await rejectPendingAdmin(pending, req.adminAuth!.admin);
         res.json(publicAdminDto(updated));
       } catch (error: any) {
-        sendRouteError(res, error, error?.code || "OPERATION_FAILED");
+        sendRouteError(res, error, "OPERATION_FAILED");
       }
     },
   );
@@ -1490,7 +1538,7 @@ export async function registerRoutes(
         const updated = await revokeAdmin(target, req.adminAuth!.admin);
         res.json(publicAdminDto(updated));
       } catch (error: any) {
-        sendRouteError(res, error, error?.code || "OPERATION_FAILED");
+        sendRouteError(res, error, "OPERATION_FAILED");
       }
     },
   );
@@ -1504,7 +1552,7 @@ export async function registerRoutes(
         const adminId = req.body?.adminId != null ? Number(req.body.adminId) : undefined;
         const email = typeof req.body?.email === "string" ? req.body.email : undefined;
         if (adminId == null && !email) {
-          return sendApiError(res, "VALIDATION_FAILED", "adminId or email is required.");
+          return sendApiError(res, "VALIDATION_FAILED", "Provide either an admin ID or an email address to look up.");
         }
         const result = await clearAdminMfa(
           { adminId, email },
@@ -1766,7 +1814,7 @@ export async function registerRoutes(
       const singerId = parseInt(req.params.id as string);
       const { duration, customDate, reason } = req.body;
       const computed = computeGiftExpiry(duration, customDate);
-      if (!computed) return res.status(400).json({ message: "Invalid duration or custom date" });
+      if (!computed) return sendApiError(res, "INVALID_DURATION");
 
       const singer = await storage.getSinger(singerId);
       if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
@@ -1798,7 +1846,7 @@ export async function registerRoutes(
       const orgId = parseInt(req.params.id as string);
       const { duration, customDate, reason } = req.body;
       const computed = computeGiftExpiry(duration, customDate);
-      if (!computed) return res.status(400).json({ message: "Invalid duration or custom date" });
+      if (!computed) return sendApiError(res, "INVALID_DURATION");
 
       const org = await storage.getOrganization(orgId);
       if (!org) return sendApiError(res, "ORG_NOT_FOUND");
@@ -1901,7 +1949,7 @@ export async function registerRoutes(
 
   app.post("/api/singer/resume", requireAuth, requireSinger, handleUpload(resumeUpload.single("resume")), async (req: Request, res: Response) => {
     try {
-      if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+      if (!req.file) return sendApiError(res, "FILE_MISSING");
       const resumePath = await uploadToSupabaseStorage("resumes", req.file);
       const singer = await storage.updateSinger(currentUserId(req), { resume_url: resumePath });
       if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
@@ -1909,7 +1957,9 @@ export async function registerRoutes(
       res.json({ resume_url: signedResumeUrl, message: "Resume uploaded successfully" });
     } catch (error: any) {
       if (error.message === "Only PDF files are allowed") {
-        return res.status(400).json({ message: "Only PDF files are allowed" });
+        return sendApiError(res, "FILE_TYPE_INVALID", {
+          message: "Resumes must be a PDF. Please export your file as PDF and upload it again.",
+        });
       }
       sendRouteError(res, error, "OPERATION_FAILED");
     }
@@ -1923,19 +1973,26 @@ export async function registerRoutes(
       const VALID_STATUSES = ['performed', 'in_preparation'];
       const roles = await storage.getSingerRoles(singerId);
       const ownsRole = roles.some((r) => r.id === roleId);
-      if (!ownsRole) return res.status(403).json({ message: "Not your role" });
+      if (!ownsRole)
+        return sendApiError(res, "NOT_RESOURCE_OWNER", {
+          message: "That role is on another singer's profile, so you can't change it.",
+        });
       const { last_performed_date, experience_depth, work_title, status } = req.body;
       if (experience_depth && !VALID_DEPTHS.includes(experience_depth)) {
-        return res.status(400).json({ message: `Experience depth must be one of: ${VALID_DEPTHS.join(", ")}` });
+        return sendApiError(res, "INVALID_EXPERIENCE_DEPTH", {
+          message: `Experience level must be one of: ${VALID_DEPTHS.join(", ")}.`,
+        });
       }
       if (status !== undefined && !VALID_STATUSES.includes(status)) {
-        return res.status(400).json({ message: `Status must be one of: ${VALID_STATUSES.join(", ")}` });
+        return sendApiError(res, "INVALID_STATUS", {
+          message: `Status must be one of: ${VALID_STATUSES.join(", ")}.`,
+        });
       }
       if (last_performed_date) {
         const d = new Date(last_performed_date + "-01");
         const now = new Date();
-        if (d > now) return res.status(400).json({ message: "Last performed date cannot be in the future" });
-        if (d < new Date("1900-01-01")) return res.status(400).json({ message: "Last performed date cannot be before 1900" });
+        if (d > now) return sendApiError(res, "DATE_IN_FUTURE");
+        if (d < new Date("1900-01-01")) return sendApiError(res, "DATE_TOO_EARLY");
       }
       let composer = req.body.composer;
       if (work_title) {
@@ -1954,7 +2011,7 @@ export async function registerRoutes(
 
   app.post("/api/singer/headshot", requireAuth, requireSinger, handleUpload(headshotUpload.single("headshot")), async (req: Request, res: Response) => {
     try {
-      if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+      if (!req.file) return sendApiError(res, "FILE_MISSING");
       const headshotPath = await uploadToSupabaseStorage("headshots", req.file);
       const singer = await storage.updateSinger(currentUserId(req), { headshot_url: headshotPath });
       if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
@@ -1970,10 +2027,13 @@ export async function registerRoutes(
     try {
       const { currentPassword, newPassword } = req.body;
       if (!currentPassword || !newPassword) {
-        return res.status(400).json({ message: "Current and new password are required" });
+        return sendApiError(res, "PASSWORD_FIELDS_REQUIRED");
       }
       if (newPassword.length < 8) {
-        return res.status(400).json({ message: "New password must be at least 8 characters" });
+        return sendApiError(res, "PASSWORD_TOO_SHORT", {
+          message: "Your new password must be at least 8 characters.",
+          field: "newPassword",
+        });
       }
       const singer = await storage.getSinger(currentUserId(req));
       if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
@@ -1991,10 +2051,13 @@ export async function registerRoutes(
     try {
       const { currentPassword, newPassword } = req.body;
       if (!currentPassword || !newPassword) {
-        return res.status(400).json({ message: "Current and new password are required" });
+        return sendApiError(res, "PASSWORD_FIELDS_REQUIRED");
       }
       if (newPassword.length < 8) {
-        return res.status(400).json({ message: "New password must be at least 8 characters" });
+        return sendApiError(res, "PASSWORD_TOO_SHORT", {
+          message: "Your new password must be at least 8 characters.",
+          field: "newPassword",
+        });
       }
       const org = await storage.getOrganization(currentUserId(req));
       if (!org) return sendApiError(res, "ORG_NOT_FOUND");
@@ -2074,7 +2137,9 @@ export async function registerRoutes(
     try {
       const singerId = parseInt(req.params.singerId as string, 10);
       if (!Number.isFinite(singerId)) {
-        return res.status(400).json({ message: "Invalid singer id" });
+        return sendApiError(res, "INVALID_ID", {
+          message: "That singer reference isn't valid. Please reopen the profile and try again.",
+        });
       }
       const singer = await storage.getSinger(singerId);
       if (!singer || !singer.admin_approved) {
@@ -2128,13 +2193,13 @@ export async function registerRoutes(
     try {
       const { singer_id, role_name, engagement_date, was_prepared, was_professional, was_accurate } = req.body;
       if (!singer_id || !role_name || !engagement_date) {
-        return res.status(400).json({ message: "singer_id, role_name, and engagement_date are required" });
+        return sendApiError(res, "FEEDBACK_FIELDS_REQUIRED");
       }
       const orgId = currentUserId(req);
 
       const isDuplicate = await storage.checkDuplicateFeedback(Number(singer_id), orgId, engagement_date);
       if (isDuplicate) {
-        return res.status(409).json({ message: "You have already submitted feedback for this singer on this engagement date." });
+        return sendApiError(res, "FEEDBACK_ALREADY_SUBMITTED");
       }
 
       const parsed = insertEngagementFeedbackSchema.parse({
@@ -2214,7 +2279,7 @@ export async function registerRoutes(
     try {
       const parsed = insertRepertoireSuggestionSchema.parse(req.body);
       if (!parsed.work_title || !parsed.work_title.trim()) {
-        return res.status(400).json({ message: "Work title is required" });
+        return sendApiError(res, "WORK_TITLE_REQUIRED");
       }
       const created = await storage.createRepertoireSuggestion({
         ...parsed,
@@ -2326,7 +2391,7 @@ export async function registerRoutes(
       const orgId = parseInt(req.params.id as string);
       const { tier } = req.body;
       if (!["free", "pro"].includes(tier)) {
-        return res.status(400).json({ message: "Tier must be 'free' or 'pro'" });
+        return sendApiError(res, "INVALID_ACCOUNT_TIER");
       }
       const org = await storage.updateOrganization(orgId, { subscription_tier: tier });
       if (!org) return sendApiError(res, "ORG_NOT_FOUND");
@@ -2343,11 +2408,13 @@ export async function registerRoutes(
       const { amount, reason } = req.body;
       const amt = parseInt(amount);
       if (!Number.isFinite(amt) || amt === 0) {
-        return res.status(400).json({ message: "Amount must be a non-zero integer" });
+        return sendApiError(res, "CREDIT_AMOUNT_INVALID");
       }
       const VALID_REASONS = ["Promotional Grant", "Support Adjustment", "Refund", "Correction", "Other"];
       if (!reason || !VALID_REASONS.includes(reason)) {
-        return res.status(400).json({ message: `Reason must be one of: ${VALID_REASONS.join(", ")}` });
+        return sendApiError(res, "CREDIT_REASON_INVALID", {
+          message: `Reason must be one of: ${VALID_REASONS.join(", ")}.`,
+        });
       }
       const org = await storage.getOrganization(orgId);
       if (!org) return sendApiError(res, "ORG_NOT_FOUND");
@@ -2357,12 +2424,16 @@ export async function registerRoutes(
       const previousBalance = limit - used;
       const newBalance = previousBalance + amt;
       if (newBalance < 0) {
-        return res.status(400).json({ message: `Adjustment would make balance negative (current: ${previousBalance}, requested: ${amt})` });
+        return sendApiError(res, "CREDIT_BALANCE_NEGATIVE", {
+          message: `That adjustment would push the balance below zero — the current balance is ${previousBalance} and you requested ${amt}.`,
+        });
       }
 
       const newLimit = limit + amt;
       if (newLimit < used) {
-        return res.status(400).json({ message: `Adjustment would set credit limit (${newLimit}) below already-used credits (${used}) this month` });
+        return sendApiError(res, "CREDIT_LIMIT_BELOW_USED", {
+          message: `That adjustment would set the limit to ${newLimit}, below the ${used} credits already used this month.`,
+        });
       }
       const updated = await storage.updateOrganization(orgId, { contact_reveal_limit: newLimit });
       await db.insert(creditAdjustments).values({
@@ -2428,7 +2499,7 @@ export async function registerRoutes(
       const { field, value } = req.body;
       const allowedFields = ["is_pro_verified", "is_emergency_ready", "is_management_verified", "flagged_for_review"];
       if (!allowedFields.includes(field)) {
-        return res.status(400).json({ message: "Invalid badge field" });
+        return sendApiError(res, "INVALID_BADGE_FIELD");
       }
       const updateData: Record<string, any> = { [field]: !!value };
       // When granting emergency ready, clear the request flag

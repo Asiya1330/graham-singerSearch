@@ -22,6 +22,7 @@ import {
 } from "./lib/stripe";
 import { storage } from "./storage";
 import { currentUserType } from "./lib/auth-user";
+import { describeErrorForLog, sendApiError, sendRouteError } from "./lib/api-response";
 
 type AuthMiddleware = (req: Request, res: Response, next: () => void) => void;
 
@@ -32,9 +33,31 @@ function checkoutIdempotencyKey(userType: string, userId: number, interval: "mon
   return `checkout:${userType}:${userId}:${interval}:${Math.floor(Date.now() / CHECKOUT_COOLDOWN_MS)}`;
 }
 
-function stripeNotReadyMessage(): string {
+/**
+ * Billing misconfiguration is an operator problem, not a user one. The specific
+ * issue (missing key, wrong price id) goes to the server log; the caller gets
+ * catalog copy that tells them what to do instead.
+ */
+function rejectStripeNotConfigured(res: Response, context: string): Response {
   const { issues } = getStripeConfigStatus();
-  return issues[0] || "Stripe billing is not configured yet. See SETUP-STRIPE.md";
+  console.error(
+    `[stripe] ${context} blocked — billing not configured: ${issues.join("; ") || "unknown reason"}`,
+  );
+  return sendApiError(res, "BILLING_NOT_CONFIGURED");
+}
+
+/** Resolves the signed-in user, or null after sending the auth error. */
+function requireStripeUser(
+  req: Request,
+  res: Response,
+): { userType: "singer" | "organization"; userId: number } | null {
+  const userType = currentUserType(req);
+  const userId = req.authUser?.id;
+  if (!userType || !userId) {
+    sendApiError(res, "NOT_AUTHENTICATED");
+    return null;
+  }
+  return { userType: userType as "singer" | "organization", userId };
 }
 
 export function registerStripeRoutes(
@@ -48,12 +71,11 @@ export function registerStripeRoutes(
   app.get("/api/stripe/prices", async (_req: Request, res: Response) => {
     try {
       if (!isStripeCheckoutConfigured()) {
-        return res.status(503).json({ message: stripeNotReadyMessage() });
+        return rejectStripeNotConfigured(res, "load pricing");
       }
       res.json(await getStripePricing());
     } catch (error: any) {
-      console.error("[stripe] pricing error:", error);
-      res.status(500).json({ message: error.message || "Failed to load Stripe pricing" });
+      sendRouteError(res, error, "PRICING_LOAD_FAILED", "load Stripe pricing");
     }
   });
 
@@ -61,19 +83,17 @@ export function registerStripeRoutes(
     let checkoutKey: string | null = null;
     try {
       if (!isStripeCheckoutConfigured()) {
-        return res.status(503).json({ message: stripeNotReadyMessage() });
+        return rejectStripeNotConfigured(res, "start checkout");
       }
 
-      const userType = currentUserType(req);
-      const userId = req.authUser?.id;
-      if (!userType || !userId) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
+      const auth = requireStripeUser(req, res);
+      if (!auth) return;
+      const { userType, userId } = auth;
 
       checkoutKey = `${userType}:${userId}`;
       const lastCheckout = pendingCheckouts.get(checkoutKey);
       if (lastCheckout && Date.now() - lastCheckout < CHECKOUT_COOLDOWN_MS) {
-        return res.status(429).json({ message: "A checkout session was just created. Please complete or cancel it before starting another." });
+        return sendApiError(res, "CHECKOUT_IN_PROGRESS");
       }
       pendingCheckouts.set(checkoutKey, Date.now());
 
@@ -82,13 +102,15 @@ export function registerStripeRoutes(
 
       if (userType === "singer") {
         const singer = await storage.getSinger(userId);
-        if (!singer) return res.status(404).json({ message: "Singer not found" });
+        if (!singer) return sendApiError(res, "SINGER_NOT_FOUND");
         if (hasActiveStripeSubscription(singer)) {
-          return res.status(400).json({ message: "You already have an active subscription" });
+          return sendApiError(res, "SUBSCRIPTION_ALREADY_ACTIVE");
         }
         if (singer.subscription_tier === "pro" && !singer.stripe_subscription_id) {
           const reason = singer.founding_artist ? "Founding Artist" : singer.is_gifted ? "gifted" : "active Pro";
-          return res.status(400).json({ message: `You already have free Pro access as a ${reason} member. No payment needed!` });
+          return sendApiError(res, "SUBSCRIPTION_ALREADY_FREE", {
+            message: `You already have free Pro access as a ${reason} member, so there's nothing to pay for.`,
+          });
         }
         const url = await createCheckoutSession("singer", userId, singer.email, singer, interval, idempotencyKey);
         pendingCheckouts.set(checkoutKey, Date.now());
@@ -96,40 +118,39 @@ export function registerStripeRoutes(
       }
 
       const org = await storage.getOrganization(userId);
-      if (!org) return res.status(404).json({ message: "Organization not found" });
+      if (!org) return sendApiError(res, "ORG_NOT_FOUND");
       if (hasActiveStripeSubscription(org)) {
-        return res.status(400).json({ message: "You already have an active subscription" });
+        return sendApiError(res, "SUBSCRIPTION_ALREADY_ACTIVE");
       }
       if (org.subscription_tier === "pro" && !org.stripe_subscription_id) {
         const reason = org.founding_org ? "Founding Organization" : org.is_gifted ? "gifted" : "active Pro";
-        return res.status(400).json({ message: `You already have free Pro access as a ${reason} member. No payment needed!` });
+        return sendApiError(res, "SUBSCRIPTION_ALREADY_FREE", {
+          message: `You already have free Pro access as a ${reason} member, so there's nothing to pay for.`,
+        });
       }
       const url = await createCheckoutSession("organization", userId, org.email, org, interval, idempotencyKey);
       pendingCheckouts.set(checkoutKey, Date.now());
       return res.json({ url });
     } catch (error: any) {
       if (checkoutKey) pendingCheckouts.delete(checkoutKey);
-      console.error("[stripe] checkout error:", error);
-      res.status(500).json({ message: error.message || "Failed to start checkout" });
+      sendRouteError(res, error, "CHECKOUT_FAILED", "start Stripe checkout");
     }
   });
 
   app.post("/api/stripe/portal", requireAuth, async (req: Request, res: Response) => {
     try {
       if (!isStripeCheckoutConfigured()) {
-        return res.status(503).json({ message: stripeNotReadyMessage() });
+        return rejectStripeNotConfigured(res, "open billing portal");
       }
 
-      const userType = currentUserType(req);
-      const userId = req.authUser?.id;
-      if (!userType || !userId) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
+      const auth = requireStripeUser(req, res);
+      if (!auth) return;
+      const { userType, userId } = auth;
 
       if (userType === "singer") {
         const singer = await storage.getSinger(userId);
         if (!singer?.stripe_customer_id) {
-          return res.status(400).json({ message: "No billing account found. Subscribe to Pro first." });
+          return sendApiError(res, "BILLING_ACCOUNT_MISSING");
         }
         const url = await createPortalSession("singer", singer.stripe_customer_id);
         return res.json({ url });
@@ -137,58 +158,52 @@ export function registerStripeRoutes(
 
       const org = await storage.getOrganization(userId);
       if (!org?.stripe_customer_id) {
-        return res.status(400).json({ message: "No billing account found. Subscribe to Pro first." });
+        return sendApiError(res, "BILLING_ACCOUNT_MISSING");
       }
       const url = await createPortalSession("organization", org.stripe_customer_id);
       return res.json({ url });
     } catch (error: any) {
-      console.error("[stripe] portal error:", error);
-      res.status(500).json({ message: error.message || "Failed to open billing portal" });
+      sendRouteError(res, error, "BILLING_PORTAL_FAILED", "open Stripe billing portal");
     }
   });
 
   app.post("/api/stripe/sync", requireAuth, async (req: Request, res: Response) => {
     try {
       if (!isStripeCheckoutConfigured()) {
-        return res.status(503).json({ message: stripeNotReadyMessage() });
+        return rejectStripeNotConfigured(res, "sync subscription");
       }
 
-      const userType = currentUserType(req);
-      const userId = req.authUser?.id;
-      if (!userType || !userId) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
+      const auth = requireStripeUser(req, res);
+      if (!auth) return;
+      const { userType, userId } = auth;
 
       const updated = await syncSubscriptionForUser(userType, userId);
       if (!updated) {
-        return res.status(404).json({ message: "User not found" });
+        return sendApiError(res, userType === "singer" ? "SINGER_NOT_FOUND" : "ORG_NOT_FOUND");
       }
 
       const { password: _, ...safe } = updated;
       res.json({ ...safe, userType });
     } catch (error: any) {
-      console.error("[stripe] sync error:", error);
-      res.status(500).json({ message: error.message || "Failed to sync subscription" });
+      sendRouteError(res, error, "SUBSCRIPTION_SYNC_FAILED", "sync Stripe subscription");
     }
   });
 
   app.post("/api/stripe/cancel", requireAuth, async (req: Request, res: Response) => {
     try {
       if (!isStripeCheckoutConfigured()) {
-        return res.status(503).json({ message: stripeNotReadyMessage() });
+        return rejectStripeNotConfigured(res, "cancel subscription");
       }
 
-      const userType = currentUserType(req);
-      const userId = req.authUser?.id;
-      if (!userType || !userId) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
+      const auth = requireStripeUser(req, res);
+      if (!auth) return;
+      const { userType, userId } = auth;
 
       const user = userType === "singer"
         ? await storage.getSinger(userId)
         : await storage.getOrganization(userId);
       if (!user?.stripe_subscription_id) {
-        return res.status(400).json({ message: "No active subscription to cancel" });
+        return sendApiError(res, "SUBSCRIPTION_NOT_ACTIVE");
       }
 
       const sub = await cancelSubscription(user.stripe_subscription_id);
@@ -198,42 +213,42 @@ export function registerStripeRoutes(
         : null;
 
       const updated = await syncSubscriptionForUser(userType, userId);
-      if (!updated) return res.status(404).json({ message: "User not found" });
+      if (!updated) {
+        return sendApiError(res, userType === "singer" ? "SINGER_NOT_FOUND" : "ORG_NOT_FOUND");
+      }
       const { password: _, ...safe } = updated;
       res.json({ ...safe, userType, cancelAt: expiresAt });
     } catch (error: any) {
-      console.error("[stripe] cancel error:", error);
-      res.status(500).json({ message: error.message || "Failed to cancel subscription" });
+      sendRouteError(res, error, "SUBSCRIPTION_UPDATE_FAILED", "cancel Stripe subscription");
     }
   });
 
   app.post("/api/stripe/resume", requireAuth, async (req: Request, res: Response) => {
     try {
       if (!isStripeCheckoutConfigured()) {
-        return res.status(503).json({ message: stripeNotReadyMessage() });
+        return rejectStripeNotConfigured(res, "resume subscription");
       }
 
-      const userType = currentUserType(req);
-      const userId = req.authUser?.id;
-      if (!userType || !userId) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
+      const auth = requireStripeUser(req, res);
+      if (!auth) return;
+      const { userType, userId } = auth;
 
       const user = userType === "singer"
         ? await storage.getSinger(userId)
         : await storage.getOrganization(userId);
       if (!user?.stripe_subscription_id) {
-        return res.status(400).json({ message: "No subscription to resume" });
+        return sendApiError(res, "SUBSCRIPTION_NOT_CANCELLING");
       }
 
       await resumeSubscription(user.stripe_subscription_id);
       const updated = await syncSubscriptionForUser(userType, userId);
-      if (!updated) return res.status(404).json({ message: "User not found" });
+      if (!updated) {
+        return sendApiError(res, userType === "singer" ? "SINGER_NOT_FOUND" : "ORG_NOT_FOUND");
+      }
       const { password: _, ...safe } = updated;
       res.json({ ...safe, userType });
     } catch (error: any) {
-      console.error("[stripe] resume error:", error);
-      res.status(500).json({ message: error.message || "Failed to resume subscription" });
+      sendRouteError(res, error, "SUBSCRIPTION_UPDATE_FAILED", "resume Stripe subscription");
     }
   });
 
@@ -241,13 +256,13 @@ export function registerStripeRoutes(
     let webhookEventId: string | null = null;
     try {
       if (!isStripeWebhookConfigured()) {
-        return res.status(503).json({ message: stripeNotReadyMessage() });
+        return rejectStripeNotConfigured(res, "receive webhook");
       }
 
       const signature = req.headers["stripe-signature"];
       const rawBody = req.rawBody;
       if (!Buffer.isBuffer(rawBody)) {
-        return res.status(400).json({ message: "Missing request body" });
+        return sendApiError(res, "WEBHOOK_BODY_MISSING");
       }
 
       const event = constructWebhookEvent(rawBody, signature);
@@ -261,17 +276,23 @@ export function registerStripeRoutes(
       await markStripeWebhookEventProcessed(event.id);
       res.json({ received: true });
     } catch (error: any) {
-      console.error("[stripe] webhook error:", error);
+      // Status choice drives Stripe's retry behaviour: 4xx means "don't retry,
+      // the request itself is wrong", 5xx means "retry, we failed to handle it".
       if (error?.type === "StripeSignatureVerificationError") {
-        return res.status(400).json({ message: error.message || "Webhook verification failed" });
+        console.error(
+          `[stripe] webhook signature rejected: ${describeErrorForLog(error)}`,
+        );
+        return sendApiError(res, "WEBHOOK_SIGNATURE_INVALID");
       }
+
+      console.error(
+        `[stripe] webhook processing failed${webhookEventId ? ` (event ${webhookEventId})` : ""}:`,
+        error,
+      );
       if (webhookEventId) {
         await markStripeWebhookEventFailed(webhookEventId, error);
       }
-      if (error instanceof StripeWebhookProcessingError) {
-        return res.status(500).json({ message: error.message || "Webhook processing failed" });
-      }
-      res.status(500).json({ message: error.message || "Webhook processing failed" });
+      return sendApiError(res, "WEBHOOK_PROCESSING_FAILED");
     }
   });
 }

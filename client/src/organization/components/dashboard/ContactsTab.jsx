@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { BarChart2, Users } from "lucide-react";
 import { useOrgUser } from "../../hooks/useOrgUser";
 import { RateEngagementModal } from "./RateEngagementModal";
+import { describeError, getApiErrorMessage } from "../../../lib/api";
 
 export function ContactsTab({ viewProfile }) {
   const { setOrgTab } = useOrgUser();
@@ -45,15 +46,14 @@ export function ContactsTab({ viewProfile }) {
           was_accurate: feedbackForm.was_accurate,
         }),
       });
-      const data = await res.json();
       if (!res.ok) {
-        setFeedbackMsg({ type: "error", text: data.message || "Failed to submit feedback" });
+        setFeedbackMsg({ type: "error", text: await getApiErrorMessage(res, "OPERATION_FAILED") });
       } else {
         setFeedbackMsg({ type: "success", text: "Feedback submitted. Thank you!" });
         setTimeout(() => { setFeedbackForm(null); setFeedbackMsg(null); loadRevealedSingers(); }, 1800);
       }
     } catch (err) {
-      setFeedbackMsg({ type: "error", text: "Failed to submit feedback" });
+      setFeedbackMsg({ type: "error", text: describeError(err) });
     }
     setFeedbackSubmitting(false);
   };

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { CheckCircle } from "lucide-react";
 import { useSingerUser } from "../../hooks/useSingerUser";
+import { describeError } from "../../../lib/api";
 
 export function ResumeSection() {
   const { user, showAlert, refreshUser } = useSingerUser();
@@ -22,7 +23,12 @@ export function ResumeSection() {
       await refreshUser();
       showAlert("Resume uploaded successfully", "success");
     } catch (err) {
-      showAlert(err.name === "AbortError" ? "Upload timed out. Please try again." : "Failed to upload resume", "error");
+      showAlert(
+        err.name === "AbortError"
+          ? "The resume upload timed out. Please check your connection and try again."
+          : describeError(err, "UPLOAD_FAILED"),
+        "error",
+      );
     } finally {
       clearTimeout(timeout);
       setResumeUploading(false);

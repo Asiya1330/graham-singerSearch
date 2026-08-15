@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Lightbulb } from "lucide-react";
 import { adminFetch } from "../lib/adminApi";
+import { describeError, getApiErrorMessage } from "../lib/api";
 
 export function SuggestionsPanel() {
   const [repertoireSuggestions, setRepertoireSuggestions] = useState([]);
@@ -14,11 +15,11 @@ export function SuggestionsPanel() {
       setError("");
       try {
         const res = await adminFetch("/api/admin/repertoire-suggestions", { credentials: "include" });
-        if (!res.ok) throw new Error("Failed to load suggestions");
+        if (!res.ok) throw new Error(await getApiErrorMessage(res, "OPERATION_FAILED"));
         const data = await res.json();
         if (!cancelled) setRepertoireSuggestions(Array.isArray(data) ? data : []);
       } catch (err) {
-        if (!cancelled) setError(err.message || "Failed to load suggestions");
+        if (!cancelled) setError(describeError(err));
       } finally {
         if (!cancelled) setLoading(false);
       }

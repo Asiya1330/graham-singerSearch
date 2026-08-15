@@ -5,6 +5,7 @@ import { useAppContext } from "./AppContext";
 import { navigateToView } from "./lib/nav";
 import { logoutAccount } from "./lib/accountAuth";
 import { getStripePricing, startStripeCheckout, openStripeBillingPortal } from "./lib/stripe";
+import { describeError } from "./lib/api";
 import { Navbar } from "./landing/Navbar";
 import { AppFooter } from "./AppShared";
 import { getBillingDisplay } from "./components/BillingIntervalPicker";
@@ -129,7 +130,7 @@ export function PricingPage({ showAlert }) {
       setCurrentUser(null);
       navigateToView(setView, view);
     } catch (err) {
-      showAlert(err.message || "Failed to log out", "error");
+      showAlert(describeError(err, "LOGOUT_FAILED"), "error");
       setAccountSwitchLoading(false);
     }
   }
@@ -144,7 +145,7 @@ export function PricingPage({ showAlert }) {
       try {
         await openStripeBillingPortal();
       } catch (err) {
-        showAlert(err.message || "Failed to open billing portal", "error");
+        showAlert(describeError(err, "BILLING_PORTAL_FAILED"), "error");
       }
       return;
     }
