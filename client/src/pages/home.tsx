@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import heroBg from "@/assets/hero-bg.png";
 import { motion } from "framer-motion";
 import { MapPin, Mic2, Music, Search, Sparkles } from "lucide-react";
+import { describeError, getErrorMessageFromBody } from "@/lib/api";
 
 type ApiSinger = {
   id: number;
@@ -88,11 +89,11 @@ export function FeaturedSingers({ limit, searchQuery = "", className = "" }: Fea
       try {
         const res = await fetch("/api/search");
         const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Failed to load singers");
+        if (!res.ok) throw new Error(getErrorMessageFromBody(data, "SEARCH_FAILED"));
         if (!cancelled) setSingers(data.results || []);
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Failed to load singers");
+          setError(describeError(err, "SEARCH_FAILED"));
           setSingers([]);
         }
       } finally {

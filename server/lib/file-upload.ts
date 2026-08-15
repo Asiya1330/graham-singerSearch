@@ -3,6 +3,7 @@ import path from "path";
 import type { Express } from "express";
 import { getStorageBucket } from "./env";
 import { getSupabaseAdmin } from "./supabase";
+import { HttpApiError } from "./api-response";
 
 // Default signed-URL lifetime. Comfortable window so <img>/resume links don't
 // break on long-open pages.
@@ -38,7 +39,8 @@ export async function uploadToSupabaseStorage(
   });
 
   if (error) {
-    throw new Error(`Supabase Storage upload failed: ${error.message}`);
+    console.error(`[storage] upload to ${objectPath} failed:`, error.message);
+    throw new HttpApiError("UPLOAD_FAILED");
   }
 
   return objectPath;

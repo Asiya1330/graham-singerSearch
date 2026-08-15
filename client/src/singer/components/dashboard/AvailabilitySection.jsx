@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Calendar, X, Zap } from "lucide-react";
 import { useSingerUser } from "../../hooks/useSingerUser";
 import { EmergencyAvailabilityPanel } from "./EmergencyAvailabilityPanel";
+import { describeError, getApiErrorMessage } from "../../../lib/api";
 
 export function AvailabilitySection() {
   const { user, setView, showAlert, refreshUser } = useSingerUser();
@@ -13,8 +14,14 @@ export function AvailabilitySection() {
   const [availSaving, setAvailSaving] = useState(false);
 
   const handleAddAvailability = async () => {
-    if (!availStart || !availEnd) { showAlert("Please select both start and end dates", "error"); return; }
-    if (new Date(availEnd) <= new Date(availStart)) { showAlert("End date must be after start date", "error"); return; }
+    if (!availStart || !availEnd) {
+      showAlert("Please pick both a start date and an end date for this window.", "error");
+      return;
+    }
+    if (new Date(availEnd) <= new Date(availStart)) {
+      showAlert("The end date needs to be after the start date.", "error");
+      return;
+    }
     setAvailSaving(true);
     try {
       const res = await fetch("/api/singer/availability", {
@@ -23,13 +30,17 @@ export function AvailabilitySection() {
         credentials: "include",
         body: JSON.stringify({ start_date: availStart, end_date: availEnd }),
       });
-      if (!res.ok) { showAlert("Failed to add availability", "error"); setAvailSaving(false); return; }
+      if (!res.ok) {
+        showAlert(await getApiErrorMessage(res, "OPERATION_FAILED"), "error");
+        setAvailSaving(false);
+        return;
+      }
       await refreshUser();
       setAvailStart("");
       setAvailEnd("");
       showAlert("Availability window added", "success");
     } catch (err) {
-      showAlert("Failed to add availability", "error");
+      showAlert(describeError(err), "error");
     }
     setAvailSaving(false);
   };
@@ -40,23 +51,25 @@ export function AvailabilitySection() {
         method: "DELETE",
         credentials: "include",
       });
-      if (!res.ok) { showAlert("Failed to remove availability", "error"); return; }
+      if (!res.ok) {
+        showAlert(await getApiErrorMessage(res, "OPERATION_FAILED"), "error");
+        return;
+      }
       await refreshUser();
       showAlert("Availability removed", "success");
     } catch (err) {
-      showAlert("Failed to remove availability", "error");
+      showAlert(describeError(err), "error");
     }
   };
 
   const handleRequestEmergency = async () => {
     try {
       const res = await fetch("/api/singer/request-emergency", { method: "POST", credentials: "include" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
+      if (!res.ok) throw new Error(await getApiErrorMessage(res, "OPERATION_FAILED"));
       await refreshUser();
       showAlert("Urgent availability signal submitted for admin review.", "success");
     } catch (err) {
-      showAlert(err.message || "Failed to submit request", "error");
+      showAlert(describeError(err), "error");
     }
   };
 
@@ -64,11 +77,14 @@ export function AvailabilitySection() {
     if (!window.confirm("Opt out of Short-Notice Engagements? Your profile will no longer appear in urgent searches.")) return;
     try {
       const res = await fetch("/api/singer/emergency/opt-out", { method: "POST", credentials: "include" });
-      if (!res.ok) { showAlert("Failed to opt out", "error"); return; }
+      if (!res.ok) {
+        showAlert(await getApiErrorMessage(res, "OPERATION_FAILED"), "error");
+        return;
+      }
       await refreshUser();
       showAlert("Opted out of Short-Notice Engagements.", "success");
     } catch (err) {
-      showAlert("Failed to opt out", "error");
+      showAlert(describeError(err), "error");
     }
   };
 
@@ -80,11 +96,14 @@ export function AvailabilitySection() {
         credentials: "include",
         body: JSON.stringify({ emergency_status_requested: false }),
       });
-      if (!res.ok) { showAlert("Failed to cancel request", "error"); return; }
+      if (!res.ok) {
+        showAlert(await getApiErrorMessage(res, "PROFILE_UPDATE_FAILED"), "error");
+        return;
+      }
       await refreshUser();
       showAlert("Urgent request cancelled.", "success");
     } catch (err) {
-      showAlert("Failed to cancel request", "error");
+      showAlert(describeError(err), "error");
     }
   };
 

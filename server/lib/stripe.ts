@@ -10,6 +10,7 @@ import {
   getStripeWebhookSecret,
 } from "./env";
 import { pool, storage } from "../storage";
+import { HttpApiError } from "./api-response";
 
 export const STRIPE_TRIAL_DAYS = 7;
 export const STRIPE_SYNC_INTERVAL_MS = 5 * 60 * 1000;
@@ -65,7 +66,9 @@ function getPriceId(userType: StripeUserType, interval?: "monthly" | "annual"): 
     const annualPrice =
       userType === "singer" ? getStripePriceSingerProAnnual() : getStripePriceOrgProAnnual();
     if (!annualPrice) {
-      throw new Error("Annual billing is not configured yet. Please choose monthly billing.");
+      // Thrown as a catalog error so the reason survives the route's generic
+      // CHECKOUT_FAILED fallback — this one is worth telling the buyer.
+      throw new HttpApiError("ANNUAL_BILLING_UNAVAILABLE");
     }
     return annualPrice;
   }

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Loader2, Shield, UserPlus } from "lucide-react";
-import { apiFetch } from "../lib/api";
+import { apiFetch, describeError } from "../lib/api";
 
 /** Admin roster APIs used by this panel (all exist under /api/admin/auth/*). */
 const ADMIN_AUTH_API = {
@@ -24,7 +24,7 @@ export function AdminsPanel({ currentAdminId, isSuper, showAlert }) {
       const { data } = await apiFetch(ADMIN_AUTH_API.list);
       setAdmins(Array.isArray(data) ? data : []);
     } catch (err) {
-      showAlert?.(err.message || "Failed to load admins", "error");
+      showAlert?.(describeError(err), "error");
     } finally {
       setLoading(false);
     }
@@ -42,7 +42,7 @@ export function AdminsPanel({ currentAdminId, isSuper, showAlert }) {
         await action();
         await loadAdmins();
       } catch (err) {
-        showAlert?.(err.message || "Action failed", "error");
+        showAlert?.(describeError(err), "error");
       } finally {
         setBusy(null);
       }
