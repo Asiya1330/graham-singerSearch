@@ -9,23 +9,27 @@ export { API_ERRORS, resolveApiErrorMessage };
 /**
  * Parse JSON (or text) from a failed API response into a user-facing message.
  */
-export async function getApiErrorMessage(res, fallbackCode = "OPERATION_FAILED") {
+async function readErrorPayload(res) {
   try {
     const text = await res.text();
     if (!text) {
       if (res.status === 502 || res.status === 503) {
-        return API_ERRORS.SERVICE_UNAVAILABLE.message;
+        return { code: "SERVICE_UNAVAILABLE" };
       }
-      return API_ERRORS[fallbackCode].message;
+      return null;
     }
     try {
-      return resolveApiErrorMessage(JSON.parse(text), fallbackCode);
+      return JSON.parse(text);
     } catch {
-      return resolveApiErrorMessage({ message: text }, fallbackCode);
+      return { message: text };
     }
   } catch {
-    return API_ERRORS.NETWORK_ERROR.message;
+    return { code: "NETWORK_ERROR" };
   }
+}
+
+export async function getApiErrorMessage(res, fallbackCode = "OPERATION_FAILED") {
+  return resolveApiErrorMessage(await readErrorPayload(res), fallbackCode);
 }
 
 /**
@@ -56,9 +60,11 @@ export async function apiFetch(url, options = {}, fallbackCode = "OPERATION_FAIL
     });
 
     if (!res.ok) {
-      const message = await getApiErrorMessage(res, fallbackCode);
+      const payload = await readErrorPayload(res);
+      const message = resolveApiErrorMessage(payload, fallbackCode);
       const err = new Error(message);
       err.status = res.status;
+      if (payload && typeof payload.code === "string") err.code = payload.code;
       throw err;
     }
 
