@@ -52,6 +52,7 @@ import {
   requireSinger,
   requireOrg,
   attachUser,
+  sendUnauthenticated,
   currentUserId,
   currentUserType,
 } from "./lib/auth-user";
@@ -461,7 +462,7 @@ export async function registerRoutes(
       await attachUser(req, res, () => {});
       const ctx = req.authUser;
       if (!ctx) {
-        return sendApiError(res, "NOT_AUTHENTICATED");
+        return sendUnauthenticated(res, req);
       }
 
       if (ctx.type === "singer") {

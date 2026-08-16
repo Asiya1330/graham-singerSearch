@@ -25,6 +25,7 @@ export type ApiErrorCode =
   // --- Authentication & accounts ---
   | "RATE_LIMITED"
   | "NOT_AUTHENTICATED"
+  | "ACCOUNT_NOT_ENROLLED"
   | "SINGER_ACCESS_REQUIRED"
   | "ORG_ACCESS_REQUIRED"
   | "ACCOUNT_TYPE_MISMATCH"
@@ -187,6 +188,11 @@ export const API_ERRORS: Record<ApiErrorCode, ApiErrorDefinition> = {
   NOT_AUTHENTICATED: {
     status: 401,
     message: "Your session has ended. Please sign in again to continue.",
+  },
+  ACCOUNT_NOT_ENROLLED: {
+    status: 403,
+    message:
+      "This email isn't enrolled as a singer or organization. Register first, or contact support if you already have a profile.",
   },
   SINGER_ACCESS_REQUIRED: {
     status: 403,

@@ -20,10 +20,19 @@ export type UserAuthContext = {
   profile: Singer | Organization;
 };
 
+/** Why a Bearer token did not resolve to a singer/organization profile. */
+export type AuthResolveFailure = "invalid" | "unenrolled";
+
+export type TokenResolveResult =
+  | { kind: "ok"; ctx: UserAuthContext }
+  | { kind: "invalid" }
+  | { kind: "unenrolled" };
+
 declare global {
   namespace Express {
     interface Request {
       authUser?: UserAuthContext;
+      authResolveFailure?: AuthResolveFailure;
     }
   }
 }
@@ -38,21 +47,21 @@ declare global {
 export async function resolveUserFromToken(
   token: string,
   preferred?: AccountType | null,
-): Promise<UserAuthContext | null> {
+): Promise<TokenResolveResult> {
   let claims: VerifiedClaims;
   try {
     claims = await verifySupabaseAccessToken(token);
   } catch {
-    return null;
+    return { kind: "invalid" };
   }
 
   const sub = typeof claims.sub === "string" ? claims.sub : null;
-  if (!sub) return null;
+  if (!sub) return { kind: "invalid" };
 
   const roles = rolesFromAppMetadata(claims.app_metadata);
   const canSing = hasAppRole(claims.app_metadata, "singer");
   const canOrg = hasAppRole(claims.app_metadata, "organization");
-  if (!canSing && !canOrg) return null;
+  if (!canSing && !canOrg) return { kind: "unenrolled" };
 
   // Try the preferred type first so a dual-role user lands where they asked.
   const order: AccountType[] =
@@ -73,19 +82,21 @@ export async function resolveUserFromToken(
 
     if (profile) {
       return {
-        id: profile.id,
-        type,
-        authUserId: sub,
-        email: profile.email,
-        roles,
-        profile,
+        kind: "ok",
+        ctx: {
+          id: profile.id,
+          type,
+          authUserId: sub,
+          email: profile.email,
+          roles,
+          profile,
+        },
       };
     }
   }
 
-  // Token says they have a role but no profile row is linked yet — treat as
-  // unauthenticated so /api/auth/finalize is the only way forward.
-  return null;
+  // Valid Auth user, but no linked singer/organization row.
+  return { kind: "unenrolled" };
 }
 
 function preferredTypeFrom(req: Request): AccountType | null {
@@ -109,11 +120,12 @@ export async function attachUser(
 
   const token = extractBearerToken(req);
   if (token) {
-    const ctx = await resolveUserFromToken(token, preferredTypeFrom(req));
-    if (ctx) {
-      req.authUser = ctx;
+    const resolved = await resolveUserFromToken(token, preferredTypeFrom(req));
+    if (resolved.kind === "ok") {
+      req.authUser = resolved.ctx;
       return next();
     }
+    req.authResolveFailure = resolved.kind;
   }
 
   // --- legacy session fallback (temporary) ---
@@ -146,9 +158,16 @@ export async function requireAuth(
 ) {
   await attachUser(req, res, () => {});
   if (!req.authUser) {
-    return sendApiError(res, "NOT_AUTHENTICATED");
+    return sendUnauthenticated(res, req);
   }
   next();
+}
+
+export function sendUnauthenticated(res: Response, req: Request) {
+  if (req.authResolveFailure === "unenrolled") {
+    return sendApiError(res, "ACCOUNT_NOT_ENROLLED");
+  }
+  return sendApiError(res, "NOT_AUTHENTICATED");
 }
 
 export function requireSinger(req: Request, res: Response, next: NextFunction) {

@@ -113,11 +113,19 @@ export async function loginAccount(email, password, userType) {
     /* login_count bump is best-effort */
   }
 
-  const { data: profile } = await apiFetch(
-    "/api/auth/me",
-    {},
-    "PROFILE_LOAD_FAILED",
-  );
+  let profile;
+  try {
+    ({ data: profile } = await apiFetch(
+      "/api/auth/me",
+      {},
+      "PROFILE_LOAD_FAILED",
+    ));
+  } catch (err) {
+    // Supabase accepted the password, but this Auth user has no singer/org
+    // profile. Drop the session so the UI does not look half-logged-in.
+    await signOutEverywhere();
+    throw err;
+  }
   return requireMatchingAccountType(profile, userType);
 }
 
