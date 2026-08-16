@@ -32,12 +32,15 @@ export type ApiErrorCode =
   | "EMAIL_PASSWORD_REQUIRED"
   | "EMAIL_USER_TYPE_REQUIRED"
   | "EMAIL_ALREADY_REGISTERED"
+  | "EMAIL_NOT_CONFIRMED"
   | "INVALID_EMAIL"
   | "USER_NOT_FOUND"
   | "INVALID_PASSWORD"
   | "CURRENT_PASSWORD_INCORRECT"
+  | "PASSWORD_UNCHANGED"
   | "INVALID_USER_TYPE"
   | "LOGIN_FAILED"
+  | "MFA_CODE_INVALID"
   | "REGISTRATION_FAILED"
   | "LOGOUT_FAILED"
   | "INVALID_SESSION"
@@ -221,6 +224,12 @@ export const API_ERRORS: Record<ApiErrorCode, ApiErrorDefinition> = {
     message: "An account already uses this email. Sign in instead, or reset your password.",
     field: "email",
   },
+  EMAIL_NOT_CONFIRMED: {
+    status: 403,
+    message:
+      "Please confirm your email address first — check your inbox for the link we sent.",
+    field: "email",
+  },
   INVALID_EMAIL: {
     status: 400,
     message: "That email address doesn't look right. Please check it and try again.",
@@ -243,6 +252,11 @@ export const API_ERRORS: Record<ApiErrorCode, ApiErrorDefinition> = {
     message: "Your current password is incorrect. Please re-enter it and try again.",
     field: "currentPassword",
   },
+  PASSWORD_UNCHANGED: {
+    status: 400,
+    message: "Please choose a password that's different from your current one.",
+    field: "password",
+  },
   INVALID_USER_TYPE: {
     status: 400,
     message: "Please choose a valid account type — either singer or organization.",
@@ -251,6 +265,10 @@ export const API_ERRORS: Record<ApiErrorCode, ApiErrorDefinition> = {
   LOGIN_FAILED: {
     status: 500,
     message: "We couldn't sign you in just now. Please try again in a moment.",
+  },
+  MFA_CODE_INVALID: {
+    status: 401,
+    message: "That verification code is incorrect or expired. Enter a fresh code from your app.",
   },
   REGISTRATION_FAILED: {
     status: 500,
@@ -625,6 +643,8 @@ export const API_ERRORS: Record<ApiErrorCode, ApiErrorDefinition> = {
 export const LEGACY_MESSAGE_ALIASES: Record<string, ApiErrorCode> = {
   "Failed to reach Railway API": "SERVICE_UNAVAILABLE",
   "Invalid credentials": "INVALID_PASSWORD",
+  "Invalid login credentials": "INVALID_PASSWORD",
+  "Email not confirmed": "EMAIL_NOT_CONFIRMED",
   "Not authenticated": "NOT_AUTHENTICATED",
   "Admin authentication required": "ADMIN_AUTH_REQUIRED",
   "Singer access required": "SINGER_ACCESS_REQUIRED",

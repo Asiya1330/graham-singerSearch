@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { getSupabaseBrowser } from "../lib/supabase";
 import { apiFetch, API_ERRORS } from "../lib/api";
+import { messageFromAuthProviderError } from "@shared/auth-error-map";
 import { ApiErrorText } from "../components/ApiErrorText";
 import { TotpCodeInput } from "./TotpCodeInput";
 import { PasswordInput } from "../components/PasswordInput";
@@ -48,7 +49,9 @@ export function AdminLoginFlow({ onSuccess }) {
         email: email.trim().toLowerCase(),
         password,
       });
-      if (signError) throw new Error(signError.message);
+      if (signError) {
+        throw new Error(messageFromAuthProviderError(signError, "admin"));
+      }
 
       const { data: factorsData } = await supabase.auth.mfa.listFactors();
       const totpFactors = (factorsData?.totp || []).filter(
@@ -61,7 +64,9 @@ export function AdminLoginFlow({ onSuccess }) {
             factorType: "totp",
             friendlyName: "Admin authenticator",
           });
-        if (enrollError) throw new Error(enrollError.message);
+        if (enrollError) {
+          throw new Error(messageFromAuthProviderError(enrollError, "admin"));
+        }
         setFactorId(enrollData.id);
         setQrCode(enrollData.totp?.qr_code || null);
         setOtpResetKey((k) => k + 1);
@@ -99,14 +104,18 @@ export function AdminLoginFlow({ onSuccess }) {
           await supabase.auth.mfa.challenge({
             factorId,
           });
-        if (challengeError) throw new Error(challengeError.message);
+        if (challengeError) {
+          throw new Error(messageFromAuthProviderError(challengeError, "admin"));
+        }
 
         const { error: verifyError } = await supabase.auth.mfa.verify({
           factorId,
           challengeId: challenge.id,
           code,
         });
-        if (verifyError) throw new Error(verifyError.message);
+        if (verifyError) {
+          throw new Error(messageFromAuthProviderError(verifyError, "admin"));
+        }
 
         await finishIfReady();
       } catch (err) {
@@ -289,10 +298,12 @@ export function AdminSetPasswordPage({ onDone }) {
       const { error: updateError } = await supabase.auth.updateUser({
         password,
       });
-      if (updateError) throw new Error(updateError.message);
+      if (updateError) {
+        throw new Error(messageFromAuthProviderError(updateError, "password"));
+      }
       onDone?.();
     } catch (err) {
-      setError(err.message || "Could not set password.");
+      setError(err.message || API_ERRORS.PASSWORD_RESET_FAILED.message);
     } finally {
       setLoading(false);
     }

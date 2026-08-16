@@ -9,6 +9,7 @@ import {
 } from "./env";
 import { grantAuthRole } from "./auth-roles";
 import { HttpApiError } from "./api-response";
+import { mapAuthProviderError } from "@shared/auth-error-map";
 import type { AccountType } from "./auth-user";
 
 export function normalizeEmail(email: unknown): string {
@@ -179,7 +180,14 @@ export async function verifyAccountPassword(
       body: JSON.stringify({ email, password }),
     },
   );
-  return res.ok;
+  if (res.ok) return true;
+  // Wrong password is 400. Anything else (outage, rate limit) must not look
+  // like "your current password is incorrect".
+  if (res.status === 400 || res.status === 401) return false;
+  if (res.status === 429) {
+    throw new HttpApiError("RATE_LIMITED");
+  }
+  throw new HttpApiError("SERVICE_UNAVAILABLE");
 }
 
 export async function changeAccountPassword(
@@ -191,7 +199,7 @@ export async function changeAccountPassword(
     { password: newPassword },
   );
   if (error) {
-    throw new HttpApiError("OPERATION_FAILED", error.message);
+    throw new HttpApiError(mapAuthProviderError(error, "password"));
   }
 }
 
@@ -204,7 +212,7 @@ export async function changeAccountEmail(
     { email: newEmail, email_confirm: true },
   );
   if (error) {
-    throw new HttpApiError("OPERATION_FAILED", error.message);
+    throw new HttpApiError(mapAuthProviderError(error, "password"));
   }
 }
 
