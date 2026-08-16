@@ -4,6 +4,7 @@ import {
   getSiteUrl,
   isExampleEmail,
   logEmailConfigStatus,
+  type EmailConfigStatus,
 } from "./config";
 import { getResendClient } from "./client";
 import {
