@@ -5,20 +5,10 @@ import {
   signOutEverywhere,
   setAccountType,
 } from "./supabase";
-
-/** Supabase returns this for both "no such user" and "wrong password". */
-function isBadCredentials(error) {
-  const msg = String(error?.message || "").toLowerCase();
-  return (
-    msg.includes("invalid login credentials") ||
-    msg.includes("invalid credentials") ||
-    error?.status === 400
-  );
-}
-
-function isUnconfirmed(error) {
-  return String(error?.message || "").toLowerCase().includes("email not confirmed");
-}
+import {
+  isCredentialRejection,
+  messageFromAuthProviderError,
+} from "@shared/auth-error-map";
 
 function mismatchMessage(expectedType) {
   if (expectedType === "singer") {
@@ -55,6 +45,18 @@ async function requireMatchingAccountType(profile, expectedType) {
   return profile;
 }
 
+function rethrowIfNotCredentials(err) {
+  const code = err?.code;
+  if (
+    code === "RATE_LIMITED" ||
+    code === "NETWORK_ERROR" ||
+    code === "SERVICE_UNAVAILABLE" ||
+    code === "DATABASE_UNAVAILABLE"
+  ) {
+    throw err;
+  }
+}
+
 /**
  * Sign in a singer or organization.
  *
@@ -70,7 +72,7 @@ export async function loginAccount(email, password, userType) {
 
   let { error } = await signInWithPassword(email, password);
 
-  if (error && isBadCredentials(error)) {
+  if (error && isCredentialRejection(error)) {
     let migrated = false;
     try {
       const { data } = await apiFetch(
@@ -80,11 +82,11 @@ export async function loginAccount(email, password, userType) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password, userType }),
         },
-        "LOGIN_FAILED",
+        "INVALID_PASSWORD",
       );
       migrated = !!data?.migrated;
-    } catch {
-      // Fall through to the original error — never reveal which step failed.
+    } catch (legacyErr) {
+      rethrowIfNotCredentials(legacyErr);
     }
     if (migrated) {
       ({ error } = await signInWithPassword(email, password));
@@ -92,12 +94,7 @@ export async function loginAccount(email, password, userType) {
   }
 
   if (error) {
-    if (isUnconfirmed(error)) {
-      throw new Error(
-        "Please confirm your email address first — check your inbox for the link we sent.",
-      );
-    }
-    throw new Error(API_ERRORS.LOGIN_FAILED.message);
+    throw new Error(messageFromAuthProviderError(error, "login"));
   }
 
   // Hint the preferred profile before /api/auth/me; the response userType is authoritative.
@@ -143,10 +140,7 @@ export async function registerAccount(userType, { email, password, ...profile })
 
   const { data, error } = await signUpWithPassword(email, password);
   if (error) {
-    if (String(error.message || "").toLowerCase().includes("already registered")) {
-      throw new Error(API_ERRORS.EMAIL_ALREADY_REGISTERED.message);
-    }
-    throw new Error(error.message || API_ERRORS.REGISTRATION_FAILED.message);
+    throw new Error(messageFromAuthProviderError(error, "register"));
   }
 
   setAccountType(userType);

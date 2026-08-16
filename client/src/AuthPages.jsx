@@ -5,6 +5,7 @@ import { US_STATES } from "./AppShared";
 import { useCityStateAutofill } from "./hooks/useCityStateAutofill";
 import { navigateToView } from "./lib/nav";
 import { apiFetch, API_ERRORS } from "./lib/api";
+import { messageFromAuthProviderError } from "@shared/auth-error-map";
 import {
   loginAccount,
   registerAccount,
@@ -525,7 +526,7 @@ export function ResetPasswordPage({ showAlert }) {
     try {
       const supabase = getSupabaseBrowser();
       const { error } = await supabase.auth.updateUser({ password });
-      if (error) throw new Error(error.message);
+      if (error) throw new Error(messageFromAuthProviderError(error, "reset"));
       // Force a fresh sign-in with the new password rather than riding the
       // recovery session into the app.
       await signOutEverywhere();
