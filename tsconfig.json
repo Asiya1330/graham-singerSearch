@@ -5,6 +5,8 @@
     "incremental": true,
     "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
     "noEmit": true,
+    // Needed so tsc allows spreading a Set ([...new Set(...)]) — default target is ES3.
+    "target": "ES2020",
     "module": "ESNext",
     "strict": true,
     "allowJs": true,
