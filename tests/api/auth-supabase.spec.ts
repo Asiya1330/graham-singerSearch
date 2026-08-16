@@ -70,6 +70,18 @@ test.describe("token authentication", () => {
     expect(status).toBe(401);
   });
 
+  test("a valid Auth user with no singer or organization profile is not treated as a dropped session", async () => {
+    const email = testEmail("unenrolled");
+    const user = await createAuthUser(email);
+    created.push(user.id);
+    const token = await signIn(email);
+
+    const { status, body } = await api("/auth/me", { token });
+    expect(status).toBe(403);
+    expect(body.code).toBe("ACCOUNT_NOT_ENROLLED");
+    expect(String(body.message)).not.toMatch(/session has ended/i);
+  });
+
   test("token with a tampered signature is rejected", async () => {
     const singer = await account("singer", "tamper");
     const [h, p] = singer.token.split(".");

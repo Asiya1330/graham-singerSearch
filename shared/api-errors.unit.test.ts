@@ -16,6 +16,7 @@ import {
 test("auth error codes carry the expected HTTP statuses", () => {
   const expected: Partial<Record<ApiErrorCode, number>> = {
     NOT_AUTHENTICATED: 401,
+    ACCOUNT_NOT_ENROLLED: 403,
     SINGER_ACCESS_REQUIRED: 403,
     ORG_ACCESS_REQUIRED: 403,
     ADMIN_AUTH_REQUIRED: 401,
