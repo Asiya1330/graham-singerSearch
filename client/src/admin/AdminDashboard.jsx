@@ -353,8 +353,12 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
     setCreditAdjustError("");
   };
 
-  const handleMainTabChange = (tab) => {
+  const handleMainTabChange = (tab, singerTab) => {
     setAdminMainTab(tab);
+    if (singerTab) {
+      setAdminTab(singerTab);
+      setSingerSearchQuery("");
+    }
     setAdminViewSinger(null);
     setEditingSinger(null);
     setAdminViewOrg(null);
@@ -470,9 +474,9 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
           <button
             data-testid="button-admin-logout"
             onClick={handleLogout}
-            className="text-sm font-medium text-slate-600 hover:text-red-600 transition-colors flex items-center gap-1"
+            className="text-sm font-medium text-slate-600 hover:text-red-600 transition-colors flex items-center gap-1 whitespace-nowrap"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
             Log Out
@@ -480,8 +484,8 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
         }
       />
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-slate-900 mb-6">Platform Overview</h1>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <h1 className="text-xl sm:text-2xl font-bold text-slate-900 mb-4 sm:mb-6">Platform Overview</h1>
 
         {loading && (
           <div className="flex items-center justify-center py-20">
@@ -501,7 +505,7 @@ export function AdminDashboard({ setAdminMode, showAlert }) {
             <AdminStats
               stats={stats}
               extStats={extStats}
-              onNavigateSingers={() => handleMainTabChange("singers")}
+              onNavigateSingers={(singerTab) => handleMainTabChange("singers", singerTab || "all")}
               onNavigateOrgs={() => handleMainTabChange("orgs")}
             />
 

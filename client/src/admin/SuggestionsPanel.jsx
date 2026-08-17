@@ -29,8 +29,8 @@ export function SuggestionsPanel() {
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 overflow-hidden mb-8" data-testid="section-repertoire-suggestions">
-      <div className="px-6 py-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
-        <h2 className="text-lg font-bold text-slate-900">Repertoire Suggestions</h2>
+      <div className="px-4 sm:px-6 py-4 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <h2 className="text-base sm:text-lg font-bold text-slate-900">Repertoire Suggestions</h2>
         <span className="text-sm text-slate-500">{repertoireSuggestions.length} total</span>
       </div>
       {loading ? (
@@ -44,7 +44,7 @@ export function SuggestionsPanel() {
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm min-w-[720px]">
             <thead className="bg-slate-50 text-slate-600">
               <tr>
                 <th className="text-left px-4 py-2 font-medium">Singer</th>

@@ -20,7 +20,7 @@ export function CreditAdjustModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={close} data-testid="modal-credit-adjust-overlay">
-      <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()} data-testid="modal-credit-adjust">
+      <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-5 sm:p-6 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()} data-testid="modal-credit-adjust">
         <h3 className="text-lg font-bold text-slate-900 mb-1">Adjust Credits</h3>
         <p className="text-sm text-slate-600 mb-4">{targetOrg.organization_name}</p>
         <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-md">

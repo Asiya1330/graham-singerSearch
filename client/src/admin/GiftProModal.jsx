@@ -11,7 +11,7 @@ export function GiftProModal({ giftTarget, giftForm, setGiftForm, giftError, gif
 
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={close} data-testid="modal-gift-pro">
-      <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+      <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-xl shadow-xl max-w-md w-full p-5 sm:p-6 max-h-[90vh] overflow-y-auto">
         <div className="flex items-start justify-between mb-3">
           <div>
             <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">🎁 Gift Pro Access</h3>
