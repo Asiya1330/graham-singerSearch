@@ -18,17 +18,17 @@ export function OrgEditView({
           <button onClick={onCancel} className="text-sm text-blue-600 hover:text-blue-800">← Back to List</button>
         }
       />
-      <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-          <div className="px-6 py-5 bg-slate-50 border-b border-slate-200">
-            <h2 className="text-xl font-bold text-slate-900">Edit Organization: {editingOrg.organization_name}</h2>
+          <div className="px-4 sm:px-6 py-5 bg-slate-50 border-b border-slate-200">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 break-words">Edit Organization: {editingOrg.organization_name}</h2>
           </div>
-          <div className="p-6 space-y-4">
+          <div className="p-4 sm:p-6 space-y-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Organization Name</label>
               <input type="text" className="w-full border border-slate-300 rounded-md h-10 px-3 text-sm" value={orgEditForm.organization_name || ""} onChange={(e) => setOrgEditForm({ ...orgEditForm, organization_name: e.target.value })} data-testid="input-org-edit-name" />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
                 <input type="email" className="w-full border border-slate-300 rounded-md h-10 px-3 text-sm" value={orgEditForm.email || ""} onChange={(e) => setOrgEditForm({ ...orgEditForm, email: e.target.value })} data-testid="input-org-edit-email" />
@@ -38,7 +38,7 @@ export function OrgEditView({
                 <input type="text" className="w-full border border-slate-300 rounded-md h-10 px-3 text-sm" value={orgEditForm.city || ""} onChange={(e) => setOrgEditForm({ ...orgEditForm, city: e.target.value })} data-testid="input-org-edit-city" />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Contact Person Name</label>
                 <input type="text" className="w-full border border-slate-300 rounded-md h-10 px-3 text-sm" value={orgEditForm.contact_person_name || ""} onChange={(e) => setOrgEditForm({ ...orgEditForm, contact_person_name: e.target.value })} data-testid="input-org-edit-contact-name" />

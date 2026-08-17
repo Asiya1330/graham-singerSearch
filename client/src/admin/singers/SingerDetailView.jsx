@@ -18,22 +18,22 @@ export function SingerDetailView({
           <button onClick={onBack} className="text-sm text-blue-600 hover:text-blue-800">← Back to List</button>
         }
       />
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-          <div className="px-6 py-5 bg-slate-50 border-b border-slate-200">
-            <div className="flex items-start justify-between">
-              <div>
-                <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2 flex-wrap">
+          <div className="px-4 sm:px-6 py-5 bg-slate-50 border-b border-slate-200">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+              <div className="min-w-0">
+                <h2 className="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2 flex-wrap">
                   {s.first_name} {s.last_name}
                   {s.founding_artist && <span className="text-[10px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-full">🌟 FOUNDING</span>}
                   {s.is_gifted && <span className="text-[10px] font-bold bg-violet-100 text-violet-800 px-1.5 py-0.5 rounded-full">🎁 GIFTED</span>}
                 </h2>
-                <p className="text-sm text-slate-500">{s.primary_voice_type} · {s.city}, {s.state} · {s.email}</p>
+                <p className="text-sm text-slate-500 break-words">{s.primary_voice_type} · {s.city}, {s.state} · {s.email}</p>
                 {s.subscription_tier === "pro" && s.pro_expires_at && (
                   <p className="text-xs text-slate-500 mt-0.5">Pro access until {new Date(s.pro_expires_at).toLocaleDateString()}</p>
                 )}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center flex-wrap gap-2 shrink-0">
                 <button
                   onClick={() => onFoundingToggle("singer", s.id, `${s.first_name} ${s.last_name}`, !s.founding_artist)}
                   disabled={isBusy(`singer:${s.id}:founding`)}
@@ -53,13 +53,13 @@ export function SingerDetailView({
               </div>
             </div>
           </div>
-          <div className="p-6 space-y-6">
+          <div className="p-4 sm:p-6 space-y-6">
             {s.gift_history?.length > 0 && (
               <div>
                 <h4 className="text-sm font-semibold text-slate-500 uppercase mb-2">🎁 Gift History</h4>
                 <ul className="divide-y divide-slate-100 border border-slate-200 rounded-lg">
                   {s.gift_history.map((g) => (
-                    <li key={g.id} className="px-3 py-2 text-sm flex items-center justify-between gap-2" data-testid={`row-gift-singer-${g.id}`}>
+                    <li key={g.id} className="px-3 py-2 text-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2" data-testid={`row-gift-singer-${g.id}`}>
                       <div>
                         <div className="font-medium text-slate-900">{g.duration_days} days · expires {new Date(g.expires_at).toLocaleDateString()}</div>
                         {g.reason && <div className="text-xs text-slate-500">Reason: {g.reason}</div>}
@@ -112,7 +112,7 @@ export function SingerDetailView({
                 </div>
               </div>
             )}
-            <div className="flex gap-3 pt-4 border-t border-slate-200">
+            <div className="flex flex-wrap gap-3 pt-4 border-t border-slate-200">
               <button
                 onClick={async () => {
                   const action = s.admin_approved ? "reject" : "approve";

@@ -137,7 +137,7 @@ export function AdminLoginFlow({ onSuccess }) {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
       <div
-        className={`bg-white rounded-xl shadow-sm border border-slate-200 w-full ${cardMaxWidth} p-8`}
+        className={`bg-white rounded-xl shadow-sm border border-slate-200 w-full ${cardMaxWidth} p-6 sm:p-8`}
       >
         <div className="mb-6 text-center">
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-100 mb-3">
@@ -311,7 +311,7 @@ export function AdminSetPasswordPage({ onDone }) {
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 w-full max-w-sm p-8">
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 w-full max-w-sm p-6 sm:p-8">
         <h1 className="text-xl font-bold text-slate-900 mb-2">
           Set admin password
         </h1>
