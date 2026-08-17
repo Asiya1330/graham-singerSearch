@@ -14,6 +14,7 @@ import { HttpApiError } from "./api-response";
 
 export const STRIPE_TRIAL_DAYS = 7;
 export const STRIPE_SYNC_INTERVAL_MS = 5 * 60 * 1000;
+export const CUSTOMER_CREATE_IDEMPOTENCY_WINDOW_MS = 10_000;
 const PAST_DUE_GRACE_MS = 3 * 24 * 60 * 60 * 1000;
 
 export type StripeUserType = "singer" | "organization";
@@ -61,6 +62,52 @@ function getStripeSubscriptionId(
   return typeof subscription === "string" ? subscription : subscription.id;
 }
 
+function isStripeResourceMissing(error: unknown): boolean {
+  return typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "resource_missing";
+}
+
+function isDeletedStripeCustomer(
+  customer: Stripe.Customer | Stripe.DeletedCustomer,
+): customer is Stripe.DeletedCustomer {
+  return "deleted" in customer && customer.deleted === true;
+}
+
+/**
+ * A subscription only updates a user that is already bound to its customer.
+ * Binding happens at checkout (getOrCreateStripeCustomer, then
+ * checkout.session.completed), never here — otherwise a stale event, which still
+ * carries the old userId in its metadata, would re-attach a customer the operator
+ * just cleared from Stripe and from the row.
+ */
+export function shouldApplyLiveSubscription(args: {
+  userCustomerId: string | null | undefined;
+  subscriptionCustomerId: string | null;
+  status: string | null;
+}): boolean {
+  if (!args.status || !args.subscriptionCustomerId) return false;
+  return args.userCustomerId === args.subscriptionCustomerId;
+}
+
+async function retrieveUsableStripeCustomer(customerId: string): Promise<Stripe.Customer | null> {
+  try {
+    const customer = await getStripe().customers.retrieve(customerId);
+    if (isDeletedStripeCustomer(customer)) return null;
+    return customer;
+  } catch (error) {
+    if (isStripeResourceMissing(error)) return null;
+    throw error;
+  }
+}
+
+async function retrieveUsableStripeSubscription(subscriptionId: string): Promise<Stripe.Subscription | null> {
+  try {
+    return await getStripe().subscriptions.retrieve(subscriptionId);
+  } catch (error) {
+    if (isStripeResourceMissing(error)) return null;
+    throw error;
+  }
+}
+
 function getPriceId(userType: StripeUserType, interval?: "monthly" | "annual"): string {
   if (interval === "annual") {
     const annualPrice =
@@ -83,6 +130,18 @@ function getDisplayName(userType: StripeUserType, user: Singer | Organization): 
   return (user as Organization).organization_name;
 }
 
+async function persistStripeCustomerId(
+  userType: StripeUserType,
+  userId: number,
+  customerId: string,
+): Promise<void> {
+  if (userType === "singer") {
+    await storage.updateSinger(userId, { stripe_customer_id: customerId });
+    return;
+  }
+  await storage.updateOrganization(userId, { stripe_customer_id: customerId });
+}
+
 export async function getOrCreateStripeCustomer(
   userType: StripeUserType,
   userId: number,
@@ -91,20 +150,25 @@ export async function getOrCreateStripeCustomer(
   existingCustomerId?: string | null,
   idempotencyKey?: string,
 ): Promise<string> {
-  if (existingCustomerId) return existingCustomerId;
+  if (existingCustomerId) {
+    const live = await retrieveUsableStripeCustomer(existingCustomerId);
+    if (live) return live.id;
+    console.warn(
+      `[stripe] stored customer ${existingCustomerId} is missing or deleted; creating a new customer for ${userType} ${userId}`,
+    );
+  }
 
-  const customer = await getStripe().customers.create({
+  const params: Stripe.CustomerCreateParams = {
     email,
     name,
     metadata: { userId: String(userId), userType },
-  }, idempotencyKey ? { idempotencyKey } : undefined);
+  };
+  const customer = await getStripe().customers.create(
+    params,
+    idempotencyKey ? { idempotencyKey } : undefined,
+  );
 
-  if (userType === "singer") {
-    await storage.updateSinger(userId, { stripe_customer_id: customer.id });
-  } else {
-    await storage.updateOrganization(userId, { stripe_customer_id: customer.id });
-  }
-
+  await persistStripeCustomerId(userType, userId, customer.id);
   return customer.id;
 }
 
@@ -122,7 +186,7 @@ export async function createCheckoutSession(
     email,
     getDisplayName(userType, user),
     user.stripe_customer_id,
-    `customer:${userType}:${userId}`,
+    `customer:${userType}:${userId}:${Math.floor(Date.now() / CUSTOMER_CREATE_IDEMPOTENCY_WINDOW_MS)}`,
   );
 
   const siteUrl = getStripeReturnBaseUrl();
@@ -347,18 +411,59 @@ function syncTimestampUpdate() {
   return { stripe_last_synced_at: new Date() };
 }
 
-export async function applySubscriptionUpdate(
+async function handleMissingStripeSubscription(
   sub: Stripe.Subscription,
   userTypeHint?: StripeUserType,
   userIdHint?: number,
 ): Promise<void> {
   const resolved = await resolveUserFromSubscription(sub, userTypeHint, userIdHint);
+  if (!resolved) return;
+
+  const eventCustomerId = getStripeCustomerId(sub.customer);
+  const liveCustomer = eventCustomerId ? await retrieveUsableStripeCustomer(eventCustomerId) : null;
+  const ownedDeletedCustomer =
+    !liveCustomer && (!resolved.user.stripe_customer_id || resolved.user.stripe_customer_id === eventCustomerId);
+
+  if (ownedDeletedCustomer) {
+    await clearDeletedStripeCustomerState(resolved.userType, resolved.userId, resolved.user);
+    return;
+  }
+
+  if (resolved.user.stripe_subscription_id === sub.id) {
+    await clearMissingStripeSubscriptionState(resolved.userType, resolved.userId, resolved.user);
+  }
+}
+
+export async function applySubscriptionUpdate(
+  sub: Stripe.Subscription,
+  userTypeHint?: StripeUserType,
+  userIdHint?: number,
+): Promise<void> {
+  const live = await retrieveUsableStripeSubscription(sub.id);
+  if (!live) {
+    await handleMissingStripeSubscription(sub, userTypeHint, userIdHint);
+    return;
+  }
+
+  const resolved = await resolveUserFromSubscription(live, userTypeHint, userIdHint);
   if (!resolved) {
-    throw new StripeWebhookProcessingError(`[stripe] Could not resolve user for subscription ${sub.id}`);
+    throw new StripeWebhookProcessingError(`[stripe] Could not resolve user for subscription ${live.id}`);
+  }
+
+  const subscriptionCustomerId = getStripeCustomerId(live.customer);
+  if (!shouldApplyLiveSubscription({
+    userCustomerId: resolved.user.stripe_customer_id,
+    subscriptionCustomerId,
+    status: live.status,
+  })) {
+    console.warn(
+      `[stripe] ignoring stale subscription ${live.id} (${live.status}) for ${resolved.userType} ${resolved.userId}`,
+    );
+    return;
   }
 
   const { userType, userId, user } = resolved;
-  const update = mapSubscriptionToDbUpdate(sub);
+  const update = mapSubscriptionToDbUpdate(live);
 
   if (update.subscription_tier === "free" && hasNonStripeProAccess(user)) {
     await (userType === "singer"
@@ -406,7 +511,7 @@ export async function applySubscriptionUpdate(
     stripe_subscription_status: update.stripe_subscription_status,
     stripe_billing_interval: update.stripe_billing_interval,
     stripe_last_synced_at: new Date(),
-    stripe_trial_started_at: sub.trial_start ? new Date(sub.trial_start * 1000) : organizationUser.stripe_trial_started_at,
+    stripe_trial_started_at: live.trial_start ? new Date(live.trial_start * 1000) : organizationUser.stripe_trial_started_at,
     subscription_tier: update.subscription_tier,
     pro_expires_at: proExpiresAt,
     contact_reveal_limit: update.subscription_tier === "pro" ? 50 : 3,
@@ -417,20 +522,18 @@ export async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Se
   const userType = session.metadata?.userType as StripeUserType | undefined;
   const userId = session.metadata?.userId ? parseInt(session.metadata.userId, 10) : undefined;
   const customerId = getStripeCustomerId(session.customer);
+  const liveCustomer = customerId ? await retrieveUsableStripeCustomer(customerId) : null;
 
-  if (userType && userId && customerId) {
-    if (userType === "singer") {
-      await storage.updateSinger(userId, { stripe_customer_id: customerId });
-    } else {
-      await storage.updateOrganization(userId, { stripe_customer_id: customerId });
-    }
+  if (userType && userId && liveCustomer) {
+    await persistStripeCustomerId(userType, userId, liveCustomer.id);
   }
 
   const subscriptionId =
     getStripeSubscriptionId(session.subscription);
   if (!subscriptionId) return;
 
-  const sub = await getStripe().subscriptions.retrieve(subscriptionId);
+  const sub = await retrieveUsableStripeSubscription(subscriptionId);
+  if (!sub) return;
   await applySubscriptionUpdate(sub, userType, userId);
 }
 
@@ -489,6 +592,36 @@ async function clearMissingStripeSubscriptionState(
   });
 }
 
+async function clearDeletedStripeCustomerState(
+  userType: StripeUserType,
+  userId: number,
+  user: Singer | Organization,
+): Promise<void> {
+  const baseUpdate = {
+    stripe_customer_id: null,
+    stripe_subscription_id: null,
+    stripe_subscription_status: null,
+    stripe_billing_interval: null,
+    stripe_last_synced_at: new Date(),
+  };
+
+  if (userType === "singer") {
+    await storage.updateSinger(userId, {
+      ...baseUpdate,
+      ...(hasNonStripeProAccess(user) ? {} : { subscription_tier: "free", pro_expires_at: null }),
+    });
+    return;
+  }
+
+  await storage.updateOrganization(userId, {
+    ...baseUpdate,
+    stripe_trial_started_at: null,
+    ...(hasNonStripeProAccess(user)
+      ? {}
+      : { subscription_tier: "free", pro_expires_at: null, contact_reveal_limit: 3 }),
+  });
+}
+
 export function shouldSyncStripeState(
   user: Pick<Singer | Organization, "stripe_customer_id" | "stripe_subscription_status" | "stripe_last_synced_at">,
   now = new Date(),
@@ -511,8 +644,16 @@ export async function syncSubscriptionForUser(
       : await storage.getOrganization(userId);
   if (!user?.stripe_customer_id) return user;
 
+  const liveCustomer = await retrieveUsableStripeCustomer(user.stripe_customer_id);
+  if (!liveCustomer) {
+    await clearDeletedStripeCustomerState(userType, userId, user);
+    return userType === "singer"
+      ? await storage.getSinger(userId)
+      : await storage.getOrganization(userId);
+  }
+
   const { data } = await getStripe().subscriptions.list({
-    customer: user.stripe_customer_id,
+    customer: liveCustomer.id,
     status: "all",
     limit: 20,
   });
