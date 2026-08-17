@@ -236,3 +236,53 @@ test("throttles auth sync unless the last sync is stale", () => {
     );
   });
 });
+
+test("does not reattach any Stripe sub after billing was cleared", () => {
+  return loadStripeModule().then(({ shouldApplyLiveSubscription }) => {
+    for (const status of ["canceled", "active", "trialing", "past_due", "incomplete", "unpaid"]) {
+      assert.equal(
+        shouldApplyLiveSubscription({
+          userCustomerId: null,
+          subscriptionCustomerId: "cus_old",
+          status,
+        }),
+        false,
+        `status ${status} must not re-bind a cleared row`,
+      );
+    }
+  });
+});
+
+test("does not apply a webhook for a previous Stripe customer", () => {
+  return loadStripeModule().then(({ shouldApplyLiveSubscription }) => {
+    assert.equal(
+      shouldApplyLiveSubscription({
+        userCustomerId: "cus_new",
+        subscriptionCustomerId: "cus_old",
+        status: "canceled",
+      }),
+      false,
+    );
+  });
+});
+
+test("applies a live subscription for the customer currently on the user", () => {
+  return loadStripeModule().then(({ shouldApplyLiveSubscription }) => {
+    assert.equal(
+      shouldApplyLiveSubscription({
+        userCustomerId: "cus_live",
+        subscriptionCustomerId: "cus_live",
+        status: "canceled",
+      }),
+      true,
+    );
+    assert.equal(
+      shouldApplyLiveSubscription({
+        userCustomerId: "cus_live",
+        subscriptionCustomerId: "cus_live",
+        status: null,
+      }),
+      false,
+    );
+  });
+});
