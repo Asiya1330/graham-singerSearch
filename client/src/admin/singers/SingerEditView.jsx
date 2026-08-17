@@ -31,12 +31,12 @@ export function SingerEditView({
           <button onClick={onCancel} className="text-sm text-blue-600 hover:text-blue-800">← Back to List</button>
         }
       />
-      <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-          <div className="px-6 py-5 bg-slate-50 border-b border-slate-200">
-            <h2 className="text-xl font-bold text-slate-900">Edit Singer: {editingSinger.first_name} {editingSinger.last_name}</h2>
+          <div className="px-4 sm:px-6 py-5 bg-slate-50 border-b border-slate-200">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 break-words">Edit Singer: {editingSinger.first_name} {editingSinger.last_name}</h2>
           </div>
-          <div className="p-6 space-y-4">
+          <div className="p-4 sm:p-6 space-y-4">
             <div className="flex flex-col sm:flex-row gap-5 p-4 rounded-xl border border-slate-200 bg-slate-50" data-testid="edit-singer-profile-summary">
               <div className="shrink-0">
                 {editingSinger.headshot_url ? (
@@ -115,7 +115,7 @@ export function SingerEditView({
                 </dl>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">First Name</label>
                 <input type="text" className="w-full border border-slate-300 rounded-md h-10 px-3 text-sm" value={editForm.first_name || ""} onChange={(e) => setEditForm({ ...editForm, first_name: e.target.value })} data-testid="input-edit-first-name" />
@@ -125,7 +125,7 @@ export function SingerEditView({
                 <input type="text" className="w-full border border-slate-300 rounded-md h-10 px-3 text-sm" value={editForm.last_name || ""} onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })} data-testid="input-edit-last-name" />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Primary Voice Type</label>
                 <select className="w-full border border-slate-300 rounded-md h-10 px-3 text-sm" value={editForm.primary_voice_type || ""} onChange={(e) => setEditForm({ ...editForm, primary_voice_type: e.target.value })} data-testid="select-edit-voice-type">
@@ -141,7 +141,7 @@ export function SingerEditView({
                 </select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">City</label>
                 <input type="text" className="w-full border border-slate-300 rounded-md h-10 px-3 text-sm" value={editForm.city || ""} onChange={(e) => handleCityChange(e.target.value)} data-testid="input-edit-city" />
@@ -161,7 +161,7 @@ export function SingerEditView({
               <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
               <input type="email" className="w-full border border-slate-300 rounded-md h-10 px-3 text-sm" value={editForm.email || ""} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} data-testid="input-edit-email" />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Union Status</label>
                 <select className="w-full border border-slate-300 rounded-md h-10 px-3 text-sm" value={editForm.union_status || ""} onChange={(e) => setEditForm({ ...editForm, union_status: e.target.value })} data-testid="select-edit-union">

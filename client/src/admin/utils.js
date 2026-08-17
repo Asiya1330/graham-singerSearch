@@ -21,6 +21,7 @@ export function filterSingers(allSingers, adminTab, singerSearchQuery) {
     if (adminTab === "approved" && !(s.admin_approved && s.subscription_status !== "inactive")) return false;
     if (adminTab === "inactive" && s.subscription_status !== "inactive") return false;
     if (adminTab === "requests" && !(s.emergency_status_requested === true && !s.is_emergency_ready)) return false;
+    if (adminTab === "founding" && !s.founding_artist) return false;
     return true;
   });
 }
