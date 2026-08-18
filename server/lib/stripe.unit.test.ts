@@ -286,3 +286,59 @@ test("applies a live subscription for the customer currently on the user", () =>
     );
   });
 });
+
+test("a trial cancelled before it converts reports as canceling", () => {
+  return loadStripeModule().then(({ mapSubscriptionToDbUpdate }) => {
+    const nowSeconds = Math.floor(Date.now() / 1000);
+    const update = mapSubscriptionToDbUpdate(
+      makeSubscription({ status: "trialing", cancel_at_period_end: true, trial_end: nowSeconds + 86400 }),
+    );
+    assert.equal(update.stripe_subscription_status, "canceling");
+    assert.equal(update.subscription_tier, "pro");
+  });
+});
+
+test("a cancelled paid period reports as canceling and keeps Pro until it ends", () => {
+  return loadStripeModule().then(({ mapSubscriptionToDbUpdate }) => {
+    const update = mapSubscriptionToDbUpdate(makeSubscription({ cancel_at_period_end: true }));
+    assert.equal(update.stripe_subscription_status, "canceling");
+    assert.equal(update.subscription_tier, "pro");
+  });
+});
+
+test("a subscription cancelled outright drops to free at ended_at", () => {
+  return loadStripeModule().then(({ mapSubscriptionToDbUpdate }) => {
+    const nowSeconds = Math.floor(Date.now() / 1000);
+    const update = mapSubscriptionToDbUpdate(
+      makeSubscription({ status: "canceled", ended_at: nowSeconds - 60, canceled_at: nowSeconds - 60 }),
+    );
+    assert.equal(update.stripe_subscription_status, "canceled");
+    assert.equal(update.subscription_tier, "free");
+    assert.equal(update.pro_expires_at, null);
+  });
+});
+
+test("a portal cancellation scheduled via cancel_at reports as canceling", () => {
+  return loadStripeModule().then(({ mapSubscriptionToDbUpdate }) => {
+    const nowSeconds = Math.floor(Date.now() / 1000);
+    const cancelAt = nowSeconds + 86400;
+    // The Stripe billing portal sets cancel_at and leaves the flag false.
+    const update = mapSubscriptionToDbUpdate(
+      makeSubscription({ status: "active", cancel_at_period_end: false, cancel_at: cancelAt, canceled_at: nowSeconds }),
+    );
+    assert.equal(update.stripe_subscription_status, "canceling");
+    assert.equal(update.subscription_tier, "pro");
+    assert.equal(update.pro_expires_at?.getTime(), cancelAt * 1000);
+  });
+});
+
+test("a cancel_at before the period end wins over the period end", () => {
+  return loadStripeModule().then(({ mapSubscriptionToDbUpdate }) => {
+    const nowSeconds = Math.floor(Date.now() / 1000);
+    const cancelAt = nowSeconds + 3600;
+    const update = mapSubscriptionToDbUpdate(
+      makeSubscription({ status: "active", cancel_at_period_end: false, cancel_at: cancelAt }),
+    );
+    assert.equal(update.pro_expires_at?.getTime(), cancelAt * 1000);
+  });
+});
