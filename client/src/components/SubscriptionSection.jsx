@@ -25,9 +25,13 @@ function mergeSyncedUser(prev, data, fallbackType) {
   return next;
 }
 
-export function SubscriptionSection({ user, setCurrentUser, setProfileMsg, userType }) {
+export function SubscriptionSection({ user, setCurrentUser, userType }) {
   const [stripeLoading, setStripeLoading] = React.useState(null);
   const [pricingData, setPricingData] = React.useState(null);
+  // Billing outcomes belong to this card. They used to be pushed into the parent's
+  // profile-form message, which renders next to Save Changes — a cancellation
+  // error surfaced above an unrelated form.
+  const [billingMsg, setBillingMsg] = React.useState(null);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -62,6 +66,12 @@ export function SubscriptionSection({ user, setCurrentUser, setProfileMsg, userT
   const hasStripeSub = Boolean(user.stripe_subscription_id);
   const stripeStatus = stripeStatusLabel(user.stripe_subscription_status);
   const cancelAtPeriodEnd = user.stripe_subscription_status === "canceling";
+  // Cancelled outright in the Stripe portal (or the period already lapsed). The
+  // row can still be tier=pro while paid-for time remains, so this has to gate the
+  // "you are on the Pro plan" panel independently of the tier.
+  const isCanceledSub = ["canceled", "incomplete_expired", "unpaid"].includes(
+    user.stripe_subscription_status,
+  );
 
   const foundingDate = isFounding && user.pro_expires_at
     ? new Date(user.pro_expires_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
@@ -69,9 +79,10 @@ export function SubscriptionSection({ user, setCurrentUser, setProfileMsg, userT
   const trialEndDate = user.pro_expires_at && user.stripe_subscription_status === "trialing"
     ? new Date(user.pro_expires_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
     : null;
-  const cancelDate = cancelAtPeriodEnd && user.pro_expires_at
-    ? new Date(user.pro_expires_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
-    : null;
+  const formatDate = (value) =>
+    value ? new Date(value).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : null;
+  const cancelDate = cancelAtPeriodEnd ? formatDate(user.pro_expires_at) : null;
+  const canceledAccessUntil = isCanceledSub && isPro ? formatDate(user.pro_expires_at) : null;
 
   const isAnnualSub = isPro && hasStripeSub && user.stripe_billing_interval === "year";
 
@@ -89,10 +100,11 @@ export function SubscriptionSection({ user, setCurrentUser, setProfileMsg, userT
 
   const withLoading = (key, fn) => async () => {
     setStripeLoading(key);
+    setBillingMsg(null);
     try {
       await fn();
     } catch (e) {
-      setProfileMsg({ type: "error", text: describeError(e) });
+      setBillingMsg({ type: "error", text: describeError(e) });
     } finally {
       setStripeLoading(null);
     }
@@ -106,12 +118,13 @@ export function SubscriptionSection({ user, setCurrentUser, setProfileMsg, userT
       return;
     }
     setStripeLoading("cancel");
+    setBillingMsg(null);
     try {
       const data = await cancelStripeSubscription();
       setCurrentUser((prev) => mergeSyncedUser(prev, data, userType));
-      setProfileMsg({ type: "success", text: `Subscription canceled. Pro access continues until ${data.cancelAt || "end of period"}.` });
+      setBillingMsg({ type: "success", text: `Subscription canceled. Pro access continues until ${data.cancelAt || "end of period"}.` });
     } catch (e) {
-      setProfileMsg({ type: "error", text: describeError(e, "SUBSCRIPTION_UPDATE_FAILED") });
+      setBillingMsg({ type: "error", text: describeError(e, "SUBSCRIPTION_UPDATE_FAILED") });
     } finally {
       setStripeLoading(null);
     }
@@ -120,7 +133,7 @@ export function SubscriptionSection({ user, setCurrentUser, setProfileMsg, userT
   const handleResume = withLoading("resume", async () => {
     const data = await resumeStripeSubscription();
     setCurrentUser((prev) => mergeSyncedUser(prev, data, userType));
-    setProfileMsg({ type: "success", text: "Subscription resumed!" });
+    setBillingMsg({ type: "success", text: "Subscription resumed!" });
   });
 
   return (
@@ -142,6 +155,16 @@ export function SubscriptionSection({ user, setCurrentUser, setProfileMsg, userT
           </span>
         )}
       </div>
+
+      {billingMsg && (
+        <p
+          className={`text-sm ${billingMsg.type === "success" ? "text-emerald-600" : "text-red-600"}`}
+          role="status"
+          data-testid={`text-billing-message-${suffix}`}
+        >
+          {billingMsg.text}
+        </p>
+      )}
 
       {isFounding && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-3" data-testid={`text-founding-${suffix}-info`}>
@@ -188,7 +211,29 @@ export function SubscriptionSection({ user, setCurrentUser, setProfileMsg, userT
         </div>
       )}
 
-      {isPro && !isFounding && !cancelAtPeriodEnd && (
+      {isCanceledSub && !isFounding && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 space-y-3" data-testid={`text-subscription-canceled-${suffix}`}>
+          <div>
+            <p className="text-sm text-yellow-900 font-semibold">Your subscription has been canceled</p>
+            <p className="text-sm text-yellow-800 mt-1">
+              {canceledAccessUntil
+                ? `You'll continue to have Pro access until ${canceledAccessUntil}. After that, your account switches to the Free plan.`
+                : "Your account is now on the Free plan. Pick a plan below to start Pro again."}
+            </p>
+          </div>
+          {hasStripeSub && (
+            <button
+              onClick={handleBilling}
+              disabled={stripeLoading !== null}
+              className="text-sm font-medium text-slate-600 hover:text-slate-800 border border-slate-300 hover:bg-slate-50 px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+            >
+              {stripeLoading === "billing" ? "Redirecting…" : "Manage billing"}
+            </button>
+          )}
+        </div>
+      )}
+
+      {isPro && !isFounding && !cancelAtPeriodEnd && !isCanceledSub && (
         <div className="space-y-3">
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
             <p className="text-sm text-blue-900 font-medium">
@@ -225,7 +270,7 @@ export function SubscriptionSection({ user, setCurrentUser, setProfileMsg, userT
         </div>
       )}
 
-      {!isPro && !isFounding && (
+      {(!isPro || isCanceledSub) && !isFounding && (
         <div className="space-y-4">
           {!isSinger && (
             <p className="text-sm text-slate-600">
