@@ -630,7 +630,6 @@ export function SingerSettings() {
         <SubscriptionSection
           user={user}
           setCurrentUser={setCurrentUser}
-          setProfileMsg={setProfileMsg}
           userType="singer"
         />
 

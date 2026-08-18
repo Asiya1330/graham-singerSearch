@@ -279,7 +279,6 @@ export function OrgSettings() {
         <SubscriptionSection
           user={user}
           setCurrentUser={setCurrentUser}
-          setProfileMsg={setProfileMsg}
           userType="organization"
         />
 
