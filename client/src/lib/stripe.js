@@ -81,6 +81,8 @@ export function stripeStatusLabel(status) {
       return "Canceling";
     case "canceled":
       return "Canceled";
+    case "incomplete_expired":
+      return "Expired";
     case "unpaid":
       return "Unpaid";
     default:

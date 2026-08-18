@@ -246,8 +246,12 @@ export async function cancelSubscription(
 export async function resumeSubscription(
   subscriptionId: string,
 ): Promise<Stripe.Subscription> {
+  // `cancel_at: null` clears a scheduled cancellation whichever way it was made —
+  // the portal's `cancel_at` or our own `cancel_at_period_end` flag, which Stripe
+  // stores as a `cancel_at` too. Sending both parameters is rejected outright:
+  // "Received both cancel_at_period_end and cancel_at parameters."
   return getStripe().subscriptions.update(subscriptionId, {
-    cancel_at_period_end: false,
+    cancel_at: null,
   });
 }
 
@@ -272,8 +276,31 @@ function getBillingInterval(sub: Stripe.Subscription): string | null {
  * the right expiry while the subscription is still trialing. Once it converts, the
  * paid period end is authoritative — reading trial_end there pins pro_expires_at to
  * a date in the past. */
+/** When a cancellation is already scheduled, as Unix seconds.
+ *
+ * The Stripe billing portal schedules cancellations by setting `cancel_at` and
+ * leaves `cancel_at_period_end` false, while our own /api/stripe/cancel sets the
+ * flag. Reading only the flag missed every cancellation made in the portal, so
+ * both have to be honoured. `cancel_at` wins because it can fall before the
+ * period end.
+ */
+function scheduledCancelAt(sub: Stripe.Subscription): number | null {
+  if (sub.cancel_at) return sub.cancel_at;
+  if (sub.cancel_at_period_end) return getPeriodEnd(sub);
+  return null;
+}
+
 function subscriptionExpiresAt(sub: Stripe.Subscription): Date | null {
-  const endTs = sub.status === "trialing" ? sub.trial_end ?? getPeriodEnd(sub) : getPeriodEnd(sub);
+  // A subscription cancelled outright (portal "cancel now", or a period that has
+  // already rolled over) carries ended_at. Access stops there, not at the period
+  // boundary Stripe still reports on the item — reading the latter would keep the
+  // account on Pro after the subscription is gone.
+  if (sub.status === "canceled" && sub.ended_at) {
+    return new Date(sub.ended_at * 1000);
+  }
+  const endTs =
+    scheduledCancelAt(sub) ??
+    (sub.status === "trialing" ? sub.trial_end ?? getPeriodEnd(sub) : getPeriodEnd(sub));
   if (!endTs) return null;
   return new Date(endTs * 1000);
 }
@@ -312,7 +339,10 @@ function hasNonStripeProAccess(user: Singer | Organization): boolean {
 }
 
 function normalizeSubscriptionStatus(sub: Stripe.Subscription): string {
-  return sub.cancel_at_period_end && sub.status === "active"
+  // A trial cancelled before it converts is just as much a pending cancellation
+  // as a cancelled paid period — both must surface as "canceling", or the UI keeps
+  // presenting the plan as if nothing happened.
+  return scheduledCancelAt(sub) && (sub.status === "active" || sub.status === "trialing")
     ? "canceling"
     : sub.status;
 }
@@ -350,6 +380,8 @@ export function mapSubscriptionToDbUpdate(sub: Stripe.Subscription): {
     };
   }
 
+  // A cancelled subscription can still have paid-for time left (cancel at period
+  // end that has not elapsed yet); once expiresAt is past, it drops to free below.
   if (expiresAt && expiresAt > new Date() && (status === "canceled" || status === "active")) {
     return {
       ...base,
@@ -628,7 +660,7 @@ export function shouldSyncStripeState(
 ): boolean {
   if (!user.stripe_customer_id) return false;
   if (!user.stripe_last_synced_at) return true;
-  if (user.stripe_subscription_status && ["past_due", "incomplete", "unpaid", "trialing"].includes(user.stripe_subscription_status)) {
+  if (user.stripe_subscription_status && ["past_due", "incomplete", "unpaid", "trialing", "canceling"].includes(user.stripe_subscription_status)) {
     return true;
   }
   return now.getTime() - new Date(user.stripe_last_synced_at).getTime() >= STRIPE_SYNC_INTERVAL_MS;
