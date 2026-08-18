@@ -106,7 +106,6 @@ export function PricingPage({ showAlert }) {
         { text: "First in line for urgent cover calls", accent: "blue" },
         { text: "Priority placement in casting searches", accent: "blue" },
         { text: "Detailed availability so the right gigs find you", accent: "blue" },
-        { text: "See which organizations view your profile", accent: "blue" },
         { text: "A featured profile that stands out", accent: "blue" },
       ]
     : [
