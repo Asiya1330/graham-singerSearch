@@ -14,6 +14,7 @@ import {
 } from "./lib/accountAuth";
 import { getSupabaseBrowser, signOutEverywhere } from "./lib/supabase";
 import { PasswordInput } from "./components/PasswordInput";
+import { VOICE_TYPE_OPTIONS } from "@shared/voice-types";
 
 export function SingerLogin({ showAlert, setShowWelcome }) {
   const { setCurrentUser, setView } = useAppContext();
@@ -793,13 +794,9 @@ export function SingerRegistration({ showAlert, setShowWelcome }) {
                 className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white"
               >
                 <option value="">Select voice type</option>
-                <option value="Soprano">Soprano</option>
-                <option value="Mezzo-Soprano">Mezzo-Soprano</option>
-                <option value="Contralto">Contralto</option>
-                <option value="Countertenor">Countertenor</option>
-                <option value="Tenor">Tenor</option>
-                <option value="Baritone">Baritone</option>
-                <option value="Bass">Bass</option>
+                {VOICE_TYPE_OPTIONS.map((v) => (
+                  <option key={v} value={v}>{v}</option>
+                ))}
               </select>
             </div>
             <div className="grid grid-cols-2 gap-4">

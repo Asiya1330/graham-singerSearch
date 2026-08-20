@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import { CheckCircle } from "lucide-react";
 import { useSingerUser } from "../../hooks/useSingerUser";
 import { describeError } from "../../../lib/api";
+import { displayFileUrl } from "../../../lib/singerFiles";
 
 export function ResumeSection() {
   const { user, showAlert, refreshUser } = useSingerUser();
   const [resumeUploading, setResumeUploading] = useState(false);
+  const resumeHref = displayFileUrl(user.resume_url);
 
   const handleResumeUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -61,8 +63,9 @@ export function ResumeSection() {
               <span className="inline-flex items-center gap-1 text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
                 <CheckCircle className="w-3.5 h-3.5" /> Resume uploaded
               </span>
+              {resumeHref && (
               <a
-                href={user.resume_url}
+                href={resumeHref}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm text-blue-600 hover:text-blue-800 underline"
@@ -70,6 +73,7 @@ export function ResumeSection() {
               >
                 View PDF
               </a>
+              )}
             </div>
           )}
         </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Award, BarChart2, CheckCircle, Eye, Globe, Heart, Lock, Mail, MapPin, Shield, Star, Users, Video, Zap } from "lucide-react";
 import { useAppContext } from "../../AppContext";
 import { AlertBanner, formatMonthYear } from "../../AppShared";
+import { displayFileUrl } from "../../lib/singerFiles";
 
 function sanitizeHttpUrl(url) {
   if (!url || typeof url !== "string") return null;
@@ -65,6 +66,7 @@ export function ProfileView({ revealContact, isShortlisted, onToggleShortlist })
     const allowOrgActions = !previewMode && currentUser?.type === "organization";
     const isOrg = allowOrgActions || previewMode;
     const contactRevealed = allowOrgActions && singer.revealed;
+    const headshotSrc = displayFileUrl(singer.headshot_url);
     const videoTiles = [singer.video_link_1, singer.video_link_2]
       .map(raw => {
         const safeUrl = sanitizeHttpUrl(raw);
@@ -133,9 +135,9 @@ export function ProfileView({ revealContact, isShortlisted, onToggleShortlist })
             {(() => {
               const headshotTile = (
                 <div className="rounded-lg overflow-hidden bg-slate-100 border border-slate-200 aspect-[4/5]">
-                  {singer.headshot_url ? (
+                  {headshotSrc ? (
                     <img
-                      src={singer.headshot_url}
+                      src={headshotSrc}
                       alt={`${singer.first_name} ${singer.last_name}`}
                       className="w-full h-full object-cover"
                       data-testid="img-singer-headshot-large"

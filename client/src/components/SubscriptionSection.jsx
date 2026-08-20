@@ -10,6 +10,7 @@ import {
 } from "../lib/stripe";
 import { getBillingDisplay } from "./BillingIntervalPicker";
 import { userFromProfile } from "../lib/accountAuth";
+import { mergeUserData } from "../lib/singerFiles";
 import { describeError } from "../lib/api";
 
 function mergeSyncedUser(prev, data, fallbackType) {
@@ -20,7 +21,7 @@ function mergeSyncedUser(prev, data, fallbackType) {
   }
   const next = userFromProfile({ ...userData, userType: type });
   if (prev?.data) {
-    return { ...next, data: { ...prev.data, ...next.data } };
+    return { ...next, data: mergeUserData(prev.data, next.data) };
   }
   return next;
 }
