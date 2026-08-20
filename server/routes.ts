@@ -83,6 +83,7 @@ import {
 import { eq, desc, and } from "drizzle-orm";
 import { HttpApiError, sendApiError, sendRouteError } from "./lib/api-response";
 import { getApiError } from "@shared/api-errors";
+import { VOICE_TYPE_DB_TO_LABEL } from "@shared/voice-types";
 import { registerStripeRoutes } from "./stripe-routes";
 import { hasActiveStripeSubscription, shouldSyncStripeState, syncSubscriptionForUser } from "./lib/stripe";
 import { isStripeCheckoutConfigured } from "./lib/env";
@@ -549,6 +550,7 @@ export async function registerRoutes(
         stripe_customer_id, stripe_subscription_id, stripe_subscription_status,
         confidence_tier, reliability_score, total_gigs,
         is_emergency_ready, latitude, longitude, email,
+        headshot_url, resume_url,
         ...updates
       } = req.body;
       if (updates.short_bio && updates.short_bio.length > 1700) {
@@ -638,7 +640,7 @@ export async function registerRoutes(
       });
       if (!updated) return sendApiError(res, "SINGER_NOT_FOUND");
       const { password: _, ...safe } = updated;
-      res.json(safe);
+      res.json(await signSingerFiles(safe));
     } catch (error: any) {
       sendRouteError(res, error, "OPERATION_FAILED");
     }
@@ -1145,15 +1147,6 @@ export async function registerRoutes(
       }
 
       // Intelligent work/role expansion using repertoire_reference
-      const VOICE_TYPE_DB_TO_LABEL: Record<string, string> = {
-        soprano: "Soprano",
-        mezzo_soprano: "Mezzo-Soprano",
-        contralto: "Contralto",
-        countertenor: "Countertenor",
-        tenor: "Tenor",
-        baritone: "Baritone",
-        bass: "Bass",
-      };
 
       if (filters.workTitle) {
         // Save original for singer_works fallback
@@ -2097,7 +2090,7 @@ export async function registerRoutes(
       const updated = await storage.updateSinger(singer.id, { email });
       if (!updated) return sendApiError(res, "SINGER_NOT_FOUND");
       const { password: _, ...safe } = updated;
-      res.json(safe);
+      res.json(await signSingerFiles(safe));
     } catch (error: any) {
       if (error?.code === "23505") return sendApiError(res, "EMAIL_ALREADY_REGISTERED");
       sendRouteError(res, error, "PROFILE_UPDATE_FAILED");
