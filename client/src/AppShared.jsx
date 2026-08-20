@@ -28,6 +28,7 @@ export function AppFooter() {
 }
 
 import RepertoireAutocomplete, { VOICE_TYPE_DB_TO_LABEL } from "./RepertoireAutocomplete";
+import { VOICE_TYPE_OPTIONS } from "@shared/voice-types";
 import { useCityStateAutofill } from "./hooks/useCityStateAutofill";
 import { useAppContext } from "./AppContext";
 
@@ -361,13 +362,9 @@ export function SearchForm({ isPro, onSearch, onClear, onNavigate, isSearching, 
                     data-testid="select-voice-type"
                   >
                     <option value="">Any Voice Type</option>
-                    <option value="Soprano">Soprano</option>
-                    <option value="Mezzo-Soprano">Mezzo-Soprano</option>
-                    <option value="Contralto">Contralto</option>
-                    <option value="Countertenor">Countertenor</option>
-                    <option value="Tenor">Tenor</option>
-                    <option value="Baritone">Baritone</option>
-                    <option value="Bass">Bass</option>
+                    {VOICE_TYPE_OPTIONS.map((v) => (
+                      <option key={v} value={v}>{v}</option>
+                    ))}
                   </select>
                </div>
                <div>

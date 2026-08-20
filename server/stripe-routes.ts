@@ -23,6 +23,7 @@ import {
 import { storage } from "./storage";
 import { currentUserType } from "./lib/auth-user";
 import { describeErrorForLog, sendApiError, sendRouteError } from "./lib/api-response";
+import { signSingerFiles } from "./lib/file-upload";
 
 type AuthMiddleware = (req: Request, res: Response, next: () => void) => void;
 
@@ -44,6 +45,16 @@ function rejectStripeNotConfigured(res: Response, context: string): Response {
     `[stripe] ${context} blocked — billing not configured: ${issues.join("; ") || "unknown reason"}`,
   );
   return sendApiError(res, "BILLING_NOT_CONFIGURED");
+}
+
+async function jsonBillingUser(
+  res: Response,
+  updated: Record<string, any>,
+  extra: Record<string, any>,
+) {
+  const { password: _, ...safe } = updated;
+  const signed = extra.userType === "singer" ? await signSingerFiles(safe) : safe;
+  res.json({ ...signed, ...extra });
 }
 
 /** Resolves the signed-in user, or null after sending the auth error. */
@@ -182,8 +193,7 @@ export function registerStripeRoutes(
         return sendApiError(res, userType === "singer" ? "SINGER_NOT_FOUND" : "ORG_NOT_FOUND");
       }
 
-      const { password: _, ...safe } = updated;
-      res.json({ ...safe, userType });
+      await jsonBillingUser(res, updated, { userType });
     } catch (error: any) {
       sendRouteError(res, error, "SUBSCRIPTION_SYNC_FAILED", "sync Stripe subscription");
     }
@@ -216,8 +226,7 @@ export function registerStripeRoutes(
       if (!updated) {
         return sendApiError(res, userType === "singer" ? "SINGER_NOT_FOUND" : "ORG_NOT_FOUND");
       }
-      const { password: _, ...safe } = updated;
-      res.json({ ...safe, userType, cancelAt: expiresAt });
+      await jsonBillingUser(res, updated, { userType, cancelAt: expiresAt });
     } catch (error: any) {
       sendRouteError(res, error, "SUBSCRIPTION_UPDATE_FAILED", "cancel Stripe subscription");
     }
@@ -245,8 +254,7 @@ export function registerStripeRoutes(
       if (!updated) {
         return sendApiError(res, userType === "singer" ? "SINGER_NOT_FOUND" : "ORG_NOT_FOUND");
       }
-      const { password: _, ...safe } = updated;
-      res.json({ ...safe, userType });
+      await jsonBillingUser(res, updated, { userType });
     } catch (error: any) {
       sendRouteError(res, error, "SUBSCRIPTION_UPDATE_FAILED", "resume Stripe subscription");
     }
