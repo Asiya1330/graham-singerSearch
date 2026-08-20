@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import { Camera, UserX } from "lucide-react";
 import { useSingerUser } from "../../hooks/useSingerUser";
 import { describeError } from "../../../lib/api";
+import { displayFileUrl } from "../../../lib/singerFiles";
 
 export function ProfilePhotoSection() {
   const { user, showAlert, refreshUser } = useSingerUser();
   const [photoUploading, setPhotoUploading] = useState(false);
   const [photoPreview, setPhotoPreview] = useState(null);
+  const headshotSrc = photoPreview || displayFileUrl(user.headshot_url);
 
   const handlePhotoUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -51,9 +53,9 @@ export function ProfilePhotoSection() {
       <div className="px-6 py-6">
         <div className="flex items-center gap-6">
           <div className="relative flex-shrink-0">
-            {photoPreview || user.headshot_url ? (
+            {headshotSrc ? (
               <img
-                src={photoPreview || user.headshot_url}
+                src={headshotSrc}
                 alt="Profile photo"
                 className="w-24 h-24 rounded-full object-cover border-2 border-slate-200 shadow-sm"
               />
