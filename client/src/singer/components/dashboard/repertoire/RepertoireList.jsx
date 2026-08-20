@@ -1,12 +1,14 @@
 import React from "react";
 import { Edit2, Info, Users, X } from "lucide-react";
 
-export function RepertoireList({ roles, works, moveItem, onEditRole, onDeleteRole, onEditWork, onDeleteWork, onAddFirst }) {
+export function RepertoireList({ roles, works, busyItem, moveItem, onEditRole, onDeleteRole, onEditWork, onDeleteWork, onAddFirst }) {
   const allRoles = roles || [];
   const allWorks = works || [];
 
-  const renderRole = (role, opts = {}) => (
-    <li key={role.id} className={`px-4 py-3 hover:bg-slate-50 ${opts.muted ? 'opacity-80' : ''}`} data-testid={`role-item-${role.id}`}>
+  const renderRole = (role, opts = {}) => {
+    const rowBusy = busyItem === `role:${role.id}`;
+    return (
+    <li key={role.id} className={`px-4 py-3 hover:bg-slate-50 ${opts.muted ? 'opacity-80' : ''} ${rowBusy ? 'opacity-60' : ''}`} data-testid={`role-item-${role.id}`}>
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
         <div className={`min-w-0 break-words ${opts.muted ? 'text-sm' : ''}`}>
           <span className={`font-medium ${opts.muted ? 'text-slate-700' : 'text-slate-900'}`}>{role.role_name}</span>
@@ -20,10 +22,15 @@ export function RepertoireList({ roles, works, moveItem, onEditRole, onDeleteRol
               {t.replace('_', ' ')}
             </span>
           ))}
+          {rowBusy ? (
+            <span className="text-xs text-slate-400 ml-1" data-testid={`role-busy-${role.id}`}>Saving…</span>
+          ) : (
+            <>
           <button
             data-testid={`button-move-role-${role.id}`}
             onClick={() => moveItem('role', role.id, opts.muted ? 'performed' : 'in_preparation')}
-            className="text-xs text-slate-500 hover:text-blue-600 underline-offset-2 hover:underline ml-1"
+            disabled={!!busyItem}
+            className="text-xs text-slate-500 hover:text-blue-600 underline-offset-2 hover:underline ml-1 disabled:opacity-50"
             title={opts.muted ? 'Move to Performed' : 'Move to In Preparation'}
           >
             {opts.muted ? '→ Performed' : '→ In Prep'}
@@ -31,7 +38,8 @@ export function RepertoireList({ roles, works, moveItem, onEditRole, onDeleteRol
           <button
             data-testid={`button-edit-role-${role.id}`}
             onClick={() => onEditRole(role)}
-            className="text-slate-400 hover:text-blue-500 transition-colors ml-1"
+            disabled={!!busyItem}
+            className="text-slate-400 hover:text-blue-500 transition-colors ml-1 disabled:opacity-50"
             title="Edit role"
           >
             <Edit2 className="w-4 h-4" />
@@ -39,18 +47,24 @@ export function RepertoireList({ roles, works, moveItem, onEditRole, onDeleteRol
           <button
             data-testid={`button-delete-role-${role.id}`}
             onClick={() => onDeleteRole(role.id)}
-            className="text-slate-400 hover:text-red-500 transition-colors"
+            disabled={!!busyItem}
+            className="text-slate-400 hover:text-red-500 transition-colors disabled:opacity-50"
             title="Delete role"
           >
             <X className="w-4 h-4" />
           </button>
+            </>
+          )}
         </div>
       </div>
     </li>
-  );
+    );
+  };
 
-  const renderWork = (work, opts = {}) => (
-    <li key={work.id} className={`px-4 py-3 hover:bg-slate-50 ${opts.muted ? 'opacity-80' : ''}`} data-testid={`work-item-${work.id}`}>
+  const renderWork = (work, opts = {}) => {
+    const rowBusy = busyItem === `work:${work.id}`;
+    return (
+    <li key={work.id} className={`px-4 py-3 hover:bg-slate-50 ${opts.muted ? 'opacity-80' : ''} ${rowBusy ? 'opacity-60' : ''}`} data-testid={`work-item-${work.id}`}>
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
         <div className={`min-w-0 break-words ${opts.muted ? 'text-sm' : ''}`}>
           <span className={`font-medium ${opts.muted ? 'text-slate-700' : 'text-slate-900'}`}>{work.work_title}</span>
@@ -66,10 +80,15 @@ export function RepertoireList({ roles, works, moveItem, onEditRole, onDeleteRol
               {work.context}
             </span>
           )}
+          {rowBusy ? (
+            <span className="text-xs text-slate-400 ml-1" data-testid={`work-busy-${work.id}`}>Saving…</span>
+          ) : (
+            <>
           <button
             data-testid={`button-move-work-${work.id}`}
             onClick={() => moveItem('work', work.id, opts.muted ? 'performed' : 'in_preparation')}
-            className="text-xs text-slate-500 hover:text-indigo-600 underline-offset-2 hover:underline ml-1"
+            disabled={!!busyItem}
+            className="text-xs text-slate-500 hover:text-indigo-600 underline-offset-2 hover:underline ml-1 disabled:opacity-50"
             title={opts.muted ? 'Move to Performed' : 'Move to In Preparation'}
           >
             {opts.muted ? '→ Performed' : '→ In Prep'}
@@ -77,7 +96,8 @@ export function RepertoireList({ roles, works, moveItem, onEditRole, onDeleteRol
           <button
             data-testid={`button-edit-work-${work.id}`}
             onClick={() => onEditWork(work)}
-            className="text-slate-400 hover:text-blue-500 transition-colors ml-1"
+            disabled={!!busyItem}
+            className="text-slate-400 hover:text-blue-500 transition-colors ml-1 disabled:opacity-50"
             title="Edit work"
           >
             <Edit2 className="w-4 h-4" />
@@ -85,15 +105,19 @@ export function RepertoireList({ roles, works, moveItem, onEditRole, onDeleteRol
           <button
             data-testid={`button-delete-work-${work.id}`}
             onClick={() => onDeleteWork(work.id)}
-            className="text-slate-400 hover:text-red-500 transition-colors"
+            disabled={!!busyItem}
+            className="text-slate-400 hover:text-red-500 transition-colors disabled:opacity-50"
             title="Delete work"
           >
             <X className="w-4 h-4" />
           </button>
+            </>
+          )}
         </div>
       </div>
     </li>
-  );
+    );
+  };
 
   const performedRoles = allRoles.filter(r => (r.status || 'performed') === 'performed');
   const inPrepRoles = allRoles.filter(r => r.status === 'in_preparation');

@@ -113,7 +113,8 @@ export function SuggestRepertoireForm() {
             <button
               type="button"
               onClick={() => { setIsSuggestingRepertoire(false); setSuggestError(""); }}
-              className="text-sm text-slate-500 hover:text-slate-700"
+              disabled={suggestSubmitting}
+              className="text-sm text-slate-500 hover:text-slate-700 disabled:opacity-50"
               data-testid="button-cancel-suggestion"
             >
               Cancel

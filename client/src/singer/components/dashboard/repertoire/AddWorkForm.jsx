@@ -3,7 +3,7 @@ import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import RepertoireAutocomplete from "../../../../RepertoireAutocomplete";
 
-export function AddWorkForm({ isAddingWork, editingWorkId, newWork, setNewWork, toggleLanguage, onClose, onSave }) {
+export function AddWorkForm({ isAddingWork, editingWorkId, newWork, setNewWork, toggleLanguage, saving, onClose, onSave }) {
   return (
     <AnimatePresence>
       {isAddingWork && (
@@ -16,7 +16,7 @@ export function AddWorkForm({ isAddingWork, editingWorkId, newWork, setNewWork, 
           <div className="p-6">
             <div className="flex justify-between items-center mb-4">
               <h4 className="text-base font-semibold text-slate-900">{editingWorkId ? 'Edit Concert Work' : 'Add Concert Work'}</h4>
-              <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><X className="w-5 h-5"/></button>
+              <button onClick={onClose} disabled={saving} className="text-slate-400 hover:text-slate-600 disabled:opacity-50"><X className="w-5 h-5"/></button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
@@ -171,15 +171,20 @@ export function AddWorkForm({ isAddingWork, editingWorkId, newWork, setNewWork, 
             <div className="flex justify-end gap-3">
               <button
                 onClick={onClose}
-                className="px-4 py-2 border border-slate-300 rounded-md text-sm font-medium text-slate-700 bg-white hover:bg-slate-50"
+                disabled={saving}
+                className="px-4 py-2 border border-slate-300 rounded-md text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={onSave}
-                className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+                disabled={saving}
+                data-testid="button-save-work"
+                className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
               >
-                {editingWorkId !== null ? 'Update Work' : 'Save Work'}
+                {saving
+                  ? (editingWorkId !== null ? "Updating…" : "Saving…")
+                  : (editingWorkId !== null ? "Update Work" : "Save Work")}
               </button>
             </div>
           </div>
