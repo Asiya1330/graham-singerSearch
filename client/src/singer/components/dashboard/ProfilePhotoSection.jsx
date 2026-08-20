@@ -78,9 +78,9 @@ export function ProfilePhotoSection() {
                 disabled={photoUploading}
                 data-testid="input-photo-upload"
               />
-              <span className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors">
+              <span className={`inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors ${photoUploading ? "opacity-60 pointer-events-none" : ""}`}>
                 <Camera className="w-4 h-4" />
-                {user.headshot_url ? "Replace Photo" : "Upload Photo"}
+                {photoUploading ? "Uploading…" : user.headshot_url ? "Replace Photo" : "Upload Photo"}
               </span>
             </label>
             <p className="text-xs text-slate-400 mt-2">JPG, PNG or WebP · Max 5 MB</p>

@@ -44,14 +44,19 @@ export function RepertoireSection() {
   const [editingWorkId, setEditingWorkId] = useState(null);
   const [newRole, setNewRole] = useState(BLANK_ROLE);
   const [newWork, setNewWork] = useState(BLANK_WORK);
+  const [roleSaving, setRoleSaving] = useState(false);
+  const [workSaving, setWorkSaving] = useState(false);
+  const [busyItem, setBusyItem] = useState(null);
 
   const closeRoleForm = () => {
+    if (roleSaving) return;
     setIsAddingRole(false);
     setEditingRoleId(null);
     setNewRole(BLANK_ROLE);
   };
 
   const closeWorkForm = () => {
+    if (workSaving) return;
     setIsAddingWork(false);
     setEditingWorkId(null);
     setNewWork(BLANK_WORK);
@@ -76,6 +81,7 @@ export function RepertoireSection() {
   };
 
   const handleSaveRole = async () => {
+    if (roleSaving) return;
     if (!newRole.role_name || !newRole.work_title) {
       showAlert("Please enter both the role name and the work it comes from.", "error");
       return;
@@ -84,6 +90,7 @@ export function RepertoireSection() {
       ? [...newRole.languages.filter(l => l !== "Other"), newRole.other_language]
       : newRole.languages;
 
+    setRoleSaving(true);
     try {
       const res = await fetch("/api/singer/roles", {
         method: "POST",
@@ -111,14 +118,18 @@ export function RepertoireSection() {
       showAlert("Opera role added to your profile", "success");
     } catch (err) {
       showAlert(describeError(err), "error");
+    } finally {
+      setRoleSaving(false);
     }
   };
 
   const handleUpdateRole = async () => {
+    if (roleSaving) return;
     if (!newRole.role_name || !newRole.work_title) { showAlert("Please enter both the role name and the work it comes from.", "error"); return; }
     const languages = newRole.languages.includes("Other") && newRole.other_language
       ? [...newRole.languages.filter(l => l !== "Other"), newRole.other_language]
       : newRole.languages;
+    setRoleSaving(true);
     try {
       const res = await fetch(`/api/singer/roles/${editingRoleId}`, {
         method: "PUT",
@@ -147,11 +158,15 @@ export function RepertoireSection() {
       showAlert("Role updated successfully", "success");
     } catch (err) {
       showAlert(describeError(err), "error");
+    } finally {
+      setRoleSaving(false);
     }
   };
 
   const handleDeleteRole = async (roleId) => {
+    if (busyItem) return;
     if (!confirm("Delete this role from your profile?")) return;
+    setBusyItem(`role:${roleId}`);
     try {
       const res = await fetch(`/api/singer/roles/${roleId}`, { method: "DELETE", credentials: "include" });
       if (!res.ok) {
@@ -162,6 +177,8 @@ export function RepertoireSection() {
       showAlert("Role removed", "success");
     } catch (err) {
       showAlert(describeError(err), "error");
+    } finally {
+      setBusyItem(null);
     }
   };
 
@@ -192,6 +209,7 @@ export function RepertoireSection() {
   };
 
   const handleSaveWork = async () => {
+    if (workSaving) return;
     if (!newWork.work_title) {
       showAlert("Please enter the title of the work.", "error");
       return;
@@ -201,6 +219,7 @@ export function RepertoireSection() {
       : newWork.languages;
     const context = newWork.context === "Other" && newWork.other_context ? newWork.other_context : newWork.context;
 
+    setWorkSaving(true);
     try {
       const res = await fetch("/api/singer/works", {
         method: "POST",
@@ -230,15 +249,19 @@ export function RepertoireSection() {
       showAlert("Work added to your profile", "success");
     } catch (err) {
       showAlert(describeError(err), "error");
+    } finally {
+      setWorkSaving(false);
     }
   };
 
   const handleUpdateWork = async () => {
+    if (workSaving) return;
     if (!newWork.work_title) { showAlert("Please enter the title of the work.", "error"); return; }
     const languages = newWork.languages.includes("Other") && newWork.other_language
       ? [...newWork.languages.filter(l => l !== "Other"), newWork.other_language]
       : newWork.languages;
     const context = newWork.context === "Other" && newWork.other_context ? newWork.other_context : newWork.context;
+    setWorkSaving(true);
     try {
       const res = await fetch(`/api/singer/works/${editingWorkId}`, {
         method: "PUT",
@@ -269,11 +292,15 @@ export function RepertoireSection() {
       showAlert("Work updated successfully", "success");
     } catch (err) {
       showAlert(describeError(err), "error");
+    } finally {
+      setWorkSaving(false);
     }
   };
 
   const handleDeleteWork = async (workId) => {
+    if (busyItem) return;
     if (!confirm("Delete this work from your profile?")) return;
+    setBusyItem(`work:${workId}`);
     try {
       const res = await fetch(`/api/singer/works/${workId}`, { method: "DELETE", credentials: "include" });
       if (!res.ok) {
@@ -284,6 +311,8 @@ export function RepertoireSection() {
       showAlert("Work removed", "success");
     } catch (err) {
       showAlert(describeError(err), "error");
+    } finally {
+      setBusyItem(null);
     }
   };
 
@@ -309,6 +338,8 @@ export function RepertoireSection() {
   };
 
   const moveItem = async (kind, id, nextStatus) => {
+    if (busyItem) return;
+    setBusyItem(`${kind}:${id}`);
     try {
       const url = kind === 'role' ? `/api/singer/roles/${id}` : `/api/singer/works/${id}`;
       const res = await fetch(url, {
@@ -325,6 +356,8 @@ export function RepertoireSection() {
       showAlert(nextStatus === 'in_preparation' ? 'Moved to In Preparation' : 'Moved to Performed', 'success');
     } catch (e) {
       showAlert(describeError(e), 'error');
+    } finally {
+      setBusyItem(null);
     }
   };
 
@@ -360,6 +393,7 @@ export function RepertoireSection() {
         setNewRole={setNewRole}
         toggleLanguage={toggleLanguage}
         togglePerfType={togglePerfType}
+        saving={roleSaving}
         onClose={closeRoleForm}
         onSave={editingRoleId ? handleUpdateRole : handleSaveRole}
       />
@@ -370,6 +404,7 @@ export function RepertoireSection() {
         newWork={newWork}
         setNewWork={setNewWork}
         toggleLanguage={toggleLanguage}
+        saving={workSaving}
         onClose={closeWorkForm}
         onSave={editingWorkId !== null ? handleUpdateWork : handleSaveWork}
       />
@@ -377,6 +412,7 @@ export function RepertoireSection() {
       <RepertoireList
         roles={user.roles}
         works={user.works}
+        busyItem={busyItem}
         moveItem={moveItem}
         onEditRole={handleEditRole}
         onDeleteRole={handleDeleteRole}
