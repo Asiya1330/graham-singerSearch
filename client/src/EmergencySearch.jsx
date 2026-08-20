@@ -5,6 +5,7 @@ import { useAppContext } from "./AppContext";
 import { UpgradeModal, US_STATES } from "./AppShared";
 import { useCityStateAutofill } from "./hooks/useCityStateAutofill";
 import RepertoireAutocomplete, { VOICE_TYPE_DB_TO_LABEL } from "./RepertoireAutocomplete";
+import { VOICE_TYPE_OPTIONS } from "@shared/voice-types";
 import { getErrorMessageFromBody, API_ERRORS } from "./lib/api";
 
 export function EmergencySearch({ showAlert, revealContact, showUpgradeModal, setShowUpgradeModal }) {
@@ -198,13 +199,9 @@ export function EmergencySearch({ showAlert, revealContact, showUpgradeModal, se
                                         onChange={(e) => setFilters({...filters, voiceType: e.target.value})}
                                     >
                                         <option value="">Any / Implied by Role</option>
-                                        <option value="Soprano">Soprano</option>
-                                        <option value="Mezzo-Soprano">Mezzo-Soprano</option>
-                                        <option value="Contralto">Contralto</option>
-                                        <option value="Countertenor">Countertenor</option>
-                                        <option value="Tenor">Tenor</option>
-                                        <option value="Baritone">Baritone</option>
-                                        <option value="Bass">Bass</option>
+                                        {VOICE_TYPE_OPTIONS.map((v) => (
+                                          <option key={v} value={v}>{v}</option>
+                                        ))}
                                     </select>
                                 </div>
 

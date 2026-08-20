@@ -5,8 +5,10 @@ import { US_STATES } from "../../AppShared";
 import { useCityStateAutofill } from "../../hooks/useCityStateAutofill";
 import { getErrorMessageFromBody } from "../../lib/api";
 import { userFromProfile } from "../../lib/accountAuth";
+import { mergeCurrentUser } from "../../lib/singerFiles";
 import { SubscriptionSection } from "../../components/SubscriptionSection";
 import { PasswordInput } from "../../components/PasswordInput";
+import { VOICE_TYPE_OPTIONS } from "@shared/voice-types";
 
 export function SingerSettings() {
   const { currentUser, setCurrentUser, setView } = useAppContext();
@@ -38,16 +40,6 @@ export function SingerSettings() {
   const [profileMsg, setProfileMsg] = React.useState(null);
   const [profileSaving, setProfileSaving] = React.useState(false);
 
-  const FACH_OPTIONS = [
-    "Soprano",
-    "Mezzo-Soprano",
-    "Contralto",
-    "Countertenor",
-    "Tenor",
-    "Baritone",
-    "Bass-Baritone",
-    "Bass",
-  ];
   const UNION_OPTIONS = [
     "Non-Union",
     "AGMA Member",
@@ -212,11 +204,7 @@ export function SingerSettings() {
       const data = await res.json();
       if (!res.ok)
         throw new Error(getErrorMessageFromBody(data, "PROFILE_UPDATE_FAILED"));
-      setCurrentUser((prev) =>
-        prev?.data
-          ? { ...prev, data: { ...prev.data, ...mgmt } }
-          : { ...prev, ...mgmt },
-      );
+      setCurrentUser((prev) => mergeCurrentUser(prev, data));
       setMgmtMsg({ type: "success", text: "Management info saved." });
     } catch (e) {
       setMgmtMsg({ type: "error", text: e.message });
@@ -224,16 +212,6 @@ export function SingerSettings() {
       setMgmtSaving(false);
     }
   };
-
-  const voiceTypes = [
-    "Soprano",
-    "Mezzo-Soprano",
-    "Contralto",
-    "Tenor",
-    "Baritone",
-    "Bass",
-    "Countertenor",
-  ];
 
   const saveProfile = async () => {
     // Website: accept a bare domain by normalising to https:// rather than rejecting.
@@ -274,11 +252,7 @@ export function SingerSettings() {
       const data = await res.json();
       if (!res.ok)
         throw new Error(getErrorMessageFromBody(data, "PROFILE_UPDATE_FAILED"));
-      setCurrentUser((prev) =>
-        prev?.data
-          ? { ...prev, data: { ...prev.data, ...payload } }
-          : { ...prev, ...payload },
-      );
+      setCurrentUser((prev) => mergeCurrentUser(prev, data));
       setProfileMsg({ type: "success", text: "Profile updated successfully." });
     } catch (e) {
       setProfileMsg({ type: "error", text: e.message });
@@ -383,7 +357,7 @@ export function SingerSettings() {
               className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Select voice type</option>
-              {voiceTypes.map((v) => (
+              {VOICE_TYPE_OPTIONS.map((v) => (
                 <option key={v} value={v}>
                   {v}
                 </option>
@@ -446,7 +420,7 @@ export function SingerSettings() {
                 className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               >
                 <option value="">Select fach</option>
-                {FACH_OPTIONS.map((f) => (
+                {VOICE_TYPE_OPTIONS.map((f) => (
                   <option key={f} value={f}>
                     {f}
                   </option>

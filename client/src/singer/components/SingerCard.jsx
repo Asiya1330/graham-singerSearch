@@ -12,6 +12,7 @@ import {
   Globe,
   Eye,
 } from "lucide-react";
+import { displayFileUrl } from "../../lib/singerFiles";
 
 function SingerCard({
   singer,
@@ -54,6 +55,7 @@ function SingerCard({
       ].filter(Boolean);
 
   const reachedRevealLimit = !orgIsPro && revealsUsed >= revealLimit;
+  const headshotSrc = displayFileUrl(singer.headshot_url);
 
   const handleReveal = () => {
     if (reachedRevealLimit) {
@@ -73,9 +75,9 @@ function SingerCard({
       )}
 
       <div className="md:w-48 h-48 md:h-auto relative bg-slate-100 flex-shrink-0">
-        {singer.headshot_url ? (
+        {headshotSrc ? (
           <img
-            src={singer.headshot_url}
+            src={headshotSrc}
             alt={fullName}
             className="w-full h-full object-cover"
           />

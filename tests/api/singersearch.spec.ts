@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { VOICE_TYPE_OPTIONS } from "../../shared/voice-types";
 
 const BASE = "http://localhost:5000/api/search";
 
@@ -70,15 +71,9 @@ test.describe("SingerSearch API Search Tests", () => {
   expect(data.length).toBe(0);
 });
 
-const voiceTypes = [
-  "Soprano",
-  "Mezzo-Soprano",
-  "Tenor",
-  "Baritone",
-  "Bass"
-];
+import { VOICE_TYPE_OPTIONS } from "../../shared/voice-types";
 
-for (const voice of voiceTypes) {
+for (const voice of VOICE_TYPE_OPTIONS) {
   test(`Voice type search works for ${voice}`, async ({ request }) => {
     const response = await request.get(`${BASE}?voiceType=${voice}`);
     expect(response.ok()).toBeTruthy();

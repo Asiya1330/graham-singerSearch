@@ -1,15 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Search, Music, BookOpen } from "lucide-react";
 
-export const VOICE_TYPE_DB_TO_LABEL = {
-  soprano: "Soprano",
-  mezzo_soprano: "Mezzo-Soprano",
-  contralto: "Contralto",
-  countertenor: "Countertenor",
-  tenor: "Tenor",
-  baritone: "Baritone",
-  bass: "Bass",
-};
+export { VOICE_TYPE_DB_TO_LABEL } from "@shared/voice-types";
 
 export const CATEGORY_DB_TO_PERFTYPE = {
   opera: "Opera",
