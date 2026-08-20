@@ -127,8 +127,9 @@ export function EmergencyAvailabilityPanel() {
               showAlert("Short-notice settings saved", "success");
             } catch (err) {
               showAlert(describeError(err, "PROFILE_UPDATE_FAILED"), "error");
+            } finally {
+              setEmSaving(false);
             }
-            setEmSaving(false);
           }}
           className="inline-flex items-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 disabled:opacity-50"
         >

@@ -12,6 +12,8 @@ export function AvailabilitySection() {
   const [availStart, setAvailStart] = useState("");
   const [availEnd, setAvailEnd] = useState("");
   const [availSaving, setAvailSaving] = useState(false);
+  const [deletingAvailId, setDeletingAvailId] = useState(null);
+  const [emergencyBusy, setEmergencyBusy] = useState(false);
 
   const handleAddAvailability = async () => {
     if (!availStart || !availEnd) {
@@ -46,6 +48,8 @@ export function AvailabilitySection() {
   };
 
   const handleDeleteAvailability = async (availId) => {
+    if (deletingAvailId) return;
+    setDeletingAvailId(availId);
     try {
       const res = await fetch(`/api/singer/availability/${availId}`, {
         method: "DELETE",
@@ -59,10 +63,14 @@ export function AvailabilitySection() {
       showAlert("Availability removed", "success");
     } catch (err) {
       showAlert(describeError(err), "error");
+    } finally {
+      setDeletingAvailId(null);
     }
   };
 
   const handleRequestEmergency = async () => {
+    if (emergencyBusy) return;
+    setEmergencyBusy(true);
     try {
       const res = await fetch("/api/singer/request-emergency", { method: "POST", credentials: "include" });
       if (!res.ok) throw new Error(await getApiErrorMessage(res, "OPERATION_FAILED"));
@@ -70,11 +78,15 @@ export function AvailabilitySection() {
       showAlert("Urgent availability signal submitted for admin review.", "success");
     } catch (err) {
       showAlert(describeError(err), "error");
+    } finally {
+      setEmergencyBusy(false);
     }
   };
 
   const handleOptOutEmergency = async () => {
+    if (emergencyBusy) return;
     if (!window.confirm("Opt out of Short-Notice Engagements? Your profile will no longer appear in urgent searches.")) return;
+    setEmergencyBusy(true);
     try {
       const res = await fetch("/api/singer/emergency/opt-out", { method: "POST", credentials: "include" });
       if (!res.ok) {
@@ -85,10 +97,14 @@ export function AvailabilitySection() {
       showAlert("Opted out of Short-Notice Engagements.", "success");
     } catch (err) {
       showAlert(describeError(err), "error");
+    } finally {
+      setEmergencyBusy(false);
     }
   };
 
   const handleCancelEmergencyRequest = async () => {
+    if (emergencyBusy) return;
+    setEmergencyBusy(true);
     try {
       const res = await fetch("/api/singer/profile", {
         method: "PUT",
@@ -104,6 +120,8 @@ export function AvailabilitySection() {
       showAlert("Urgent request cancelled.", "success");
     } catch (err) {
       showAlert(describeError(err), "error");
+    } finally {
+      setEmergencyBusy(false);
     }
   };
 
@@ -122,10 +140,11 @@ export function AvailabilitySection() {
               </span>
               <button
                 onClick={handleOptOutEmergency}
-                className="text-xs font-medium text-slate-600 hover:text-red-700 hover:bg-red-50 border border-slate-200 hover:border-red-200 px-3 py-1 rounded transition-colors"
+                disabled={emergencyBusy}
+                className="text-xs font-medium text-slate-600 hover:text-red-700 hover:bg-red-50 border border-slate-200 hover:border-red-200 px-3 py-1 rounded transition-colors disabled:opacity-50"
                 data-testid="button-optout-emergency"
               >
-                Opt Out
+                {emergencyBusy ? "Saving…" : "Opt Out"}
               </button>
             </div>
           ) : user.emergency_status_requested ? (
@@ -136,19 +155,21 @@ export function AvailabilitySection() {
               <span className="text-[10px] text-amber-700">Awaiting admin review</span>
               <button
                 onClick={handleCancelEmergencyRequest}
-                className="text-xs font-medium text-amber-700 hover:text-red-700 hover:bg-red-50 px-2 py-0.5 rounded transition-colors"
+                disabled={emergencyBusy}
+                className="text-xs font-medium text-amber-700 hover:text-red-700 hover:bg-red-50 px-2 py-0.5 rounded transition-colors disabled:opacity-50"
                 data-testid="button-cancel-emergency-request"
               >
-                Cancel Request
+                {emergencyBusy ? "Saving…" : "Cancel Request"}
               </button>
             </div>
           ) : isPro ? (
             <button
               onClick={handleRequestEmergency}
-              className="inline-flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-1.5 rounded-lg text-xs shadow-sm transition-colors"
+              disabled={emergencyBusy}
+              className="inline-flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-1.5 rounded-lg text-xs shadow-sm transition-colors disabled:opacity-50"
               data-testid="button-request-emergency"
             >
-              <Zap className="w-3.5 h-3.5" /> Opt In to Short-Notice Engagements
+              <Zap className="w-3.5 h-3.5" /> {emergencyBusy ? "Saving…" : "Opt In to Short-Notice Engagements"}
             </button>
           ) : (
             <label className="flex items-center gap-2 px-4 py-2 rounded-full border bg-slate-50 border-slate-200 opacity-75" title="You may be contacted on short notice for last-minute replacements.">
@@ -222,10 +243,15 @@ export function AvailabilitySection() {
                     <button
                       data-testid={`button-delete-avail-${a.id}`}
                       onClick={() => handleDeleteAvailability(a.id)}
-                      className="text-slate-400 hover:text-red-500 transition-colors flex-shrink-0"
+                      disabled={!!deletingAvailId}
+                      className="text-slate-400 hover:text-red-500 transition-colors flex-shrink-0 disabled:opacity-50"
                       title="Remove this window"
                     >
-                      <X className="w-4 h-4" />
+                      {deletingAvailId === a.id ? (
+                        <span className="text-xs text-slate-400">Removing…</span>
+                      ) : (
+                        <X className="w-4 h-4" />
+                      )}
                     </button>
                   </li>
                 ))}
