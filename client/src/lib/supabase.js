@@ -95,6 +95,63 @@ export async function signUpWithPassword(email, password) {
   });
 }
 
+/**
+ * Query types used on branded Auth email links
+ * (`/reset-password?token_hash=...&type=recovery`). Must not be treated as
+ * singer vs organization — that uses `account=` instead.
+ */
+const EMAIL_OTP_TYPES = new Set([
+  "signup",
+  "invite",
+  "magiclink",
+  "recovery",
+  "email_change",
+  "email",
+]);
+
+export function parseEmailOtpFromSearch(search = window.location.search) {
+  const params = new URLSearchParams(search);
+  const tokenHash = params.get("token_hash");
+  const type = params.get("type");
+  if (!tokenHash || !EMAIL_OTP_TYPES.has(type)) return null;
+  return { tokenHash, type };
+}
+
+/**
+ * Which login portal to return to after reset. `type=recovery` is an Auth OTP
+ * type, not an account type — only `account=` or a legacy `type=singer|organization`
+ * (old Resend links) count as a portal hint.
+ */
+export function accountTypeFromResetSearch(search = window.location.search) {
+  const params = new URLSearchParams(search);
+  const account = params.get("account");
+  if (account === "organization" || account === "singer") return account;
+  const type = params.get("type");
+  if (type === "organization" || type === "singer") return type;
+  const stored = getAccountType();
+  return stored === "organization" ? "organization" : "singer";
+}
+
+export function stripEmailOtpFromUrl() {
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has("token_hash")) return;
+  url.searchParams.delete("token_hash");
+  if (EMAIL_OTP_TYPES.has(url.searchParams.get("type"))) {
+    url.searchParams.delete("type");
+  }
+  window.history.replaceState(
+    window.history.state,
+    "",
+    `${url.pathname}${url.search}${url.hash}`,
+  );
+}
+
+/** Exchange a TokenHash email link for a recovery (or other OTP) session. */
+export async function verifyEmailOtp({ tokenHash, type }) {
+  const supabase = getSupabaseBrowser();
+  return supabase.auth.verifyOtp({ token_hash: tokenHash, type });
+}
+
 export async function signOutEverywhere() {
   setAccountType(null);
   try {
