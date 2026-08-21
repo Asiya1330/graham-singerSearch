@@ -12,7 +12,14 @@ import {
   requestPasswordReset,
   userFromProfile,
 } from "./lib/accountAuth";
-import { getSupabaseBrowser, signOutEverywhere } from "./lib/supabase";
+import {
+  accountTypeFromResetSearch,
+  getSupabaseBrowser,
+  parseEmailOtpFromSearch,
+  signOutEverywhere,
+  stripEmailOtpFromUrl,
+  verifyEmailOtp,
+} from "./lib/supabase";
 import { PasswordInput } from "./components/PasswordInput";
 import { VOICE_TYPE_OPTIONS } from "@shared/voice-types";
 
@@ -451,18 +458,16 @@ export function ConfirmEmailNotice({ email, loginView }) {
 }
 
 /**
- * Landing page for the Supabase recovery link.
+ * Landing page for the password-reset link.
  *
- * The link carries its tokens in the URL fragment; the Supabase client picks
- * them up automatically (detectSessionInUrl), which leaves us with a short-lived
- * recovery session. Having that session *is* the proof the link was valid, so
- * there is no token to validate against our own API any more.
+ * Branded Auth emails use a same-domain TokenHash URL:
+ * `/reset-password?token_hash=...&type=recovery`. We exchange that with
+ * verifyOtp. Older ConfirmationURL emails still hop through supabase.co and
+ * land with tokens in the URL fragment; detectSessionInUrl handles those.
  */
 export function ResetPasswordPage({ showAlert }) {
   const { setView } = useAppContext();
-  const params = new URLSearchParams(window.location.search);
-  const userType =
-    params.get("type") === "organization" ? "organization" : "singer";
+  const userType = accountTypeFromResetSearch();
   const [validating, setValidating] = useState(true);
   const [tokenValid, setTokenValid] = useState(false);
   const [password, setPassword] = useState("");
@@ -472,8 +477,32 @@ export function ResetPasswordPage({ showAlert }) {
 
   useEffect(() => {
     let cancelled = false;
+    let timeoutId;
+    let unsubscribe;
+
     (async () => {
       try {
+        const otp = parseEmailOtpFromSearch();
+        if (otp) {
+          if (otp.type !== "recovery") {
+            if (!cancelled) {
+              setTokenValid(false);
+              setValidating(false);
+            }
+            return;
+          }
+          const { error } = await verifyEmailOtp(otp);
+          if (cancelled) return;
+          if (error) {
+            setTokenValid(false);
+          } else {
+            setTokenValid(true);
+            stripEmailOtpFromUrl();
+          }
+          setValidating(false);
+          return;
+        }
+
         const supabase = getSupabaseBrowser();
         // detectSessionInUrl resolves the fragment asynchronously, so also
         // listen for PASSWORD_RECOVERY rather than only reading once.
@@ -495,10 +524,11 @@ export function ResetPasswordPage({ showAlert }) {
             }
           },
         );
+        unsubscribe = () => sub?.subscription?.unsubscribe?.();
         // Give the fragment a moment to resolve before declaring the link dead.
-        setTimeout(() => {
+        timeoutId = setTimeout(() => {
           if (cancelled) return;
-          sub?.subscription?.unsubscribe?.();
+          unsubscribe?.();
           setValidating(false);
         }, 3000);
       } catch {
@@ -510,6 +540,8 @@ export function ResetPasswordPage({ showAlert }) {
     })();
     return () => {
       cancelled = true;
+      if (timeoutId) clearTimeout(timeoutId);
+      unsubscribe?.();
     };
   }, []);
 
