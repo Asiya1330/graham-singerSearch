@@ -126,7 +126,7 @@ export function AvailabilitySection() {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow mb-8 overflow-hidden">
+    <div id="section-availability" className="bg-white rounded-lg shadow mb-8 overflow-hidden scroll-mt-24">
       <div className="px-6 py-5 border-b border-slate-200 bg-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h3 className="text-lg leading-6 font-medium text-slate-900">Availability</h3>

@@ -362,7 +362,7 @@ export function RepertoireSection() {
   };
 
   return (
-    <div className="bg-white shadow rounded-lg mb-8">
+    <div id="section-repertoire" className="bg-white shadow rounded-lg mb-8 scroll-mt-24">
       <div className="px-6 py-5 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-t-lg">
         <div>
           <h3 className="text-lg leading-6 font-medium text-slate-900">Repertoire & Experience</h3>
