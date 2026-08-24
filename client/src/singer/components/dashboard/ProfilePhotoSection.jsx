@@ -42,7 +42,7 @@ export function ProfilePhotoSection() {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow mb-8 overflow-hidden">
+    <div id="section-headshot" className="bg-white rounded-lg shadow mb-8 overflow-hidden scroll-mt-24">
       <div className="px-6 py-5 border-b border-slate-200 bg-slate-50">
         <h3 className="text-lg leading-6 font-medium text-slate-900 flex items-center gap-2">
           <Camera className="w-5 h-5 text-slate-400" /> Profile Photo

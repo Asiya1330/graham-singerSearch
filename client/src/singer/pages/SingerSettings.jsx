@@ -22,10 +22,6 @@ export function SingerSettings() {
     represented: user.represented || false,
     agent_name: user.agent_name || "",
     agent_email: user.agent_email || "",
-    website_url: user.website_url || "",
-    video_link_1: user.video_link_1 || "",
-    video_link_2: user.video_link_2 || "",
-    audio_link_1: user.audio_link_1 || "",
     languages_sung: Array.isArray(user.languages_sung)
       ? user.languages_sung
       : [],
@@ -124,10 +120,6 @@ export function SingerSettings() {
       represented: user.represented || false,
       agent_name: user.agent_name || "",
       agent_email: user.agent_email || "",
-      website_url: user.website_url || "",
-      video_link_1: user.video_link_1 || "",
-      video_link_2: user.video_link_2 || "",
-      audio_link_1: user.audio_link_1 || "",
       languages_sung: Array.isArray(user.languages_sung)
         ? user.languages_sung
         : [],
@@ -214,31 +206,10 @@ export function SingerSettings() {
   };
 
   const saveProfile = async () => {
-    // Website: accept a bare domain by normalising to https:// rather than rejecting.
-    const normalizedWebsite =
-      profile.website_url && profile.website_url.trim()
-        ? /^https?:\/\//i.test(profile.website_url.trim())
-          ? profile.website_url.trim()
-          : `https://${profile.website_url.trim()}`
-        : "";
-    const mediaFields = [
-      { key: "video_link_1", label: "Video Link 1" },
-      { key: "video_link_2", label: "Video Link 2" },
-      { key: "audio_link_1", label: "Audio / Recording Link" },
-    ];
-    for (const f of mediaFields) {
-      if (profile[f.key] && !/^https?:\/\//i.test(profile[f.key])) {
-        setProfileMsg({
-          type: "error",
-          text: `${f.label} must start with http:// or https://`,
-        });
-        return;
-      }
-    }
     setProfileSaving(true);
     setProfileMsg(null);
     try {
-      const payload = { ...profile, website_url: normalizedWebsite };
+      const payload = { ...profile };
       if (!payload.represented) {
         payload.agent_name = "";
         payload.agent_email = "";
@@ -302,12 +273,17 @@ export function SingerSettings() {
       <SingerNav />
 
       <div className="max-w-2xl mx-auto px-4 py-10 space-y-8">
-        <h1 className="text-2xl font-bold text-slate-900">
-          Account &amp; Profile
-        </h1>
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">
+            Account
+          </h1>
+          <p className="text-sm text-slate-500 mt-1">
+            Login, billing, and professional details. Photo, YouTube, bio, availability, and repertoire are on the Dashboard.
+          </p>
+        </div>
 
         {/* Profile Info */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-5">
+        <div id="section-personal-info" className="bg-white rounded-xl border border-slate-200 p-6 space-y-5 scroll-mt-24">
           <h2 className="text-lg font-semibold text-slate-800">
             Personal Information
           </h2>
@@ -454,85 +430,21 @@ export function SingerSettings() {
                 below (single source of truth) — the duplicate inline agent block
                 was removed per QA. */}
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Website URL{" "}
-              <span className="text-slate-400 font-normal">(optional)</span>
-            </label>
-            <input
-              data-testid="input-website-url"
-              type="url"
-              value={profile.website_url}
-              onChange={(e) =>
-                setProfile((p) => ({ ...p, website_url: e.target.value }))
-              }
-              placeholder="https://yourname.com"
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <p className="text-xs text-slate-400 mt-1">
-              e.g. yourname.com — we'll add https:// for you.
-            </p>
-          </div>
-
           <div
-            className="border-t border-slate-200 pt-4"
-            data-testid="section-media-links"
+            className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3"
+            data-testid="note-media-links-on-dashboard"
           >
-            <h3 className="text-sm font-semibold text-slate-800 mb-3">
-              Media Links{" "}
-              <span className="text-slate-400 font-normal">(optional)</span>
-            </h3>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">
-                  Video Link 1 (YouTube or Vimeo URL)
-                </label>
-                <input
-                  data-testid="input-video-link-1"
-                  type="url"
-                  value={profile.video_link_1}
-                  onChange={(e) =>
-                    setProfile((p) => ({ ...p, video_link_1: e.target.value }))
-                  }
-                  placeholder="https://youtube.com/watch?v=..."
-                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">
-                  Video Link 2 (YouTube or Vimeo URL)
-                </label>
-                <input
-                  data-testid="input-video-link-2"
-                  type="url"
-                  value={profile.video_link_2}
-                  onChange={(e) =>
-                    setProfile((p) => ({ ...p, video_link_2: e.target.value }))
-                  }
-                  placeholder="https://vimeo.com/..."
-                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">
-                  Audio / Recording Link
-                </label>
-                <input
-                  data-testid="input-audio-link-1"
-                  type="url"
-                  value={profile.audio_link_1}
-                  onChange={(e) =>
-                    setProfile((p) => ({ ...p, audio_link_1: e.target.value }))
-                  }
-                  placeholder="https://soundcloud.com/..."
-                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <p className="text-xs text-slate-400">
-                All links must start with http:// or https://. Leave any field
-                blank to omit.
-              </p>
-            </div>
+            <p className="text-sm text-slate-600">
+              YouTube, audio, and website links are on your Dashboard, under Edit your profile.
+            </p>
+            <button
+              type="button"
+              data-testid="button-go-dashboard-media"
+              onClick={() => setView("singerDashboard")}
+              className="mt-2 text-sm font-medium text-blue-600 hover:text-blue-800"
+            >
+              Add YouTube &amp; links on Dashboard
+            </button>
           </div>
 
           <div>
