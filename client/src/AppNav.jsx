@@ -126,7 +126,7 @@ export function SingerNav() {
                 className={onSettings ? ITEM_ACTIVE : ITEM_INACTIVE}
                 onClick={() => setView("singerSettings")}
               >
-                Account &amp; Profile
+                Account
               </span>
             </div>
           </div>
@@ -189,7 +189,7 @@ export function SingerNav() {
               className={onSettings ? MOBILE_ITEM_ACTIVE : MOBILE_ITEM_INACTIVE}
               onClick={() => go("singerSettings")}
             >
-              Account &amp; Profile
+              Account
             </button>
             {!isPro && (
               <button

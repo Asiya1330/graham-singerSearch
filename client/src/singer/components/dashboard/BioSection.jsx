@@ -33,7 +33,7 @@ export function BioSection() {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow mb-8 overflow-hidden">
+    <div id="section-bio" className="bg-white rounded-lg shadow mb-8 overflow-hidden scroll-mt-24">
       <div className="px-6 py-5 border-b border-slate-200 bg-slate-50">
         <h3 className="text-lg leading-6 font-medium text-slate-900">Bio</h3>
         <p className="mt-1 text-sm text-slate-500">A short professional summary visible to organizations. Maximum {BIO_MAX_LENGTH} characters (~250 words).</p>

@@ -2,22 +2,45 @@ import React from "react";
 import { motion } from "framer-motion";
 import { useSingerUser } from "../../hooks/useSingerUser";
 
+const SETTINGS_KEYS = new Set(["voice", "location"]);
+
+function hasMediaLink(user) {
+  return !!(
+    (user.video_link_1 && user.video_link_1.trim()) ||
+    (user.video_link_2 && user.video_link_2.trim()) ||
+    (user.audio_link_1 && user.audio_link_1.trim())
+  );
+}
+
 export function ProfileCompletionBanner() {
-  const { user } = useSingerUser();
+  const { user, setView } = useSingerUser();
 
   const fields = [
-    { label: "Voice type", done: !!user.primary_voice_type },
-    { label: "Location", done: !!(user.city && user.state) },
-    { label: "Bio", done: !!user.short_bio },
-    { label: "Headshot", done: !!user.headshot_url },
-    { label: "At least one role", done: (user.roles?.length || 0) > 0 },
-    { label: "At least one work", done: (user.works?.length || 0) > 0 },
-    { label: "Availability", done: (user.availabilities?.length || 0) > 0 },
+    { key: "voice", label: "Voice type", done: !!user.primary_voice_type, sectionId: "section-personal-info" },
+    { key: "location", label: "Location", done: !!(user.city && user.state), sectionId: "section-personal-info" },
+    { key: "bio", label: "Bio", done: !!user.short_bio, sectionId: "section-bio" },
+    { key: "headshot", label: "Headshot", done: !!user.headshot_url, sectionId: "section-headshot" },
+    { key: "media", label: "YouTube or media", done: hasMediaLink(user), sectionId: "section-media-links" },
+    { key: "role", label: "At least one role", done: (user.roles?.length || 0) > 0, sectionId: "section-repertoire" },
+    { key: "work", label: "At least one work", done: (user.works?.length || 0) > 0, sectionId: "section-repertoire" },
+    { key: "availability", label: "Availability", done: (user.availabilities?.length || 0) > 0, sectionId: "section-availability" },
   ];
-  const completed = fields.filter(f => f.done).length;
+  const completed = fields.filter((f) => f.done).length;
   const pct = Math.round((completed / fields.length) * 100);
-  const incomplete = fields.filter(f => !f.done);
+  const incomplete = fields.filter((f) => !f.done);
   if (pct >= 100) return null;
+
+  const goToField = (field) => {
+    const scroll = () => {
+      document.getElementById(field.sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+    if (SETTINGS_KEYS.has(field.key)) {
+      setView("singerSettings");
+      setTimeout(scroll, 150);
+    } else {
+      scroll();
+    }
+  };
 
   return (
     <motion.div
@@ -44,10 +67,16 @@ export function ProfileCompletionBanner() {
           </div>
           <div className="flex flex-wrap gap-2">
             {incomplete.map((f) => (
-              <span key={f.label} className="inline-flex items-center gap-1 text-xs bg-white border border-amber-200 text-amber-800 px-2 py-1 rounded-full">
+              <button
+                key={f.key}
+                type="button"
+                onClick={() => goToField(f)}
+                data-testid={`chip-complete-${f.key}`}
+                className="inline-flex items-center gap-1 text-xs bg-white border border-amber-200 text-amber-800 px-2 py-1 rounded-full hover:bg-amber-100 hover:border-amber-300 cursor-pointer transition-colors"
+              >
                 <span className="w-1.5 h-1.5 bg-amber-400 rounded-full" />
                 {f.label}
-              </span>
+              </button>
             ))}
           </div>
         </div>
