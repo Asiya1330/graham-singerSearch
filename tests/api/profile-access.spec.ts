@@ -81,6 +81,40 @@ test.describe("singer profile — happy path", () => {
     });
     expect(badUrl.status).toBe(400);
   });
+
+  test("a singer can save YouTube and other media links", async () => {
+    const singer = await account("singer", "media");
+    const payload = {
+      website_url: "https://qa-singer.example.com",
+      video_link_1: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      video_link_2: "https://vimeo.com/123456789",
+      audio_link_1: "https://soundcloud.com/qa/demo",
+    };
+    const { status, body } = await api("/singer/profile", {
+      method: "PUT",
+      token: singer.token,
+      accountType: "singer",
+      body: payload,
+    });
+
+    expect(status).toBe(200);
+    expect(body.website_url).toBe(payload.website_url);
+    expect(body.video_link_1).toBe(payload.video_link_1);
+    expect(body.video_link_2).toBe(payload.video_link_2);
+    expect(body.audio_link_1).toBe(payload.audio_link_1);
+
+    const reread = await api("/singer/profile", { token: singer.token, accountType: "singer" });
+    expect(reread.body.video_link_1).toBe(payload.video_link_1);
+    expect(reread.body.audio_link_1).toBe(payload.audio_link_1);
+
+    const badVideo = await api("/singer/profile", {
+      method: "PUT",
+      token: singer.token,
+      accountType: "singer",
+      body: { video_link_1: "javascript:alert(1)" },
+    });
+    expect(badVideo.status).toBe(400);
+  });
 });
 
 test.describe("organization profile — happy path", () => {
