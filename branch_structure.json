@@ -1,0 +1,33 @@
+{
+  "default_branch": "main",
+  "branches": [
+    "copy/founding-banner-will-receive-pro",
+    "feat/meta-pixel",
+    "feat/singer-dashboard-loading-states",
+    "feat/singers-landing",
+    "fix/password-reset-token-hash",
+    "fix/singer-media-links-on-dashboard",
+    "main",
+    "origin"
+  ],
+  "parent": {
+    "copy/founding-banner-will-receive-pro": "main",
+    "feat/meta-pixel": "main",
+    "feat/singer-dashboard-loading-states": "main",
+    "feat/singers-landing": "main",
+    "fix/password-reset-token-hash": "main",
+    "fix/singer-media-links-on-dashboard": "main",
+    "main": null,
+    "origin": "main"
+  },
+  "order": [
+    "main",
+    "copy/founding-banner-will-receive-pro",
+    "feat/meta-pixel",
+    "feat/singer-dashboard-loading-states",
+    "feat/singers-landing",
+    "fix/password-reset-token-hash",
+    "fix/singer-media-links-on-dashboard",
+    "origin"
+  ]
+}
