@@ -6,7 +6,7 @@ export function FoundingBanner() {
       <span>🌟</span>
       <div>
         <b className="font-bold">Founding Member spots are filling fast.</b>{" "}
-        Join now to be considered for a free year of Pro.
+        Join now and you will receive a free year of Pro.
       </div>
     </div>
   );
