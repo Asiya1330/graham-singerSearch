@@ -1,6 +1,7 @@
 /** Maps in-app view names to browser paths (SPA routing). */
 export const APP_ROUTES = {
   landing: "/",
+  singersLanding: "/singers",
   singerLogin: "/login/singer",
   organizationLogin: "/login/organization",
   singerRegister: "/register/singer",
