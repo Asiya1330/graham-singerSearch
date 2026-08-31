@@ -48,6 +48,7 @@ import { SingerDashboard } from "./singer/pages/SingerDashboard";
 import { SingerSettings } from "./singer/pages/SingerSettings";
 import { OrgSettings } from "./organization/pages/OrgSettings";
 import { LandingView } from "./LandingView";
+import SingersLanding from "@/pages/SingersLanding";
 import { EmergencySearch } from "./EmergencySearch";
 import { OrgDashboard } from "./organization/pages/OrgDashboard";
 import { ProfileView } from "./singer/pages/ProfileView";
@@ -452,6 +453,8 @@ export default function App() {
     switch (view) {
       case "landing":
         return <LandingView setAdminMode={setAdminMode} />;
+      case "singersLanding":
+        return <SingersLanding />;
       case "terms":
         return <><TermsPage /><AppFooter /></>;
       case "privacy":
