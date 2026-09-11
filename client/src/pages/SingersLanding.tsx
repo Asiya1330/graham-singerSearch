@@ -219,7 +219,6 @@ export default function SingersLanding() {
             <h2 className="text-[26px] font-bold leading-tight tracking-tight text-slate-800 sm:text-[32px]">
               How it works
             </h2>
-            <p className="mt-3.5 text-[17px] text-slate-500">About fifteen minutes, once.</p>
           </div>
 
           <div className="mt-10 grid gap-5 md:grid-cols-3">

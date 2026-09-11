@@ -6,7 +6,6 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
-.env 
 # Playwright
 /test-results/
 /playwright-report/
@@ -29,3 +28,4 @@ CLIENT-UPDATE.md
 temp_auto_push.bat
 temp_interactive_push.bat
 config.bat
+branch_structure.json
