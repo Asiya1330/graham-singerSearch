@@ -87,6 +87,19 @@ export default function App() {
     },
     [navigate],
   );
+
+  // Meta Pixel: the base code in index.html only fires PageView on a hard
+  // load, so fire it on SPA route changes too. Skip the first render to avoid
+  // double-counting that initial load.
+  const firstPageView = useRef(true);
+  useEffect(() => {
+    if (firstPageView.current) {
+      firstPageView.current = false;
+      return;
+    }
+    if (window.fbq) window.fbq("track", "PageView");
+  }, [location]);
+
   const [currentUser, setCurrentUser] = useState(null);
   const [bootstrapLoading, setBootstrapLoading] = useState(true);
   const [alert, setAlert] = useState(null);
