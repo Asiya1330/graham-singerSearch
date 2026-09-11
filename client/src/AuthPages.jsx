@@ -702,6 +702,9 @@ export function SingerRegistration({ showAlert, setShowWelcome }) {
     setLoading(true);
     try {
       const result = await registerAccount("singer", form);
+      // registerAccount throws on failure, so the account exists here — fire
+      // before the branch so email-confirmation signups are counted too.
+      if (window.fbq) window.fbq("track", "CompleteRegistration");
       if (result.confirmationRequired) {
         setPendingEmail(result.email);
         return;
