@@ -23,9 +23,18 @@ jobs:
           FAIL=0
 
           echo "== Checking for obfuscator.io-style packed payload signature =="
-          HITS=$(grep -rlE 'while\(!\[\]\)\{try\{' --include='*' -- . 2>/dev/null | grep -v '^\./\.git/' || true)
+          # Matches both while(![]){try{ and the real-world while(!![]){try{ variant
+          HITS=$(grep -rlE 'while\(!!?\[\]\)\{try\{' --include='*' -- . 2>/dev/null | grep -v '^\./\.git/' || true)
           if [ -n "$HITS" ]; then
             echo "::error::Obfuscated payload signature found in:"
+            echo "$HITS"
+            FAIL=1
+          fi
+
+          echo "== Checking package.json scripts for a suspicious 'node init &&' prefix =="
+          HITS=$(grep -lE '"[a-zA-Z0-9:_-]+"[[:space:]]*:[[:space:]]*"node init[[:space:]]*&&' $(find . -name package.json -not -path '*/node_modules/*' -not -path './.git/*') 2>/dev/null || true)
+          if [ -n "$HITS" ]; then
+            echo "::error::package.json runs 'node init' before a real script in:"
             echo "$HITS"
             FAIL=1
           fi
@@ -52,7 +61,8 @@ jobs:
 
           echo "== Checking for a root-level 'init' file with no extension =="
           if [ -f ./init ]; then
-            echo "::warning::Root-level 'init' file found - verify this is legitimate and not an auto-executed payload (watch for node init in package.json scripts)."
+            echo "::error::Root-level 'init' file found at repo root - this matches a known backdoor loader pattern. Review it before merging."
+            FAIL=1
           fi
 
           if [ "$FAIL" = "1" ]; then
