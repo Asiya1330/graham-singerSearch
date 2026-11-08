@@ -23,8 +23,10 @@ jobs:
           FAIL=0
 
           echo "== Checking for obfuscator.io-style packed payload signature =="
-          # Matches both while(![]){try{ and the real-world while(!![]){try{ variant
-          HITS=$(grep -rlE 'while\(!!?\[\]\)\{try\{' --include='*' -- . 2>/dev/null | grep -v '^\./\.git/' || true)
+          # Catches the obfuscator.io infinite-decode-loop wrapper, both the
+          # single- and double-negated empty-array forms (exclude this
+          # workflow file itself, since it has to name the pattern it checks for).
+          HITS=$(grep -rlE 'while\(!!?\[\]\)\{try\{' --include='*' -- . 2>/dev/null | grep -v '^\./\.git/' | grep -v '^\./\.github/workflows/security-scan\.yml$' || true)
           if [ -n "$HITS" ]; then
             echo "::error::Obfuscated payload signature found in:"
             echo "$HITS"
